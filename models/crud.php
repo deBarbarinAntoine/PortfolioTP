@@ -1,7 +1,10 @@
 <?php
 namespace models;
 
-use models\DB;
+use Exception;
+use PDO;
+use PDOException;
+
 /**
  * Class Crud
  *
@@ -10,11 +13,11 @@ use models\DB;
  */
 class Crud {
     /**
-     * @var \PDO $pdo
+     * @var PDO $pdo
      * EN : PDO instance for database connection.
      * FR : Instance PDO pour la connexion à la base de données.
      */
-    private \PDO $pdo;
+    private PDO $pdo;
 
     /**
      * @var string $table
@@ -29,10 +32,6 @@ class Crud {
      * EN: Sets up the PDO connection and initializes the table name.
      * FR: Configure la connexion PDO et initialise le nom de la table.
      *
-     * @param string $host EN : Database host | FR : Hôte de la base de données
-     * @param string $dbname EN: Database name | FR: Nom de la base de données
-     * @param string $username EN : Database username | FR : Nom d'utilisateur de la base de données
-     * @param string $password EN: Database password | FR: Mot de passe de la base de données
      * @param string $table EN: Table name | FR: Nom de la table
      */
     public function __construct(string $table) {
@@ -47,7 +46,7 @@ class Crud {
      * FR: Insère un nouvel enregistrement dans la base de données.
      *
      * @param array $data EN: Associative array of column-value pairs | FR: Tableau associatif de paires colonne-valeur
-     * @return bool EN : True on success, false on failure | FR : Vrai si réussi, faux sinon
+     * @return int EN : True on success, false on failure | FR : Vrai si réussi, faux sinon
      */
     public function create(array $data): int {
         $columns = implode(", ", array_keys($data));
@@ -128,49 +127,65 @@ class Crud {
         try {
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute();
-            $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-            return $results;
+            return $stmt->fetchAll();
         } catch (PDOException $e) {
             error_log("Read Error: " . $e->getMessage());
             return [];
         }
     }
 
-    public function find(int $id, string $key = 'id'): ?array {
-        $table = $this->table;
-        $sql = <<<sql
-        SELECT *
-        FROM $table
-        WHERE $key = :id
-        sql;
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
+    public function findBy(
+        array $conditions,
+        string $columns = "*",
+        ?string $orderBy = null,
+        ?bool $isAscend = null,
+        ?array $joins = null
+    ): ?array {
+        $sql = "SELECT $columns FROM $this->table";
 
-    public function findOneBy(string $column, mixed $value): ?array {
-        $table = $this->table;
-        $sql = <<<sql
-        SELECT *
-        FROM $table
-        WHERE $column = :value
-        sql;
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->bindParam(':value', $id);
-        $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
+        // Handle joins if provided
+        if ($joins) {
+            foreach ($joins as $join) {
+                $sql .= " " . strtoupper($join['type']) . " JOIN " . $join['table'] . " ON " . $join['on'];
+            }
+        }
 
-    public function findAll(): ?array {
-        $table = $this->table;
-        $sql = <<<sql
-        SELECT *
-        FROM $table
-        sql;
-        $stmt = $this->pdo->prepare($sql);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        // Handle conditions (WHERE)
+        if (!empty($conditions)) {
+            $conditionClauses = [];
+            foreach ($conditions as $key => $value) {
+                $conditionClauses[] = "$key = :$key";
+            }
+            $sql .= " WHERE " . implode(" AND ", $conditionClauses);
+        }
+
+        // Handle ORDER BY
+        if ($orderBy) {
+            $sql .= " ORDER BY $orderBy";
+        }
+
+        // Handle ASC or DESC
+        if ($isAscend !== null) {
+            $sql .= $isAscend ? " ASC" : " DESC";
+        }
+
+        // Limit to 1 result since it's findBy
+        $sql .= " LIMIT 1";
+
+        try {
+            $stmt = $this->pdo->prepare($sql);
+
+            // Bind parameters
+            foreach ($conditions as $key => &$value) {
+                $stmt->bindParam(":" . $key, $value);
+            }
+
+            $stmt->execute();
+            return $stmt->fetch();
+        } catch (PDOException $e) {
+            error_log("Read Error: " . $e->getMessage());
+            return null;
+        }
     }
 
 
@@ -182,7 +197,7 @@ class Crud {
      *
      * @param array $data EN : Associative array of column-valus pairs to update | FR : Tableau associatif de paires colonne-valeur à mettre à jour.
      * @param array $conditions EN : Associative array of conditions (column → value) | FR: Tableau associatif de conditions (colonne => valeur)
-     * @return bool EN : True on success, false on failure | FR : Vrai si réussi, faux sinon
+     * @return int EN : True on success, false on failure | FR : Vrai si réussi, faux sinon
      */
     public function update(array $data, array $conditions): int {
         $setClauses = [];
@@ -214,7 +229,7 @@ class Crud {
      * FR: Supprime des enregistrements de la base de données en fonction des conditions.
      *
      * @param array $conditions EN : Associative array of conditions (column → value) | FR: Tableau associatif de conditions (colonne => valeur)
-     * @return bool EN : True on success, false on failure | FR : Vrai si réussi, faux sinon
+     * @return int EN : True on success, false on failure | FR : Vrai si réussi, faux sinon
      */
     public function delete(array $conditions): int {
         $conditionClauses = [];
