@@ -1,25 +1,29 @@
 <?php
 
 namespace models;
+use Dotenv\Dotenv;
+
+$dotenv = Dotenv::createImmutable(__DIR__ . '/../.env');
+$dotenv->load();
+use PDO;
 
 class DB
 {
-
-    private static ?\PDO $pdo = null;
+    private static ?PDO $pdo = null;
 
     private function __construct() {}
-    private static $options = [
-        \PDO::ATTR_ERRMODE => \PDO::ERRMODE_EXCEPTION,
-        \PDO::ATTR_DEFAULT_FETCH_MODE => \PDO::FETCH_ASSOC,
-        \PDO::ATTR_AUTOCOMMIT => false,
+    private static array $options = [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+        PDO::ATTR_AUTOCOMMIT => false,
     ];
 
     /**
      * Establishes a MySQL connection using PDO.
      *
-     * @return \PDO The existing or newly created PDO instance
+     * @return PDO The existing or newly created PDO instance
      */
-    public static function getPDO(): \PDO
+    public static function getPDO(): PDO
     {
         if (isset(self::$pdo) && !empty(self::$pdo)) {
             return self::$pdo;
@@ -37,7 +41,7 @@ class DB
 
         $dsn = "mysql:host=$host;port=$port;dbname=$dbname";
 
-        self::$pdo = new \PDO($dsn, $username, $password, self::$options);
+        self::$pdo = new PDO($dsn, $username, $password, self::$options);
 
         return self::$pdo;
     }
