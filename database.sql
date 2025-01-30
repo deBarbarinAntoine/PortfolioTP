@@ -1,16 +1,18 @@
-CREATE DATABASE projetb2;
-USE projetb2;
+CREATE
+DATABASE projetb2;
+USE
+projetb2;
 
 -- Table des utilisateurs
 CREATE TABLE users
 (
     id         INT PRIMARY KEY AUTO_INCREMENT,
-    username   VARCHAR(50)                           NOT NULL UNIQUE,
-    email      VARCHAR(100)                          NOT NULL UNIQUE,
-    password   VARCHAR(255)                          NOT NULL,
+    username   VARCHAR(50)  NOT NULL UNIQUE,
+    email      VARCHAR(100) NOT NULL UNIQUE,
+    password   VARCHAR(255) NOT NULL,
     role       ENUM ('admin', 'user') DEFAULT 'user' NOT NULL,
-    created_at TIMESTAMP              DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP              DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Table des compétences
@@ -24,8 +26,8 @@ CREATE TABLE skills
 CREATE TABLE user_skills
 (
     id       INT PRIMARY KEY AUTO_INCREMENT,
-    user_id  INT                                                                       NOT NULL,
-    skill_id INT                                                                       NOT NULL,
+    user_id  INT NOT NULL,
+    skill_id INT NOT NULL,
     level    ENUM ('débutant', 'intermédiaire', 'avancé', 'expert') DEFAULT 'débutant' NOT NULL,
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
     FOREIGN KEY (skill_id) REFERENCES skills (id) ON DELETE CASCADE
@@ -39,6 +41,7 @@ CREATE TABLE projects
     details       TEXT         NOT NULL,
     image         VARCHAR(255),
     external_link VARCHAR(255),
+    private       ENUM ('private', 'public') DEFAULT 'private' NOT NULL,
     created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
