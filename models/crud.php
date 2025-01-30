@@ -1,7 +1,7 @@
 <?php
 namespace models;
 
-use models\Database;
+use models\DB;
 /**
  * Class Crud
  *
@@ -10,11 +10,11 @@ use models\Database;
  */
 class Crud {
     /**
-     * @var PDO $pdo
+     * @var \PDO $pdo
      * EN : PDO instance for database connection.
      * FR : Instance PDO pour la connexion à la base de données.
      */
-    private PDO $pdo;
+    private \PDO $pdo;
 
     /**
      * @var string $table
@@ -37,7 +37,7 @@ class Crud {
      */
     public function __construct(string $table) {
         $this->table = $table;
-        $this ->pdo = Databse::getPDO();
+        $this->pdo = DB::getPDO();
     }
 
     /**

@@ -19,7 +19,7 @@ class DB
      *
      * @return \PDO The existing or newly created PDO instance
      */
-    public function getPDO(): \PDO
+    public static function getPDO(): \PDO
     {
         if (isset(self::$pdo) && !empty(self::$pdo)) {
             return self::$pdo;
@@ -37,7 +37,7 @@ class DB
 
         $dsn = "mysql:host=$host;port=$port;dbname=$dbname";
 
-        self::$pdo = new \PDO($dsn, $username, $password);
+        self::$pdo = new \PDO($dsn, $username, $password, self::$options);
 
         return self::$pdo;
     }
