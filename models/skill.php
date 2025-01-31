@@ -215,17 +215,17 @@ class Skill
     }
 
     /**
-     * Retrieves a skill by its name from the database.
+     * Retrieves a skill by its id from the database.
      *
-     * @param string $name The name of the skill to retrieve.
+     * @param int $id The id of the skill to retrieve.
      * @return Skill|null The Skill object if found, or null if not found or an error occurs.
      */
-    public static function get(string $name): Skill|null
+    public static function get(int $id): Skill|null
     {
         $skill_crud = new Crud('skills');
 
         try {
-            $result = $skill_crud->findBy(['name' => $name]);
+            $result = $skill_crud->findBy(['id' => $id]);
             $skill = new Skill(
                 $result['id'],
                 $result['name'],
