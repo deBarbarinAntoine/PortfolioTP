@@ -82,9 +82,6 @@ class User
         $this->updated_at = $updated_at ?? new DateTime();
     }
 
-
-
-
     /**
      * Gets the ID of the user.
      *
@@ -325,7 +322,7 @@ class User
             // TODO -> implement logging
 
             // DEBUG
-            print($e->getMessage());
+            Logger::log($e->getMessage(), __METHOD__, Level::DEBUG);
 
             return false;
         }
@@ -337,8 +334,8 @@ class User
      * @return bool True if the user was updated successfully, false otherwise.
      */
     public function update(): bool
-{
-    $user_crud = new Crud('users');
+    {
+        $user_crud = new Crud('users');
 
         try {
             $rowCount = $user_crud->update(
@@ -353,10 +350,9 @@ class User
             return $rowCount > 0;
 
         } catch (\PDOException $e) {
-            // TODO -> implement logging
 
-            // DEBUG
-            echo $e->getMessage();
+            // LOGGING
+            Logger::log($e->getMessage(), __METHOD__);
 
             return false;
         }
@@ -377,9 +373,10 @@ class User
             return $rowCount === 1;
 
         } catch (\Exception $e) {
-            // TODO -> implement logging
-            // DEBUG
-            echo $e->getMessage();
+
+            // LOGGING
+            Logger::log($e->getMessage(), __METHOD__);
+
             return false;
         }
     }
@@ -393,28 +390,32 @@ class User
      */
     public static function get(int $id): ?User
     {
+        // Create a CRUD instance for the 'users' table (aliased as 'u') to prepare for querying.
         $user_crud = new Crud('users u');
 
+        // Query the database to fetch user information with related interests and skills.
+        // Joins 'user_skills' and 'skills' tables to include user's skill details if available.
         $result = $user_crud->findAllBy(
-            conditions: [ 'id'=> $id ],
+            conditions: ['id' => $id], // Search for the user based on their unique ID.
             columns: 'u.id, u.username, u.email, u.avatar, u.role, u.created_at, u.updated_at, us.id, us.skill_id, us.level, us.created_at, us.updated_at, s.name, s.description',
             joins: [
                 [
-                    'type' => 'left',
+                    'type' => 'left', // Perform LEFT JOIN with 'user_skills' to link user and skills.
                     'table' => 'user_skills us',
-                    'on' => 'us.user_id = u.id'
+                    'on' => 'us.user_id = u.id' // Join condition: match 'user_id' from 'user_skills' with 'id' from 'users'.
                 ],
                 [
-                    'type' => 'left',
+                    'type' => 'left', // Perform another LEFT JOIN to fetch skill details from 'skills' table.
                     'table' => 'skills s',
-                    'on' => 's.id = us.skill_id'
+                    'on' => 's.id = us.skill_id' // Join condition: match 'skill_id' in 'user_skills' with 'id' in 'skills'.
                 ]
             ]
         );
 
-        // DEBUG
+        // DEBUG: Display the fetched result for debugging purposes (should be removed in production).
         print_r($result);
 
+        // Convert the raw database result into a User object and return it. Null if no user is found.
         return User::toUser($result);
     }
 
@@ -440,8 +441,8 @@ class User
         // If no matching email is found, return null, signaling authentication failure
         if (empty($result)) {
 
-            // DEBUG: Log or display when no user matches the provided email
-            // print('No results found.');
+            // DEBUG: Log when no user matches the provided email
+            Logger::log("User '$email' not found", __METHOD__, Level::DEBUG);
 
             return null;
         }
@@ -457,14 +458,12 @@ class User
 
                 // DEBUG: Print user details (for development/testing purposes)
                 print_r($user);
+
                 return $user;
             } catch (\Exception $e) {
 
-                // Handle unexpected errors during the User fetch process, e.g., database issues
-                // TODO -> implement logging for the caught exception
-
-                // DEBUG: Display the error message
-                print($e->getMessage());
+                // LOGGING
+                Logger::log($e->getMessage(), __METHOD__);
             }
         }
 
@@ -480,23 +479,27 @@ class User
      */
     public static function getAll(): array
     {
-        $user_crud = new Crud('users');
+        // Initialize the CRUD instance for the 'users' table.
+        $user_crud = new Crud('users u');
+
+        // Execute a query to fetch all user records, joining with related 'user_skills' and 'skills' tables.
         $results = $user_crud->findAllBy(
             columns: 'u.id, u.username, u.email, u.avatar, u.role, u.created_at, u.updated_at, us.id, us.skill_id, us.level, us.created_at, us.updated_at, s.name, s.description',
             joins: [
                 [
-                    'type' => 'left',
+                    'type' => 'left', // Perform a LEFT JOIN to include user skills, even if no matching skills exist.
                     'table' => 'user_skills us',
                     'on' => 'us.user_id = u.id'
                 ],
                 [
-                    'type' => 'left',
+                    'type' => 'left', // Perform a LEFT JOIN to include skill details, even if no matching skills exist.
                     'table' => 'skills s',
                     'on' => 's.id = us.skill_id'
                 ]
             ]
         );
 
+        // Convert the raw database results into an array of User objects and return it.
         return User::toUserArray($results);
     }
 
@@ -557,48 +560,58 @@ class User
     /**
      * Converts a database record into a User object.
      *
-     * This helper method takes a single row of user data fetched from
-     * the database and transforms it into an instance of the User class.
+     * This method transforms a single row of user information from the database
+     * into an instance of the User class. If the additional fields for skills are not
+     * present in the result, it initializes the object without skills.
      *
-     * @param array|null $result The database record representing the user, or null.
-     * @return User|null A User object if the result is valid, or null otherwise.
-     * @throws DateMalformedStringException
+     * @param array|null $result The database record representing the user, or null if no data exists.
+     *                           Expected format varies based on the presence of skills data.
+     * @return User|null A new User object if $result is valid; null otherwise.
+     * @throws DateMalformedStringException If either 'created_at' or 'updated_at' fields are invalid.
      */
     private static function toUser(?array $result): User|null
     {
+        // If the result is empty, return null as it signifies no user data was found.
         if (empty($result)) {
             return null;
         }
 
+        // Check if the result does not include detailed user fields with prefixes like 'u.id'.
         if (!isset($result['u.id'])) {
+
+            // Extract the user ID from the result and return a simplified User object without skills.
             $userId = $result['id'];
             return new User(
                 $userId,
                 $result['username'],
                 $result['email'],
                 $result['avatar'] ?? null,
-                '',
-                new DateTime($result['created_at']),
-                new DateTime($result['updated_at']),
+                '', // Default empty value for password hash.
+                new DateTime($result['created_at']), // Parse and set the creation timestamp.
+                new DateTime($result['updated_at']), // Parse and set the update timestamp.
                 [],
                 $result['role'],
             );
         }
 
+        // Initialize an empty array to store the user's skills.
         $skills = [];
         foreach ($result as $row) {
+
+            // Each row is processed to create a new Skill object, which is then added to the skills array.
             $skills[] = Skill::newUserSkill($row);
         }
 
+        // Construct and return a comprehensive User object using the first row of the result.
         return new User(
             $result[0]['u.id'],
             $result[0]['u.username'],
             $result[0]['u.email'],
             $result[0]['u.avatar'] ?? null,
-            '',
-            new DateTime($result[0]['u.created_at']),
-            new DateTime($result[0]['u.updated_at']),
-            $skills,
+            '', // Default empty value for password hash.
+            new DateTime($result[0]['u.created_at']), // Parse and set the creation timestamp.
+            new DateTime($result[0]['u.updated_at']), // Parse and set the update timestamp.
+            $skills, // Assign the previously generated array of skills.
             $result[0]['u.role'],
         );
     }
@@ -615,30 +628,66 @@ class User
      */
     private static function toUserArray(array $results): array
     {
+        // If no records are found, return an empty array immediately.
         if (empty($results)) {
             return [];
         }
-
+    
         $users = [];
 
-        foreach ($results as $row) {
-            $user = User::toUser($row);
+        // Check if the results contain a direct list of 'id' keys (i.e., one user per row).
+        if (isset($results[0]['id'])) {
 
-            if (!empty($user)) {
-                $users[] = $user;
+            // Iterate through each record in the results.
+            foreach ($results as $row) {
+
+                // Convert each row into a User object.
+                $user = User::toUser($row);
+                if (!empty($user)) {
+
+                    // Add the User object to the resulting array if it is valid.
+                    $users[] = $user;
+                }
             }
+        } else {
+
+            // If results don't directly contain 'id', group rows by user ID.
+            foreach ($results as $row) {
+
+                // Group rows under their respective user ID.
+                $users[$row['u.id']][] = $row;
+            }
+            $userList = [];
+
+            // Process each group of rows to create User objects.
+            foreach ($users as $user) {
+
+                // Convert each group of rows corresponding to a user to a User object.
+                $userList[] = User::toUser($user);
+            }
+            $users = $userList;
         }
 
+        // Return the fully-processed array of User objects.
         return $users;
     }
 
     /**
+     * Retrieves a list of users based on a search query and offset for pagination.
+     *
+     * This method interacts with the database to fetch user records
+     * that match the given search criteria and are limited to a specific page size.
+     * The result set is then converted into an array of `User` objects.
+     *
+     * @param string $search The search query to filter users by name, email, etc.
+     * @param int $offset The offset for paginated results.
+     * @return array An array of `User` objects matching the search criteria.
      * @throws DateMalformedStringException
      */
     public static function getAllUsers(string $search, int $offset): array
     {
         $user_crud = new Crud('users');
-        $results = $user_crud -> search($search,10, $offset);
+        $results = $user_crud->search($search, 10, $offset);
         return User::toUserArray($results);
     }
 }
