@@ -319,7 +319,6 @@ class User
             return $id > 0;
 
         } catch (\Exception $e) {
-            // TODO -> implement logging
 
             // DEBUG
             Logger::log($e->getMessage(), __METHOD__, Level::DEBUG);
