@@ -305,7 +305,7 @@ class User
      */
     public function create(): bool
     {
-        $user_crud = new Crud('user');
+        $user_crud = new Crud('users');
 
         try {
             $id = $user_crud->create([
@@ -334,7 +334,7 @@ class User
      */
     public function update(): bool
 {
-    $user_crud = new Crud('user');
+    $user_crud = new Crud('users');
 
         try {
             $rowCount = $user_crud->update(
@@ -362,7 +362,7 @@ class User
      */
     public static function delete(int $id): bool
     {
-        $user_crud = new Crud('user');
+        $user_crud = new Crud('users');
 
         try {
             $rowCount = $user_crud->delete([ 'id' => $id ]);
@@ -385,7 +385,7 @@ class User
      */
     public static function get(int $id): ?User
     {
-        $user_crud = new Crud('user');
+        $user_crud = new Crud('users');
 
         $result = $user_crud->findBy([ 'id'=> $id ]);
 
@@ -427,7 +427,7 @@ class User
      */
     public static function login(string $email, string $password): ?User
     {
-        $user_crud = new Crud('user');
+        $user_crud = new Crud('users');
 
         $result = $user_crud->findBy([ 'email' => $email ]);
 
@@ -474,7 +474,7 @@ class User
      */
     public static function getAll(): array
     {
-        $user_crud = new Crud('user');
+        $user_crud = new Crud('users');
         $results = $user_crud->findAllBy();
 
         if (empty($results)) {
