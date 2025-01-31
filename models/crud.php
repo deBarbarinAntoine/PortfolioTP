@@ -189,7 +189,7 @@ class Crud {
         ?bool $isAscend = null,
         ?int $limit = null,
         ?array $joins = null
-    ): ?string {
+    ): mixed {
         // Default aggregate function
         $sql = "SELECT $aggregateFunction($column) FROM $this->table";
 
@@ -229,7 +229,7 @@ class Crud {
             return $stmt->fetchColumn(); // Fetch the single column value (COUNT, SUM, etc.)
         } catch (PDOException $e) {
             error_log("Read Error: " . $e->getMessage());
-            return null; // Return null in case of error
+            return 0; // Return null in case of error
         }
     }
 
@@ -257,6 +257,34 @@ class Crud {
         foreach ($conditions as $key => $value) {
             $stmt->bindValue(":$key", $value); // Bind values safely
         }
+    }
+
+    // Méthode pour vérifier si un utilisateur existe (utilisation de EXISTS)
+    public function exists($conditions): bool
+    {
+        // Construire la partie WHERE de la requête en fonction des conditions
+        $conditionStrings = [];
+        foreach ($conditions as $key => $value) {
+            $conditionStrings[] = "$key = :$key";
+        }
+
+        // Construire la requête SELECT EXISTS
+        $sql = "SELECT EXISTS(SELECT 1 FROM $this->table WHERE " . implode(" AND ", $conditionStrings) . ") AS exists";
+
+        // Préparer et exécuter la requête
+        $stmt = $this->pdo->prepare($sql);
+
+        // Lier les valeurs des conditions
+        foreach ($conditions as $key => $value) {
+            $stmt->bindValue(":$key", $value);
+        }
+
+        // Exécuter la requête
+        $stmt->execute();
+
+        // Retourner le résultat de la requête (true si l'utilisateur existe, false sinon)
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return (bool) $result['exists'];
     }
 
 

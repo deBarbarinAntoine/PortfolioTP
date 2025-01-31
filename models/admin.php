@@ -1,7 +1,10 @@
 <?php
 
 namespace models;
-use models\Crud;
+
+use DateMalformedStringException;
+use PDOException;
+
 class admin
 {
     public static function getAdminDashboard()
@@ -9,9 +12,7 @@ class admin
 
         // Fetch stats securely using prepared statements
         try {
-            $stmt = $conn->prepare("SELECT COUNT(*) FROM users");
-            $stmt->execute();
-            $users_count = $stmt->fetchColumn();
+            $users_count = user::getCountAll();
 
             $stmt = $conn->prepare("SELECT COUNT(*) FROM skills");
             $stmt->execute();
@@ -24,6 +25,7 @@ class admin
             $stmt = $conn->prepare("SELECT COUNT(*) FROM users WHERE created_at >= NOW() - INTERVAL 24 HOUR");
             $stmt->execute();
             $users_count_last24hours = $stmt->fetchColumn();
+            user::getLastUsers();
 
             $stmt = $conn->prepare("SELECT COUNT(*) FROM projects WHERE created_at >= NOW() - INTERVAL 24 HOUR");
             $stmt->execute();
@@ -48,7 +50,7 @@ class admin
                 'latest_users' => $latest_users,
                 'skills' => $skills
             ];
-        } catch (PDOException $e) {
+        } catch (PDOException|DateMalformedStringException $e) {
             die("Error fetching data: " . $e->getMessage());
         }
     }

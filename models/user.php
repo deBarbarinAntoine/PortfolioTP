@@ -81,6 +81,8 @@ class User
         $this->updated_at = $updated_at ?? new DateTime();
     }
 
+
+
     /**
      * Gets the ID of the user.
      *
@@ -502,5 +504,17 @@ class User
         }
 
         return $users;
+    }
+
+    public static function getCountAll():int
+    {
+        $count_user_crud = new Crud('users');
+        return $count_user_crud->findSingleValueBy();
+    }
+
+    public static function getLastUsers(): ?int
+    {
+        $count_user_crud = new Crud('users');
+        return $count_user_crud->findSingleValueBy();
     }
 }
