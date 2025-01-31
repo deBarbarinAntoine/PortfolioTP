@@ -8,6 +8,15 @@ $projectController = new ProjectController();
 $projects = $projectController->getPublicProjects();
 ?>
 
+    <!-- Welcome Section -->
+    <header>
+        <h1>Bienvenue sur ProjetB2</h1>
+        <p>Une plateforme pour gérer vos compétences et projets.</p>
+        <?php if (!isset($_SESSION['user_id'])): ?>
+            <a href="register.php" class="btn">S'inscrire</a>
+        <?php endif; ?>
+    </header>
+
 <!-- Public Projects Section -->
 <section class="projects">
     <h2>Projets Publics</h2>
