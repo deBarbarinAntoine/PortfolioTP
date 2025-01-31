@@ -2,6 +2,7 @@
 
 namespace models;
 
+use DateTime;
 use PDOException;
 
 /**
@@ -26,6 +27,21 @@ class Skill
      * A detailed description of the skill.
      */
     private string $description;
+
+    /**
+     * The proficiency level of the skill (e.g., beginner, intermediate, expert).
+     */
+    private string $level;
+
+    /**
+     * The timestamp of when the skill was created.
+     */
+    private DateTime $created_at;
+
+    /**
+     * The timestamp of when the skill was last updated.
+     */
+    private DateTime $updated_at;
 
     /**
      * Gets the ID of the skill.
@@ -91,17 +107,104 @@ class Skill
     }
 
     /**
-     * Constructs a Skill object with the specified ID, name, and description.
+     * Gets the proficiency level of the skill.
+     *
+     * @return string|null The proficiency level of the skill.
+     */
+    public function getLevel(): ?string
+    {
+        return $this->level;
+    }
+
+    /**
+     * Sets the proficiency level of the skill.
+     *
+     * @param string|null $level The level to set.
+     * @return void
+     */
+    public function setLevel(?string $level): void
+    {
+        $this->level = $level;
+    }
+
+    /**
+     * Gets the creation timestamp of the skill.
+     *
+     * @return DateTime|null The creation timestamp.
+     */
+    public function getCreatedAt(): ?DateTime
+    {
+        return $this->created_at;
+    }
+
+    /**
+     * Sets the creation timestamp of the skill.
+     *
+     * @param DateTime|null $created_at The creation timestamp to set.
+     * @return void
+     */
+    public function setCreatedAt(?DateTime $created_at): void
+    {
+        $this->created_at = $created_at;
+    }
+
+    /**
+     * Gets the last updated timestamp of the skill.
+     *
+     * @return DateTime|null The last updated timestamp.
+     */
+    public function getUpdatedAt(): ?DateTime
+    {
+        return $this->updated_at;
+    }
+
+    /**
+     * Sets the last updated timestamp of the skill.
+     *
+     * @param DateTime|null $updated_at The last updated timestamp to set.
+     * @return void
+     */
+    public function setUpdatedAt(?DateTime $updated_at): void
+    {
+        $this->updated_at = $updated_at;
+    }
+
+    /**
+     * Constructs a Skill object with the specified attributes.
      *
      * @param int $id The unique identifier for the skill. A value of -1 indicates an unsaved skill.
      * @param string $name The name of the skill.
      * @param string $description A detailed description of the skill.
+     * @param string|null $level The proficiency level of the skill (e.g., beginner, intermediate, expert).
+     * @param DateTime|null $created_at The timestamp of when the skill was created.
+     * @param DateTime|null $updated_at The timestamp of when the skill was last updated.
      */
-    private function __construct(int $id, string $name, string $description)
+    private function __construct(int $id, string $name, string $description, ?string $level = null, ?DateTime $created_at = null, ?DateTime $updated_at = null)
     {
         $this->id = $id;
         $this->name = $name;
         $this->description = $description;
+        $this->level = $level;
+        $this->created_at = $created_at;
+        $this->updated_at = $updated_at;
+    }
+
+    /**
+     * Creates a new Skill object based on user skill data from the database.
+     *
+     * @param array $result An associative array containing user skill data (e.g., skill ID, name, and level).
+     * @return Skill The newly created Skill instance populated with the provided data.
+     */
+    public static function newUserSkill(array $result): Skill
+    {
+        return new Skill(
+            $result['us.skill_id'],
+            $result['s.name'],
+            $result['s.description'],
+            $result['us.level'],
+            $result['us.created_at'],
+            $result['us.updated_at']
+        );
     }
 
     /**
@@ -229,7 +332,7 @@ class Skill
             $skill = new Skill(
                 $result['id'],
                 $result['name'],
-                $result['description'],
+                $result['description']
             );
             return $skill;
         } catch (PDOException $e) {
@@ -266,11 +369,22 @@ class Skill
         }
     }
 
+    /**
+     * Retrieves the total count of all skills in the database.
+     *
+     * @return mixed The total count of skills as an integer or other appropriate data type.
+     */
     public static function getCountAll(): mixed
     {
         $count_user_crud = new Crud('skills');
         return $count_user_crud->findSingleValueBy();
     }
+
+    /**
+     * Retrieves all available skills from the database and maps them to Skill objects.
+     *
+     * @return array An array of Skill objects representing all available skills in the database.
+     */
     public static function getAllSkills(): array
     {
         // Create a new Crud object for 'skills' table

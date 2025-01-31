@@ -374,7 +374,7 @@ class User
 
         try {
             $rowCount = $user_crud->delete([ 'id' => $id ]);
-            return $rowCount > 0;
+            return $rowCount === 1;
 
         } catch (\Exception $e) {
             // TODO -> implement logging
@@ -393,9 +393,24 @@ class User
      */
     public static function get(int $id): ?User
     {
-        $user_crud = new Crud('users');
+        $user_crud = new Crud('users u');
 
-        $result = $user_crud->findBy([ 'id'=> $id ]);
+        $result = $user_crud->findAllBy(
+            conditions: [ 'id'=> $id ],
+            columns: 'u.id, u.username, u.email, u.avatar, u.role, u.created_at, u.updated_at, us.id, us.skill_id, us.level, us.created_at, us.updated_at, s.name, s.description',
+            joins: [
+                [
+                    'type' => 'left',
+                    'table' => 'user_skills us',
+                    'on' => 'us.user_id = u.id'
+                ],
+                [
+                    'type' => 'left',
+                    'table' => 'skills s',
+                    'on' => 's.id = us.skill_id'
+                ]
+            ]
+        );
 
         // DEBUG
         print_r($result);
@@ -466,7 +481,21 @@ class User
     public static function getAll(): array
     {
         $user_crud = new Crud('users');
-        $results = $user_crud->findAllBy();
+        $results = $user_crud->findAllBy(
+            columns: 'u.id, u.username, u.email, u.avatar, u.role, u.created_at, u.updated_at, us.id, us.skill_id, us.level, us.created_at, us.updated_at, s.name, s.description',
+            joins: [
+                [
+                    'type' => 'left',
+                    'table' => 'user_skills us',
+                    'on' => 'us.user_id = u.id'
+                ],
+                [
+                    'type' => 'left',
+                    'table' => 'skills s',
+                    'on' => 's.id = us.skill_id'
+                ]
+            ]
+        );
 
         return User::toUserArray($results);
     }
@@ -541,17 +570,36 @@ class User
             return null;
         }
 
-        $userId = $result['id'];
+        if (!isset($result['u.id'])) {
+            $userId = $result['id'];
+            return new User(
+                $userId,
+                $result['username'],
+                $result['email'],
+                $result['avatar'] ?? null,
+                '',
+                new DateTime($result['created_at']),
+                new DateTime($result['updated_at']),
+                [],
+                $result['role'],
+            );
+        }
+
+        $skills = [];
+        foreach ($result as $row) {
+            $skills[] = Skill::newUserSkill($row);
+        }
+
         return new User(
-            $userId,
-            $result['username'],
-            $result['email'],
-            $result['avatar'] ?? null,
+            $result[0]['u.id'],
+            $result[0]['u.username'],
+            $result[0]['u.email'],
+            $result[0]['u.avatar'] ?? null,
             '',
-            new DateTime($result['created_at']),
-            new DateTime($result['updated_at']),
-            [],
-            $result['role'],
+            new DateTime($result[0]['u.created_at']),
+            new DateTime($result[0]['u.updated_at']),
+            $skills,
+            $result[0]['u.role'],
         );
     }
 
@@ -574,44 +622,15 @@ class User
         $users = [];
 
         foreach ($results as $row) {
-            $users[] = User::toUser($row);
+            $user = User::toUser($row);
+
+            if (!empty($user)) {
+                $users[] = $user;
+            }
         }
 
         return $users;
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     /**
      * @throws DateMalformedStringException
@@ -619,7 +638,7 @@ class User
     public static function getAllUsers(string $search, int $offset): array
     {
         $user_crud = new Crud('users');
-        $results = $user_crud -> search($search,10,$offset);
+        $results = $user_crud -> search($search,10, $offset);
         return User::toUserArray($results);
     }
 }
