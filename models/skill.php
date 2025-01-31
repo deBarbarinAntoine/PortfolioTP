@@ -265,4 +265,33 @@ class Skill
             return [];
         }
     }
+
+    public static function getCountAll(): mixed
+    {
+        $count_user_crud = new Crud('skills');
+        return $count_user_crud->findSingleValueBy();
+    }
+    public static function getAllSkills(): array
+    {
+        // Create a new Crud object for 'skills' table
+        $user_crud = new Crud('skills');
+
+        // Define the conditions (empty array to get all skills)
+        $conditions = [];  // You can modify this based on your use case
+
+        // Get raw results from the findAllBy method
+        $results = $user_crud->findAllBy();
+
+        // Initialize an empty array to hold Skill objects
+        $skills = [];
+
+        // Map the results to Skill objects
+        foreach ($results as $row) {
+            // Assuming each row has 'id', 'name', and 'description' keys
+            $skills[] = new Skill($row['id'], $row['name'], $row['description']);
+        }
+
+        // Return the array of Skill objects
+        return $skills;
+    }
 }
