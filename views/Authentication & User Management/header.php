@@ -9,7 +9,7 @@ session_start();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Accueil - ProjetB2</title>
-    <link rel="stylesheet" href="CSS/headerStyles.css"> <!-- Assurez-vous d’avoir un fichier CSS -->
+    <link rel="stylesheet" href="../style.css"> <!-- Assurez-vous d’avoir compilé le fichier SCSS -->
 </head>
 <body>
 
