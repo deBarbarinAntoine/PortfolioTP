@@ -355,7 +355,7 @@ class User
 
             // DEBUG
             echo $e->getMessage();
-            
+
             return false;
         }
     }
@@ -533,7 +533,7 @@ class User
      * @return User|null A User object if the result is valid, or null otherwise.
      * @throws \DateMalformedStringException
      */
-    private static function toUser($result): User|null
+    private static function toUser(?array $result): User|null
     {
         if (empty($result)) {
             return null;
@@ -563,7 +563,7 @@ class User
      * @return array An array of User objects, or an empty array if no records are provided.
      * @throws \DateMalformedStringException
      */
-    private static function toUserArray($results): array
+    private static function toUserArray(array $results): array
     {
         if (empty($results)) {
             return [];
