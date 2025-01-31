@@ -350,8 +350,12 @@ class User
             );
             return $rowCount > 0;
 
-        } catch (Exception $e) {
+        } catch (\PDOException $e) {
             // TODO -> implement logging
+
+            // DEBUG
+            echo $e->getMessage();
+            
             return false;
         }
     }
@@ -394,24 +398,7 @@ class User
         // DEBUG
         print_r($result);
 
-        if (empty($result)) {
-            return null;
-        }
-
-        $userId = $result['id'];
-        $user = new User(
-            $userId,
-            $result['username'],
-            $result['email'],
-            $result['avatar'] ?? null,
-            '',
-            new DateTime($result['created_at']),
-            new DateTime($result['updated_at']),
-            [],
-            $result['role'],
-        );
-
-        return $user;
+        return User::toUser($result);
     }
 
     /**
@@ -479,32 +466,18 @@ class User
         $user_crud = new Crud('users');
         $results = $user_crud->findAllBy();
 
-        if (empty($results)) {
-            return [];
-        }
-
-        $users = [];
-
-        foreach ($results as $row) {
-
-            $userId = $row['id'];
-            $user = new User(
-                $userId,
-                $row['username'],
-                $row['email'],
-                $row['avatar'] ?? null,
-                '',
-                new DateTime($row['created_at']),
-                new DateTime($row['updated_at']),
-                [],
-                $row['role']
-            );
-
-            $users[] = $user;
-        }
-
-        return $users;
+        return User::toUserArray($results);
     }
+
+    /**
+     * Retrieves the last 5 users created within the last 24 hours.
+     *
+     * This method queries the database for the most recent 5 users and
+     * converts the result set into an array of User objects.
+     *
+     * @return array An array of User objects, or an empty array if none are found.
+     * @throws \DateMalformedStringException
+     */
     public static function get5LastUsers(): array
     {
         $user_crud = new Crud('users');
@@ -512,16 +485,35 @@ class User
         $conditions = [
             'created_at' => 'NOW() - INTERVAL 24 HOUR'
         ];
+
         // Call the findAllBy method with the necessary parameters
-        return $user_crud->findAllBy($conditions, "*", 'created_at', false, 5);
+        $results = $user_crud->findAllBy($conditions, "*", 'created_at', false, 5);
+
+        return User::toUserArray($results);
     }
 
+    /**
+     * Retrieves the total number of users in the database.
+     *
+     * This method queries the database to count the total number
+     * of user records available.
+     *
+     * @return mixed The total number of users as an integer.
+     */
     public static function getCountAll(): mixed
     {
         $count_user_crud = new Crud('users');
         return $count_user_crud->findSingleValueBy();
     }
 
+    /**
+     * Retrieves the count of users created within the last 24 hours.
+     *
+     * This method uses a database query to calculate how many users
+     * were created within the past day.
+     *
+     * @return mixed The number of new users as an integer.
+     */
     public static function getCountLastUsers(): mixed
     {
         $count_user_crud = new Crud('users');
@@ -529,5 +521,60 @@ class User
             'created_at' => 'NOW() - INTERVAL 24 HOUR'
         ];
         return $count_user_crud->findSingleValueBy($conditions);
+    }
+
+    /**
+     * Converts a database record into a User object.
+     *
+     * This helper method takes a single row of user data fetched from
+     * the database and transforms it into an instance of the User class.
+     *
+     * @param array|null $result The database record representing the user, or null.
+     * @return User|null A User object if the result is valid, or null otherwise.
+     * @throws \DateMalformedStringException
+     */
+    private static function toUser($result): User|null
+    {
+        if (empty($result)) {
+            return null;
+        }
+
+        $userId = $result['id'];
+        return new User(
+            $userId,
+            $result['username'],
+            $result['email'],
+            $result['avatar'] ?? null,
+            '',
+            new DateTime($result['created_at']),
+            new DateTime($result['updated_at']),
+            [],
+            $result['role'],
+        );
+    }
+
+    /**
+     * Converts an array of database records into an array of User objects.
+     *
+     * This helper method takes multiple rows of user data fetched from
+     * the database and transforms them into User class instances.
+     *
+     * @param array $results The database records for users.
+     * @return array An array of User objects, or an empty array if no records are provided.
+     * @throws \DateMalformedStringException
+     */
+    private static function toUserArray($results): array
+    {
+        if (empty($results)) {
+            return [];
+        }
+
+        $users = [];
+
+        foreach ($results as $row) {
+            $users[] = User::toUser($row);
+        }
+
+        return $users;
     }
 }
