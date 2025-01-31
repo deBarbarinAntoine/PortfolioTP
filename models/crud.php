@@ -229,7 +229,7 @@ class Crud {
             return $stmt->fetchColumn(); // Fetch the single column value (COUNT, SUM, etc.)
         } catch (PDOException $e) {
             error_log("Read Error: " . $e->getMessage());
-            return 0; // Return null in case of error
+            return $e->getMessage();
         }
     }
 

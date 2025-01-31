@@ -505,16 +505,29 @@ class User
 
         return $users;
     }
+    public static function get5LastUsers(): array
+    {
+        $user_crud = new Crud('users');
+        // Set the condition for the query
+        $conditions = [
+            'created_at' => 'NOW() - INTERVAL 24 HOUR'
+        ];
+        // Call the findAllBy method with the necessary parameters
+        return $user_crud->findAllBy($conditions, "*", 'created_at', false, 5);
+    }
 
-    public static function getCountAll():int
+    public static function getCountAll(): mixed
     {
         $count_user_crud = new Crud('users');
         return $count_user_crud->findSingleValueBy();
     }
 
-    public static function getLastUsers(): ?int
+    public static function getCountLastUsers(): mixed
     {
         $count_user_crud = new Crud('users');
-        return $count_user_crud->findSingleValueBy();
+        $conditions = [
+            'created_at' => 'NOW() - INTERVAL 24 HOUR'
+        ];
+        return $count_user_crud->findSingleValueBy($conditions);
     }
 }
