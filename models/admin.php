@@ -9,28 +9,14 @@ class admin
 {
     public static function getAdminDashboard()
     {
-
-        // Fetch stats securely using prepared statements
         try {
             $users_count = user::getCountAll();
             $users_count_last24hours = user::getCountLastUsers();
             $latest_users = user::get5LastUsers();
             $skills_count = skill::getCountAll();
             $skills = skill::getAllSkills();
-
-            $stmt = $conn->prepare("SELECT COUNT(*) FROM projects");
-            $stmt->execute();
-            $projects_count = $stmt->fetchColumn();
-
-            $stmt = $conn->prepare("SELECT COUNT(*) FROM projects WHERE created_at >= NOW() - INTERVAL 24 HOUR");
-            $stmt->execute();
-            $projects_count_last24hours = $stmt->fetchColumn();
-            
-
-
-
-
-
+            $projects_count = project::getCountAll();
+            $projects_count_last24hours = project::getCountLastProject();
 
             return [
                 'users_count' => $users_count,
@@ -44,5 +30,22 @@ class admin
         } catch (PDOException|DateMalformedStringException $e) {
             die("Error fetching data: " . $e->getMessage());
         }
+    }
+
+    /**
+     * @throws DateMalformedStringException
+     */
+    public static function get_admin_users(string $search, int $offset): array
+    {
+        return user::getAllUsers($search, $offset);
+    }
+
+    public static function deleteUser($user_id): bool
+    {
+        $rowCount = user::delete($user_id);
+        if ($rowCount > 0) {
+            return true;
+        }
+        return false;
     }
 }

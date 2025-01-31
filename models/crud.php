@@ -96,15 +96,19 @@ class Crud {
         array $conditions = [],
         string $columns = "*",
         ?string $orderBy = null,
-        ?bool $isAscend = null,
+        ?string $Ascend = null,
         ?int $limit = null,
+        ?int $offset =null,
         ?array $joins = null
     ): array {
-        $sql = $this->getSql($columns, $joins, $conditions, $orderBy, $isAscend);
+        $sql = $this->getSql($columns, $joins, $conditions, $orderBy, $Ascend);
 
         // Handle LIMIT
         if ($limit) {
             $sql .= " LIMIT $limit";
+            if ($offset) {
+                $sql .= " OFFSET $offset";
+            }
         }
 
         // Debugging output for the query (you can remove this in production)
@@ -143,10 +147,10 @@ class Crud {
         array $conditions,
         string $columns = "*",
         ?string $orderBy = null,
-        ?bool $isAscend = null,
+        ?string $Ascend = null,
         ?array $joins = null
     ): ?array {
-        $sql = $this->getSql($columns, $joins, $conditions, $orderBy, $isAscend);
+        $sql = $this->getSql($columns, $joins, $conditions, $orderBy, $Ascend);
 
         // Limit to 1 result since it's findBy
         $sql .= " LIMIT 1";
@@ -287,7 +291,36 @@ class Crud {
         return (bool) $result['exists'];
     }
 
+    public function search(?string $search = '', int $limit = 10, int $offset = 0): array {
+        // Base SQL query
+        $sql = "SELECT * FROM $this->table";
 
+        // Add search conditions only if $search is not empty
+        if (!empty($search)) {
+            $sql .= " WHERE name LIKE :search OR username LIKE :search OR email LIKE :search";
+        }
+
+        // Append LIMIT and OFFSET
+        $sql .= " LIMIT :limit OFFSET :offset";
+
+        try {
+            $stmt = $this->pdo->prepare($sql);
+
+            // Bind parameters
+            if (!empty($search)) {
+                $searchTerm = "%$search%";
+                $stmt->bindParam(':search', $searchTerm, PDO::PARAM_STR);
+            }
+            $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Search Error: " . $e->getMessage());
+            return [];
+        }
+    }
 
     /**
      * Update : Update records in a table

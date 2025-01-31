@@ -2,17 +2,21 @@
 
 namespace models;
 
-require_once __DIR__ . '/db.php';
 
 class project {
-    public static function getPublicProjects() {
-        global $conn; // Use the database connection
 
-        $query = "SELECT * FROM projects WHERE private = 'public' ORDER BY created_at DESC";
-        $result = $conn->query($query);
-
-        return $result->fetch_all(MYSQLI_ASSOC); // Return projects as an associative array
+    public static function getCountAll(): mixed
+    {
+        $count_project_crud = new Crud('projects');
+        return $count_project_crud->findSingleValueBy();
     }
 
-
+    public static function getCountLastProject(): mixed
+    {
+        $count_project_crud = new Crud('projects');
+        $conditions = [
+            'created_at' => 'NOW() - INTERVAL 24 HOUR'
+        ];
+        return $count_project_crud->findSingleValueBy($conditions);
+    }
 }

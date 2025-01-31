@@ -2,6 +2,7 @@
 
 namespace models;
 
+use DateMalformedStringException;
 use DateTime;
 
 /**
@@ -80,6 +81,7 @@ class User
         $this->role = $role;
         $this->updated_at = $updated_at ?? new DateTime();
     }
+
 
 
 
@@ -387,7 +389,7 @@ class User
      *
      * @param int $id The unique identifier of the user.
      * @return User|null The User object if found, or null if not found.
-     * @throws \DateMalformedStringException
+     * @throws DateMalformedStringException
      */
     public static function get(int $id): ?User
     {
@@ -459,7 +461,7 @@ class User
      * Retrieves all users from the database along with their related interests.
      *
      * @return array An array of User objects representing all users in the database.
-     * @throws \DateMalformedStringException
+     * @throws DateMalformedStringException
      */
     public static function getAll(): array
     {
@@ -476,7 +478,7 @@ class User
      * converts the result set into an array of User objects.
      *
      * @return array An array of User objects, or an empty array if none are found.
-     * @throws \DateMalformedStringException
+     * @throws DateMalformedStringException
      */
     public static function get5LastUsers(): array
     {
@@ -531,7 +533,7 @@ class User
      *
      * @param array|null $result The database record representing the user, or null.
      * @return User|null A User object if the result is valid, or null otherwise.
-     * @throws \DateMalformedStringException
+     * @throws DateMalformedStringException
      */
     private static function toUser(?array $result): User|null
     {
@@ -561,7 +563,7 @@ class User
      *
      * @param array $results The database records for users.
      * @return array An array of User objects, or an empty array if no records are provided.
-     * @throws \DateMalformedStringException
+     * @throws DateMalformedStringException
      */
     private static function toUserArray(array $results): array
     {
@@ -576,5 +578,48 @@ class User
         }
 
         return $users;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * @throws DateMalformedStringException
+     */
+    public static function getAllUsers(string $search, int $offset): array
+    {
+        $user_crud = new Crud('users');
+        $results = $user_crud -> search($search,10,$offset);
+        return User::toUserArray($results);
     }
 }
