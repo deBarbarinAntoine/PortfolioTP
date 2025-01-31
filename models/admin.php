@@ -15,11 +15,8 @@ class admin
             $users_count = user::getCountAll();
             $users_count_last24hours = user::getCountLastUsers();
             $latest_users = user::get5LastUsers();
-
-
-            $stmt = $conn->prepare("SELECT COUNT(*) FROM skills");
-            $stmt->execute();
-            $skills_count = $stmt->fetchColumn();
+            $skills_count = skill::getCountAll();
+            $skills = skill::getAllSkills();
 
             $stmt = $conn->prepare("SELECT COUNT(*) FROM projects");
             $stmt->execute();
@@ -29,10 +26,11 @@ class admin
             $stmt->execute();
             $projects_count_last24hours = $stmt->fetchColumn();
             
-            // Fetch skills
-            $stmt = $conn->prepare("SELECT id, name, description FROM skills ORDER BY name");
-            $stmt->execute();
-            $skills = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+
+
+
+
 
             return [
                 'users_count' => $users_count,
