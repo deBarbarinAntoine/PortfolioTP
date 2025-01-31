@@ -1,5 +1,7 @@
 <?php
 
+use controllers\ProjectController;
+
 include 'header.php';
 
 require_once __DIR__ . '/../../controllers/ProjectController.php';

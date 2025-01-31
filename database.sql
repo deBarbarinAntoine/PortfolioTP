@@ -10,7 +10,8 @@ CREATE TABLE users
     password   VARCHAR(255) NOT NULL,
     role       ENUM ('admin', 'user') DEFAULT 'user' NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    avatar     VARCHAR(100) NOT NULL
 );
 
 -- Table des compétences (Ajout d'une description)

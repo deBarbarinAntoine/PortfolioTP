@@ -76,6 +76,23 @@ class Crud {
      * @return array EN: Array of results | FR: Tableau des résultats
      */
     public function findAllBy(
+        // exemple usage
+        //$conditions = ['status' => 'active'];
+        //$joins = [
+        //    ['type' => 'left', 'table' => 'users', 'on' => 'orders.user_id = users.id']
+        //];
+        //$orderBy = 'created_at';
+        //$isAscend = true;
+        //$limit = 10;
+        //$results = $yourClassInstance->findAllBy(
+        //    $conditions,
+        //    "*",
+        //    $orderBy,
+        //    $isAscend,
+        //    $limit,
+        //    $joins
+        //);
+        //// $results will contain an array of matching rows or an empty array if no matches found
         array $conditions = [],
         string $columns = "*",
         ?string $orderBy = null,
@@ -83,80 +100,105 @@ class Crud {
         ?int $limit = null,
         ?array $joins = null
     ): array {
-        $sql = "SELECT $columns FROM $this->table";
-
-        // Handle joins if provided
-        if ($joins) {
-            foreach ($joins as $join) {
-                $sql .= " " . strtoupper($join['type']) . " JOIN " . $join['table'] . " ON " . $join['on'];
-            }
-        }
-
-        // Handle conditions (WHERE)
-        if (!empty($conditions)) {
-            $conditionClauses = [];
-            foreach ($conditions as $key => $value) {
-                $conditionClauses[] = "$key = $value";
-            }
-            $sql .= " WHERE " . implode(" AND ", $conditionClauses);
-        }
-
-        // Handle ORDER BY
-        if ($orderBy) {
-            $sql .= " ORDER BY $orderBy";
-        }
-
-        // Handle ASC or DESC
-        if ($isAscend !== null){
-            if ($isAscend) {
-                $sql .= " ASC";
-            } else {
-                $sql .= " DESC";
-            }
-        }
-
+        $sql = $this->getSql($columns, $joins, $conditions, $orderBy, $isAscend);
 
         // Handle LIMIT
         if ($limit) {
             $sql .= " LIMIT $limit";
         }
 
+        // Debugging output for the query (you can remove this in production)
         echo $sql;
 
-        // Execute the query with conditions
         try {
             $stmt = $this->pdo->prepare($sql);
+
+            // Bind parameters safely
+            $this->bindConditions($stmt, $conditions);
+
             $stmt->execute();
-            return $stmt->fetchAll();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC); // Fetch as associative array
         } catch (PDOException $e) {
             error_log("Read Error: " . $e->getMessage());
-            return [];
+            return []; // Return an empty array in case of error
         }
     }
 
     public function findBy(
+        // example usage
+        //$conditions = ['id' => 123, 'status' => 'active'];
+        //$joins = [
+        //    ['type' => 'left', 'table' => 'users', 'on' => 'orders.user_id = users.id']
+        //];
+        //$orderBy = 'created_at';
+        //$isAscend = true;
+        //$result = $yourClassInstance->findBy(
+        //    $conditions,
+        //    "*",
+        //    $orderBy,
+        //    $isAscend,
+        //    $joins
+        //);
+        //// $result will contain the first matching row or null if no match
         array $conditions,
         string $columns = "*",
         ?string $orderBy = null,
         ?bool $isAscend = null,
         ?array $joins = null
     ): ?array {
-        $sql = "SELECT $columns FROM $this->table";
+        $sql = $this->getSql($columns, $joins, $conditions, $orderBy, $isAscend);
+
+        // Limit to 1 result since it's findBy
+        $sql .= " LIMIT 1";
+
+        try {
+            $stmt = $this->pdo->prepare($sql);
+
+            // Bind parameters using bindValue to avoid passing by reference
+            $this->bindConditions($stmt, $conditions);
+
+            $stmt->execute();
+            return $stmt->fetch(PDO::FETCH_ASSOC); // Fetch as an associative array
+        } catch (PDOException $e) {
+            error_log("Read Error: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    public function findSingleValueBy(
+        // exemple usage
+        //$conditions = ['id' => 1];
+        //$joins = [
+        //    ['type' => 'inner', 'table' => 'users', 'on' => 'orders.user_id = users.id']
+        //];
+        //$orderBy = 'created_at';
+        //$isAscend = true;
+        //$result = $yourClassInstance->findSingleValueBy(
+        //    $conditions,
+        //    "COUNT",
+        //    "id",
+        //    $orderBy,
+        //    $isAscend,
+        //    10,
+        //    $joins
+        //);
+        array $conditions = [],
+        string $aggregateFunction = "COUNT",
+        string $column = "*",
+        ?string $orderBy = null,
+        ?bool $isAscend = null,
+        ?int $limit = null,
+        ?array $joins = null
+    ): ?string {
+        // Default aggregate function
+        $sql = "SELECT $aggregateFunction($column) FROM $this->table";
 
         // Handle joins if provided
-        if ($joins) {
-            foreach ($joins as $join) {
-                $sql .= " " . strtoupper($join['type']) . " JOIN " . $join['table'] . " ON " . $join['on'];
-            }
-        }
+        $sql = $this->addJoinsToQuery($sql, $joins);
 
         // Handle conditions (WHERE)
         if (!empty($conditions)) {
-            $conditionClauses = [];
-            foreach ($conditions as $key => $value) {
-                $conditionClauses[] = "$key = :$key";
-            }
-            $sql .= " WHERE " . implode(" AND ", $conditionClauses);
+            $sql = $this->addConditionsToQuery($sql, $conditions);
         }
 
         // Handle ORDER BY
@@ -169,24 +211,54 @@ class Crud {
             $sql .= $isAscend ? " ASC" : " DESC";
         }
 
-        // Limit to 1 result since it's findBy
-        $sql .= " LIMIT 1";
+        // Handle LIMIT
+        if ($limit) {
+            $sql .= " LIMIT $limit";
+        }
 
+        echo $sql; // Debugging
+
+        // Execute the query and fetch the result
         try {
             $stmt = $this->pdo->prepare($sql);
 
-            // Bind parameters
-            foreach ($conditions as $key => &$value) {
-                $stmt->bindParam(":" . $key, $value);
-            }
+            // Bind the parameters if necessary
+            $this->bindConditions($stmt, $conditions);
 
             $stmt->execute();
-            return $stmt->fetch();
+            return $stmt->fetchColumn(); // Fetch the single column value (COUNT, SUM, etc.)
         } catch (PDOException $e) {
             error_log("Read Error: " . $e->getMessage());
-            return null;
+            return null; // Return null in case of error
         }
     }
+
+    // Add joins to the query
+    private function addJoinsToQuery(string $sql, ?array $joins): string {
+        if ($joins) {
+            foreach ($joins as $join) {
+                $sql .= " " . strtoupper($join['type']) . " JOIN " . $join['table'] . " ON " . $join['on'];
+            }
+        }
+        return $sql;
+    }
+
+    // Add conditions to the query
+    private function addConditionsToQuery(string $sql, array $conditions): string {
+        $conditionClauses = [];
+        foreach ($conditions as $key => $value) {
+            $conditionClauses[] = "$key = :$key"; // Use named placeholders for binding
+        }
+        return $sql . " WHERE " . implode(" AND ", $conditionClauses);
+    }
+
+    // Bind conditions to the prepared statement
+    private function bindConditions($stmt, array $conditions): void {
+        foreach ($conditions as $key => $value) {
+            $stmt->bindValue(":$key", $value); // Bind values safely
+        }
+    }
+
 
 
     /**
@@ -269,4 +341,61 @@ class Crud {
             throw $e;
         }
     }
+
+    /**
+     * @param string $columns
+     * @param array|null $joins
+     * @param array $conditions
+     * @param string|null $orderBy
+     * @param bool|null $isAscend
+     * @return string
+     */
+    public function getSql(string $columns, ?array $joins, array $conditions, ?string $orderBy, ?bool $isAscend): string
+    {
+        $sql = "SELECT $columns FROM $this->table";
+
+        // Handle joins if provided
+        if ($joins) {
+            foreach ($joins as $join) {
+                $sql .= " " . strtoupper($join['type']) . " JOIN " . $join['table'] . " ON " . $join['on'];
+            }
+        }
+
+        // Handle conditions (WHERE)
+        if (!empty($conditions)) {
+            $sql = $this->addConditionsToQuery($sql, $conditions);
+        }
+
+        // Handle ORDER BY
+        if ($orderBy) {
+            $sql .= " ORDER BY $orderBy";
+        }
+
+        // Handle ASC or DESC
+        if ($isAscend !== null) {
+            $sql .= $isAscend ? " ASC" : " DESC";
+        }
+        return $sql;
+    }
 }
+
+
+// exemple usage
+
+// $crud = new Crud('users');
+
+//// Create a new user
+//$data = ['name' => 'John Doe', 'email' => 'johndoe@example.com'];
+//$userId = $crud->create($data);
+
+//// Fetch all users
+//$users = $crud->findAllBy([], '*', 'name', true);
+
+//// Update user
+//$updateData = ['email' => 'newemail@example.com'];
+//$updateConditions = ['id' => $userId];
+//$updatedRows = $crud->update($updateData, $updateConditions);
+
+//// Delete user
+//$deleteConditions = ['id' => $userId];
+//$deletedRows = $crud->delete($deleteConditions);

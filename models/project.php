@@ -4,7 +4,7 @@ namespace models;
 
 require_once __DIR__ . '/db.php';
 
-class Project {
+class project {
     public static function getPublicProjects() {
         global $conn; // Use the database connection
 
@@ -13,4 +13,6 @@ class Project {
 
         return $result->fetch_all(MYSQLI_ASSOC); // Return projects as an associative array
     }
+
+
 }
