@@ -1,9 +1,9 @@
 <?php
 
-namespace models;
+namespace App\Models;
 
 
-class project {
+class Project {
 
     public static function getCountAll(): mixed
     {

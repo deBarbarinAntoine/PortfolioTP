@@ -1,13 +1,13 @@
 <?php
 
-namespace controllers;
+namespace App\Controllers;
 
-use models\User;
-require_once __DIR__ . '/../models/user.php';
+use App\Models\User;
+
 class UserController
 {
     public function getUserNumber(): ?array
     {
-        return user::getCountAll();
+        return User::getCountAll();
     }
 }

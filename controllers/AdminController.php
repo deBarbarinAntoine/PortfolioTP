@@ -1,15 +1,15 @@
 <?php
 
-namespace controllers;
+namespace App\Controllers;
 use DateMalformedStringException;
-use models\admin;
+use App\Models\Admin;
 
-require_once __DIR__ . '/../models/admin.php';
+require_once __DIR__ . '/../models/Admin.php';
 
 class AdminController {
     public function getAdminDashboard(): ?array
     {
-        return admin::getAdminDashboard();
+        return Admin::getAdminDashboard();
     }
 
     /**
@@ -17,13 +17,13 @@ class AdminController {
      */
     public function get_admin_users(string $search, int $offset): array
     {
-        return admin::get_admin_users($search,$offset);
+        return Admin::get_admin_users($search,$offset);
     }
 
     public function deleteUser($user_id): bool
     {
 
-        return admin::deleteUser($user_id);
+        return Admin::deleteUser($user_id);
     }
 
 }

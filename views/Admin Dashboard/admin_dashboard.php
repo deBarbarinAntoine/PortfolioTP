@@ -1,10 +1,8 @@
 <?php
 // Overview of site stats, users, and skills.
-use controllers\AdminController;
+use App\Controllers\AdminController;
 
 include "../Authentication & User Management/header.php";
-
-require_once __DIR__ . '/../../controllers/AdminController.php';
 
 // Check if the user is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {

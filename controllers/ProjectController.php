@@ -1,13 +1,12 @@
 <?php
 
-namespace controllers;
-use models\project;
+namespace App\Controllers;
 
-require_once __DIR__ . '/../models/Project.php';
+use App\Models\Project;
 
 class ProjectController {
     public function getPublicProjects() {
-        return project::getPublicProjects();
+        return Project::getPublicProjects();
     }
 }
 

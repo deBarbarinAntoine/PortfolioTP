@@ -1,6 +1,6 @@
 <?php
 
-namespace models;
+namespace App\Models;
 
 use DateMalformedStringException;
 use DateTime;
@@ -63,19 +63,18 @@ class User
      * @param string $username The username of the user.
      * @param string $email The email address of the user.
      * @param string $avatar The avatar of the user.
-     * @param string $password_hash The hashed password of the user.
      * @param DateTime|null $created_at The timestamp when the user was created (optional).
      * @param DateTime|null $updated_at The timestamp when the user was last updated (optional).
      * @param array $skills An optional array of Skill objects representing the user's skills (default empty).
      * @param string $role The role of the user (default 'user')
      */
-    private function __construct(int $id, string $username, string $email, string $avatar, string $password_hash = '', ?DateTime $created_at = null, ?DateTime $updated_at = null, array $skills = [], string $role = 'user')
+    private function __construct(int $id, string $username, string $email, string $avatar, ?DateTime $created_at = null, ?DateTime $updated_at = null, array $skills = [], string $role = 'user')
     {
         $this->id = $id;
         $this->username = $username;
         $this->email = $email;
         $this->avatar = $avatar;
-        $this->password_hash = $password_hash;
+        $this->password_hash = '';
         $this->created_at = $created_at ?? new DateTime();
         $this->skills = $skills;
         $this->role = $role;
@@ -320,8 +319,8 @@ class User
 
         } catch (\Exception $e) {
 
-            // DEBUG
-            Logger::log($e->getMessage(), __METHOD__, Level::DEBUG);
+            // LOGGING
+            Logger::log($e->getMessage(), __METHOD__);
 
             return false;
         }
@@ -411,8 +410,8 @@ class User
             ]
         );
 
-        // DEBUG: Display the fetched result for debugging purposes (should be removed in production).
-        print_r($result);
+        // DEBUG: Display the fetched result for debugging purposes.
+        Logger::log($result, __METHOD__, Level::DEBUG);
 
         // Convert the raw database result into a User object and return it. Null if no user is found.
         return User::toUser($result);
@@ -455,8 +454,8 @@ class User
                 // Fetch and return the User object on successful password validation
                 $user = User::get($id);
 
-                // DEBUG: Print user details (for development/testing purposes)
-                print_r($user);
+                // DEBUG: Print user details
+                Logger::log($user->toString(), __METHOD__, Level::DEBUG);
 
                 return $user;
             } catch (\Exception $e) {
@@ -585,7 +584,6 @@ class User
                 $result['username'],
                 $result['email'],
                 $result['avatar'] ?? null,
-                '', // Default empty value for password hash.
                 new DateTime($result['created_at']), // Parse and set the creation timestamp.
                 new DateTime($result['updated_at']), // Parse and set the update timestamp.
                 [],
@@ -607,7 +605,6 @@ class User
             $result[0]['u.username'],
             $result[0]['u.email'],
             $result[0]['u.avatar'] ?? null,
-            '', // Default empty value for password hash.
             new DateTime($result[0]['u.created_at']), // Parse and set the creation timestamp.
             new DateTime($result[0]['u.updated_at']), // Parse and set the update timestamp.
             $skills, // Assign the previously generated array of skills.
@@ -688,5 +685,25 @@ class User
         $user_crud = new Crud('users');
         $results = $user_crud->search($search, 10, $offset);
         return User::toUserArray($results);
+    }
+
+    /**
+     * Returns a string representation of the User object.
+     *
+     * This method provides information about the user's ID, username, email, role, and creation/update timestamp.
+     *
+     * @return string A string containing user details.
+     */
+    public function toString(): string
+    {
+        return sprintf(
+            "User { ID: '%d', Username: '%s', Email: '%s', Role: '%s', Created At: '%s', Updated At: '%s' }",
+            $this->id,
+            $this->username,
+            $this->email,
+            $this->role,
+            $this->created_at->format('Y-m-d H:i:s'),
+            $this->updated_at->format('Y-m-d H:i:s')
+        );
     }
 }

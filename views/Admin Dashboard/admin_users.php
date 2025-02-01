@@ -1,11 +1,9 @@
 <?php
 // List, edit, and delete user accounts.
-use controllers\AdminController;
-use controllers\UserController;
+use App\Controllers\AdminController;
+use App\Controllers\UserController;
 
 include "../Authentication & User Management/header.php";
-
-require_once __DIR__ . '/../../controllers/AdminController.php';
 
 // Check if the user is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {

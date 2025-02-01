@@ -1,6 +1,6 @@
 <?php
 
-namespace models;
+namespace App\Models;
 use Dotenv\Dotenv;
 
 $dotenv = Dotenv::createImmutable(__DIR__ . '/../.env');

@@ -1,6 +1,6 @@
 <?php
 
-namespace models;
+namespace App\Models;
 
 use DateTime;
 use PDOException;
@@ -244,8 +244,10 @@ class Skill
             return $id;
 
         } catch (PDOException $e) {
-            // TODO -> implement logging
-            echo $e->getMessage();
+
+            // LOGGING
+            Logger::log($e->getMessage(), __METHOD__);
+
             return -1;
         }
     }
@@ -264,8 +266,10 @@ class Skill
             $exists = $skill_crud->exists(['name' => $name]);
             return $exists;
         } catch (PDOException $e) {
-            // TODO -> implement logging
-            echo $e->getMessage();
+
+            // LOGGING
+            Logger::log($e->getMessage(), __METHOD__);
+
             return false;
         }
     }
@@ -289,8 +293,10 @@ class Skill
             );
             return $rowCount;
         } catch (PDOException $e) {
-            // TODO -> implement logging
-            echo $e->getMessage();
+
+            // LOGGING
+            Logger::log($e->getMessage(), __METHOD__);
+
             return 0;
         }
     }
@@ -311,8 +317,10 @@ class Skill
             );
             return $rowCount;
         } catch (PDOException $e) {
-            // TODO -> implement logging
-            echo $e->getMessage();
+
+            // LOGGING
+            Logger::log($e->getMessage(), __METHOD__);
+
             return 0;
         }
     }
@@ -336,8 +344,10 @@ class Skill
             );
             return $skill;
         } catch (PDOException $e) {
-            // TODO -> implement logging
-            echo $e->getMessage();
+
+            // LOGGING
+            Logger::log($e->getMessage(), __METHOD__);
+
             return null;
         }
     }
@@ -363,8 +373,10 @@ class Skill
             }
             return $skills;
         } catch (PDOException $e) {
-            // TODO -> implement logging
-            echo $e->getMessage();
+
+            // LOGGING
+            Logger::log($e->getMessage(), __METHOD__);
+
             return [];
         }
     }
@@ -391,7 +403,7 @@ class Skill
         $user_crud = new Crud('skills');
 
         // Define the conditions (empty array to get all skills)
-        $conditions = [];  // You can modify this based on your use case
+        $conditions = [];
 
         // Get raw results from the findAllBy method
         $results = $user_crud->findAllBy();
@@ -401,6 +413,7 @@ class Skill
 
         // Map the results to Skill objects
         foreach ($results as $row) {
+
             // Assuming each row has 'id', 'name', and 'description' keys
             $skills[] = new Skill($row['id'], $row['name'], $row['description']);
         }

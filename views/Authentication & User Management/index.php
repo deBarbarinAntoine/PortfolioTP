@@ -1,10 +1,8 @@
 <?php
 
-use controllers\ProjectController;
+use App\Controllers\ProjectController;
 
 include 'header.php';
-
-require_once __DIR__ . '/../../controllers/ProjectController.php';
 
 $projectController = new ProjectController();
 $projects = $projectController->getPublicProjects();

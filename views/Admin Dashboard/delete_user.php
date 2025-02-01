@@ -1,9 +1,8 @@
 <?php
 
-use controllers\AdminController;
+use App\Controllers\AdminController;
 
 session_start();
-require_once __DIR__ . '/../../controllers/AdminController.php';
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
     die("Unauthorized access.");
