@@ -4,6 +4,7 @@ namespace App\Models;
 
 use DateMalformedStringException;
 use DateTime;
+use Exception;
 
 /**
  * Represents a user in the system with their username, email, avatar, password hash, ID, interests,
@@ -317,7 +318,7 @@ class User
             ]);
             return $id > 0;
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
 
             // LOGGING
             Logger::log($e->getMessage(), __METHOD__);
@@ -370,7 +371,7 @@ class User
             $rowCount = $user_crud->delete([ 'id' => $id ]);
             return $rowCount === 1;
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
 
             // LOGGING
             Logger::log($e->getMessage(), __METHOD__);
@@ -410,7 +411,7 @@ class User
             ]
         );
 
-        // DEBUG: Display the fetched result for debugging purposes.
+        // Debug: Display the fetched result for debugging purposes.
         Logger::log($result, __METHOD__, Level::DEBUG);
 
         // Convert the raw database result into a User object and return it. Null if no user is found.
@@ -439,7 +440,7 @@ class User
         // If no matching email is found, return null, signaling authentication failure
         if (empty($result)) {
 
-            // DEBUG: Log when no user matches the provided email
+            // Debug: Log when no user matches the provided email
             Logger::log("User '$email' not found", __METHOD__, Level::DEBUG);
 
             return null;
@@ -454,11 +455,11 @@ class User
                 // Fetch and return the User object on successful password validation
                 $user = User::get($id);
 
-                // DEBUG: Print user details
+                // Debug: Print user details
                 Logger::log($user->toString(), __METHOD__, Level::DEBUG);
 
                 return $user;
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
 
                 // LOGGING
                 Logger::log($e->getMessage(), __METHOD__);

@@ -2,31 +2,41 @@
 
 namespace App\Models;
 
-// The Logger class is responsible for logging messages with various levels of severity.
-// It creates log messages with timestamps, locations, and specific log levels (e.g., debug, info, etc.).
+/**
+ * The Logger class is responsible for recording log messages of varying severity levels.
+ * It allows messages to include a timestamp, location, and specific log level for consistent error tracking.
+ */
 class Logger
 {
 
-    // The severity level of the log message (debug, info, etc.).
+    /**
+     * The severity level of the log message (e.g., debug, info, error).
+     */
     private Level $level;
 
-    // The actual log message to be recorded.
+    /**
+     * The actual log message to be recorded, which can be a string or an array of data.
+     */
     private string|array $message;
 
-    // The date and time when the log message was created.
+    /**
+     * A timestamp indicating when the log message was created.
+     */
     private string $datetime;
 
-    // The location or context where the log message originated.
+    /**
+     * The location or context from which the log message originated (e.g., a file or method name).
+     */
     private string $location;
 
     /**
-     * Constructor for the Logger class, which initializes the log properties.
-     * This is private since Logger objects are created using the static `log` method.
+     * Initializes a new Logger instance with the provided message, timestamp, location, and severity level.
+     * This constructor is private, as Logger instances should be created using the static `log` method only.
      *
-     * @param string|array $message The log message content.
-     * @param string $datetime The date and time of the log.
-     * @param string $location The context or file where the log originates.
-     * @param Level $level The severity level of the log (default is Level::ERROR).
+     * @param string|array $message The content of the log message (string or structured array).
+     * @param string $datetime The timestamp indicating when the log was recorded.
+     * @param string $location A string describing the origin of the log (e.g., method or file name).
+     * @param Level $level The severity level of the log message, with a default of Level::ERROR.
      */
     private function __construct(string|array $message, string $datetime, string $location, Level $level = Level::ERROR)
     {
@@ -37,15 +47,15 @@ class Logger
     }
 
     /**
-     * Static method to create a log message.
-     * It initializes a Logger object and prints the log.
+     * Creates and records a log message with the provided details.
+     * Uses JSON format to standardize log representation and allows filtering debug messages
+     * based on the environment setting.
      *
-     * @param string|array $message The content of the log message.
-     * @param string $location The context or file where the log originates.
-     * @param Level $level The severity level of the log (default is Level::ERROR).
+     * @param string|array $message The content of the log message, either a string or an array.
+     * @param string $location Describes the context or source location of the log event.
+     * @param Level $level The severity level of the log, defaulting to Level::ERROR.
      *
-     * Debug logs are only printed if the 'ENVIRONMENT' variable
-     * in the environment is set to 'development'. Logs at other levels are always printed.
+     * Note: debug messages will only be logged if the 'ENVIRONMENT' variable is set to 'development'.
      */
     public static function log(string|array $message, string $location, Level $level = Level::ERROR): void
     {
@@ -63,8 +73,8 @@ class Logger
     }
 
     /**
-     * Outputs the log message in JSON format to the PHP error log.
-     * This method formats the log message with relevant data.
+     * Formats the log message into a JSON structure and outputs it to the PHP error log.
+     * Handles message processing to ensure compatibility with various input types (string or array).
      */
     private function print(): void
     {
@@ -93,13 +103,4 @@ class Logger
         // Log the formatted message with the timestamp, level, and location in JSON format.
         error_log("{ \"time\": \"$this->datetime\", \"level\": \"$this->level\", \"location\": \"$this->location\", \"message\": \"$message\" }");
     }
-}
-
-// Represents various logging levels indicating the severity of the log messages.
-enum Level: string
-{
-    case DEBUG = 'debug';       // Used for detailed debug information.
-    case INFO = 'info';        // Used for informational messages.
-    case WARNING = 'warning';  // Used for warning messages that are not errors.
-    case ERROR = 'error';      // Used for error messages.
 }

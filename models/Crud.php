@@ -8,14 +8,14 @@ use PDOException;
 /**
  * Class Crud
  *
- * EN : A simple CRUD (Create, Read, Update, Delete) class to interact with a MySQL database using PDO.
- * FR : Une classe CRUD simple (Créer, Lire, Mettre à jour, Supprimer) pour interagir avec une base de données MySQL à l'aide de PDO.
+ * EN: A simple CRUD (Create, Read, Update, Delete) class to interact with a MySQL database using PDO.
+ * FR: Une classe CRUD simple (Créer, Lire, Mettre à jour, Supprimer) pour interagir avec une base de données MySQL à l'aide de PDO.
  */
 class Crud {
     /**
      * @var PDO $pdo
-     * EN : PDO instance for database connection.
-     * FR : Instance PDO pour la connexion à la base de données.
+     * EN: PDO instance for database connection.
+     * FR: Instance PDO pour la connexion à la base de données.
      */
     private PDO $pdo;
 
@@ -46,7 +46,7 @@ class Crud {
      * FR: Insère un nouvel enregistrement dans la base de données.
      *
      * @param array $data EN: Associative array of column-value pairs | FR: Tableau associatif de paires colonne-valeur
-     * @return int EN : True on success, false on failure | FR : Vrai si réussi, faux sinon
+     * @return int EN: True on success, false on failure | FR: Vrai si réussi, faux sinon
      */
     public function create(array $data): int {
         $columns = implode(", ", array_keys($data));
@@ -58,21 +58,24 @@ class Crud {
             $stmt->execute($data);
             return $this->pdo->lastInsertId() ;
         } catch (PDOException $e) {
-            error_log("Create Error: " . $e->getMessage());
+
+            // LOGGING
+            Logger::log("Create Error: " . $e->getMessage(), __METHOD__);
+
             return -1;
         }
     }
 
     /**
-     * Find : Fetch records from a table
+     * Find: Fetch records from a table
      *
      * EN: Retrieves records from the database based on conditions.
      * FR: Récupère des enregistrements de la base de données en fonction des conditions.
      *
-     * @param array $conditions EN : Associative array of conditions (column → value) | FR : Tableau associatif de conditions (colonne → valeur)
-     * @param string $columns EN : Columns to select, default is "*" | FR : Colonnes à sélectionner, par défaut "*"
+     * @param array $conditions EN: Associative array of conditions (column → value) | FR: Tableau associatif de conditions (colonne → valeur)
+     * @param string $columns EN: Columns to select, default is "*" | FR: Colonnes à sélectionner, par défaut "*"
      * @param string|null $orderBy EN: Column to order by, optional | FR: Colonne de tri, optionnel
-     * @param int|null $limit EN : Limit of rows to fetch, optional | FR : Limite du nombre de lignes à récupérer, optionnel
+     * @param int|null $limit EN: Limit of rows to fetch, optional | FR: Limite du nombre de lignes à récupérer, optionnel
      * @return array EN: Array of results | FR: Tableau des résultats
      */
     public function findAllBy(
@@ -123,7 +126,10 @@ class Crud {
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC); // Fetch as associative array
         } catch (PDOException $e) {
-            error_log("Read Error: " . $e->getMessage());
+
+            // LOGGING
+            Logger::log("Read Error: " . $e->getMessage(), __METHOD__);
+
             return []; // Return an empty array in case of error
         }
     }
@@ -164,7 +170,10 @@ class Crud {
             $stmt->execute();
             return $stmt->fetch(PDO::FETCH_ASSOC); // Fetch as an associative array
         } catch (PDOException $e) {
-            error_log("Read Error: " . $e->getMessage());
+
+            // LOGGING
+            Logger::log("Read Error: " . $e->getMessage(), __METHOD__);
+
             return null;
         }
     }
@@ -220,7 +229,8 @@ class Crud {
             $sql .= " LIMIT $limit";
         }
 
-        echo $sql; // Debugging
+        // Debug
+        Logger::log($sql, __METHOD__, Level::DEBUG);
 
         // Execute the query and fetch the result
         try {
@@ -232,7 +242,10 @@ class Crud {
             $stmt->execute();
             return $stmt->fetchColumn(); // Fetch the single column value (COUNT, SUM, etc.)
         } catch (PDOException $e) {
-            error_log("Read Error: " . $e->getMessage());
+
+            // LOGGING
+            Logger::log("Read Error: " . $e->getMessage(), __METHOD__);
+
             return $e->getMessage();
         }
     }
@@ -317,20 +330,23 @@ class Crud {
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         } catch (PDOException $e) {
-            error_log("Search Error: " . $e->getMessage());
+
+            // LOGGING
+            Logger::log("Search Error: " . $e->getMessage(), __METHOD__);
+
             return [];
         }
     }
 
     /**
-     * Update : Update records in a table
+     * Update: Update records in a table
      *
-     * EN : Updates records in the database.
-     * FR : Met à jour des enregistrements dans la base de données.
+     * EN: Updates records in the database.
+     * FR: Met à jour des enregistrements dans la base de données.
      *
-     * @param array $data EN : Associative array of column-valus pairs to update | FR : Tableau associatif de paires colonne-valeur à mettre à jour.
-     * @param array $conditions EN : Associative array of conditions (column → value) | FR: Tableau associatif de conditions (colonne => valeur)
-     * @return int EN : True on success, false on failure | FR : Vrai si réussi, faux sinon
+     * @param array $data EN: Associative array of column-valus pairs to update | FR: Tableau associatif de paires colonne-valeur à mettre à jour.
+     * @param array $conditions EN: Associative array of conditions (column → value) | FR: Tableau associatif de conditions (colonne => valeur)
+     * @return int EN: True on success, false on failure | FR: Vrai si réussi, faux sinon
      */
     public function update(array $data, array $conditions): int {
         $setClauses = [];
@@ -350,7 +366,10 @@ class Crud {
             $stmt->execute(array_merge($data, $conditions));
             return $stmt->rowCount() ;
         } catch (PDOException $e) {
-            error_log("Update Error: " . $e->getMessage());
+
+            // LOGGING
+            Logger::log("Update Error: " . $e->getMessage(), __METHOD__);
+
             return 0;
         }
     }
@@ -361,8 +380,8 @@ class Crud {
      * EN: Deletes records from the database based on conditions.
      * FR: Supprime des enregistrements de la base de données en fonction des conditions.
      *
-     * @param array $conditions EN : Associative array of conditions (column → value) | FR: Tableau associatif de conditions (colonne => valeur)
-     * @return int EN : True on success, false on failure | FR : Vrai si réussi, faux sinon
+     * @param array $conditions EN: Associative array of conditions (column → value) | FR: Tableau associatif de conditions (colonne => valeur)
+     * @return int EN: True on success, false on failure | FR: Vrai si réussi, faux sinon
      */
     public function delete(array $conditions): int {
         $conditionClauses = [];
@@ -377,7 +396,10 @@ class Crud {
             $stmt->execute($conditions);
             return $stmt->rowCount();
         } catch (PDOException $e) {
-            error_log("Delete Error: " . $e->getMessage());
+
+            // LOGGING
+            Logger::log("Delete Error: " . $e->getMessage(), __METHOD__);
+
             return 0;
         }
     }
@@ -385,12 +407,12 @@ class Crud {
     /**
      * Transaction Support
      *
-     * EN : Executes a series of database operations within a transaction.
-     * FR : Exécute une série d'opérations de base de données dans une transaction.
+     * EN: Executes a series of database operations within a transaction.
+     * FR: Exécute une série d'opérations de base de données dans une transaction.
      *
-     * @param callable $callback EN : Callback function containing transactional logic | FR : Fonction de rappel contenant la logique transactionnelle
+     * @param callable $callback EN: Callback function containing transactional logic | FR: Fonction de rappel contenant la logique transactionnelle
      * @return void
-     * @throws Exception EN : Throws exception if transaction fails | FR : Lance une exception en cas d'échec de la transaction
+     * @throws Exception EN: Throws exception if transaction fails | FR: Lance une exception en cas d'échec de la transaction
      */
     public function transaction(callable $callback): void {
         try {

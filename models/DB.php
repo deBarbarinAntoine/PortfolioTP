@@ -1,17 +1,41 @@
 <?php
 
 namespace App\Models;
+
 use Dotenv\Dotenv;
+use PDO;
+use RuntimeException;
+use function defined;
 
 $dotenv = Dotenv::createImmutable(__DIR__ . '/../.env');
 $dotenv->load();
-use PDO;
 
+/**
+ * The DB class provides a singleton pattern for managing database connections using PDO.
+ * It ensures a single connection instance throughout the application lifecycle and
+ * handles connection configurations automatically.
+ */
 class DB
 {
+    /**
+     * Holds the single instance of the PDO connection.
+     *
+     * @var PDO|null
+     */
     private static ?PDO $pdo = null;
 
-    private function __construct() {}
+    /**
+     * Private constructor to prevent direct instantiation.
+     */
+    private function __construct()
+    {
+    }
+
+    /**
+     * Default PDO connection options for error handling, fetch mode, and auto-commit.
+     *
+     * @var array
+     */
     private static array $options = [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
@@ -21,28 +45,44 @@ class DB
     /**
      * Establishes a MySQL connection using PDO.
      *
-     * @return PDO The existing or newly created PDO instance
+     * This method ensures a single instance of the PDO connection is created and reused.
+     * It retrieves database configuration values from the environment and applies
+     * pre-defined connection options.
+     *
+     * @return PDO The existing or newly created PDO instance.
+     * @throws RuntimeException If any required database configuration variables are missing.
      */
     public static function getPDO(): PDO
     {
+        // Check if a PDO connection is already established.
         if (isset(self::$pdo) && !empty(self::$pdo)) {
             return self::$pdo;
         }
 
+        // Load database configuration from environment variables.
         $host = $_ENV['DB_HOST'];
         $port = $_ENV['DB_PORT'];
         $dbname = $_ENV['DB_NAME'];
         $username = $_ENV['DB_USER'];
         $password = $_ENV['DB_PASS'];
 
-        if (!\defined('DB_NAME') || !\defined('DB_USER') || !\defined('DB_PASS')) {
-            throw new \RuntimeException('Missing database configuration variables');
+        // Ensure all required configuration variables are defined.
+        if (!defined('DB_NAME') || !defined('DB_USER') || !defined('DB_PASS')) {
+
+            // LOGGING -> Log the missing database configuration problem.
+            Logger::log('Missing database configuration variables', __METHOD__);
+
+            // Throw an exception to prevent the application from proceeding without valid settings.
+            throw new RuntimeException('Missing database configuration variables');
         }
 
+        // Create a Data Source Name (DSN) string for the MySQL connection.
         $dsn = "mysql:host=$host;port=$port;dbname=$dbname";
 
+        // Create a new PDO instance with the DSN, username, password, and connection options.
         self::$pdo = new PDO($dsn, $username, $password, self::$options);
 
+        // Return the established PDO connection.
         return self::$pdo;
     }
 }
