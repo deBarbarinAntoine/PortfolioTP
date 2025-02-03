@@ -4,7 +4,7 @@ namespace App\Controllers;
 use DateMalformedStringException;
 use App\Models\Admin;
 
-require_once __DIR__ . '/../models/Admin.php';
+require_once __DIR__ . '/../Models/Admin.php';
 
 class AdminController {
     public function getAdminDashboard(): ?array
