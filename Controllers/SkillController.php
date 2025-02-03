@@ -14,7 +14,7 @@ class SkillController
     public function createSkill(mixed $name, mixed $description): int
     {
         $skill = Skill::new($name, $description);
-        return $skill->create($name,$description);
+        return $skill->create();
     }
 
     public function updateSkill(mixed $id, mixed $name, mixed $description): int

@@ -3,14 +3,14 @@
 namespace App\Models;
 
 use DateTime;
-use PDOException;
+use Exception;
 
 /**
  * The Skill class represents a specific skill with attributes like name and description.
  * It provides methods to perform various CRUD operations such as create, read, update, and delete
  * skills from persistent storage using a basic CRUD utility class.
  */
-class Skill
+class Skill implements ICrud
 {
 
     /**
@@ -210,29 +210,18 @@ class Skill
     /**
      * Creates a new skill in the database.
      *
-     * @param string $name The name of the skill.
-     * @param string $description The description of the skill.
      * @return int The ID of the newly created skill, or -1 in case of a failure.
      */
-    public function create(string $name, string $description): int
+    public function create(): int
     {
         $skill_crud = new Crud('skills');
 
-        try {
-            return $skill_crud->create(
-                [
-                    'name' => $name,
-                    'description' => $description,
-                ]
-            );
-
-        } catch (PDOException $e) {
-
-            // LOGGING
-            Logger::log($e->getMessage(), __METHOD__);
-
-            return -1;
-        }
+        return $skill_crud->create(
+            [
+                'name' => $this->name,
+                'description' => $this->description,
+            ]
+        );
     }
 
     /**
@@ -245,64 +234,40 @@ class Skill
     {
         $skill_crud = new Crud('skills');
 
-        try {
-            return $skill_crud->exists(['name' => $name]);
-        } catch (PDOException $e) {
-
-            // LOGGING
-            Logger::log($e->getMessage(), __METHOD__);
-
-            return false;
-        }
+        return $skill_crud->exists(['name' => $name]);
     }
 
     /**
      * Updates the current skill's details in the database.
      *
-     * @return int The number of rows affected by the update, or 0 if the update fails.
+     * @return int The number of rows affected by the update, or -1 if the update fails.
      */
     public function update(): int
     {
         $skill_crud = new Crud('skills');
 
-        try {
-            return $skill_crud->update(
-                [
-                    'name' => $this->name,
-                    'description' => $this->description
-                ],
-                ['id' => $this->id],
-            );
-        } catch (PDOException $e) {
-
-            // LOGGING
-            Logger::log($e->getMessage(), __METHOD__);
-
-            return -1;
-        }
+        return $skill_crud->update(
+            [
+                'name' => $this->name,
+                'description' => $this->description
+            ],
+            ['id' => $this->id],
+        );
     }
 
     /**
      * Deletes a skill with the given ID from the database.
      *
      * @param int $id The ID of the skill to delete.
-     * @return int The number of rows affected by the deletion, or 0 if the deletion fails.
+     * @return int The number of rows affected by the deletion, or -1 if the deletion fails.
      */
     public static function delete(int $id): int
     {
         $skill_crud = new Crud('skills');
 
-        try {
-            return $skill_crud->delete(
-                ['id' => $id],
-            );
-        } catch (PDOException $e) {
-
-            // LOGGING
-            Logger::log($e->getMessage(), __METHOD__);
-
-            return 0;
-        }
+        return $skill_crud->delete(
+            ['id' => $id],
+        );
     }
 
     /**
@@ -317,12 +282,12 @@ class Skill
 
         try {
             $result = $skill_crud->findBy(['id' => $id]);
-            return new Skill(
+            return new self(
                 $result['id'],
                 $result['name'],
                 $result['description']
             );
-        } catch (PDOException $e) {
+        } catch (Exception $e) {
 
             // LOGGING
             Logger::log($e->getMessage(), __METHOD__);
@@ -344,14 +309,14 @@ class Skill
             $results = $skill_crud->findAllBy();
             $skills = [];
             foreach ($results as $skill) {
-                $skills[] = new Skill(
+                $skills[] = new self(
                     $skill['id'],
                     $skill['name'],
                     $skill['description'],
                 );
             }
             return $skills;
-        } catch (PDOException $e) {
+        } catch (Exception $e) {
 
             // LOGGING
             Logger::log($e->getMessage(), __METHOD__);
@@ -368,6 +333,7 @@ class Skill
     public static function getCountAll(): mixed
     {
         $count_skill_crud = new Crud('skills');
+        
         return $count_skill_crud->findSingleValueBy();
     }
 
@@ -385,8 +351,22 @@ class Skill
         $results = $skill_crud->searchSkill($search, 10, $offset);
 
         // Return the array of Skill objects
-        return Skill::toSkillArray($results);
+        return self::toSkillArray($results);
     }
+
+    /**
+     * Converts raw database query results into an array of Skill objects.
+     *
+     * This method takes an array of query results, processes them, and returns an array of Skill
+     * objects. If the input is empty, it will return an empty array. When the results are a flat
+     * list, each row is converted directly into a Skill object. If the results are grouped by ID,
+     * it will handle the grouping and return appropriate Skill objects.
+     *
+     * @param array $results The raw database results containing skill data.
+     *                       Each element may represent a single skill or a group of rows identified
+     *                       by a skill ID.
+     * @return array An array of Skill objects converted from the provided results.
+     */
     private static function toSkillArray(array $results): array
     {
         // If no records are found, return an empty array immediately.
@@ -403,7 +383,8 @@ class Skill
             foreach ($results as $row) {
 
                 // Convert each row into a skill object.
-                $skill = skill::toSkill($row);
+                $skill = self::toSkill($row);
+
                 if (!empty($skill)) {
 
                     // Add the skill object to the resulting array if it is valid.
@@ -425,7 +406,7 @@ class Skill
             foreach ($skills as $skill) {
 
                 // Convert each group of rows corresponding to a skill to a skill object.
-                $skillList[] = skill::toSkill($skill);
+                $skillList[] = self::toSkill($skill);
             }
 
             $skills = $skillList;
@@ -441,7 +422,7 @@ class Skill
         $firstRow = $skill[0];
 
         // Return a new skill object
-        return new skill(
+        return new self(
             $firstRow['u.id'],           // skill id
             $firstRow['name'],           // skill name
             $firstRow['description'] ?? null  // skill description
@@ -456,7 +437,7 @@ class Skill
      */
     public static function newUserSkill(array $result): Skill
     {
-        return new Skill(
+        return new self(
             $result['us.skill_id'],
             $result['s.name'],
             $result['s.description'],

@@ -56,6 +56,16 @@ class ProjectUser
     }
 
     /**
+     * Gets the role of the user in the project in string format.
+     *
+     * @return string the Project Role
+     */
+    public function getRoleStr(): string
+    {
+        return $this->role->value;
+    }
+
+    /**
      * Sets the role of the user in the project.
      *
      * @param ProjectRole $role

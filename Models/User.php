@@ -10,7 +10,7 @@ use Exception;
  * Represents a user in the system with their username, email, avatar, password hash, ID, interests,
  * and timestamp fields for creation and updates.
  */
-class User
+class User implements ICrud
 {
     /**
      * @var int The unique identifier of the user.
@@ -23,9 +23,9 @@ class User
     private array $skills;
 
     /**
-     * @var string The role of the user (e.g., 'admin', 'user').
+     * @var UserRole The role of the user (e.g., 'admin', 'user').
      */
-    private string $role;
+    private UserRole $role;
 
     /**
      * @var string The username of the user.
@@ -67,9 +67,17 @@ class User
      * @param DateTime|null $created_at The timestamp when the user was created (optional).
      * @param DateTime|null $updated_at The timestamp when the user was last updated (optional).
      * @param array $skills An optional array of Skill objects representing the user's skills (default empty).
-     * @param string $role The role of the user (default 'user')
+     * @param UserRole $role The role of the user (default `UserRole::USER`)
      */
-    private function __construct(int $id, string $username, string $email, string $avatar, ?DateTime $created_at = null, ?DateTime $updated_at = null, array $skills = [], string $role = 'user')
+    private function __construct(
+        int $id,
+        string $username,
+        string $email,
+        string $avatar,
+        ?DateTime $created_at = null,
+        ?DateTime $updated_at = null,
+        array $skills = [],
+        UserRole $role = UserRole::USER)
     {
         $this->id = $id;
         $this->username = $username;
@@ -81,8 +89,6 @@ class User
         $this->role = $role;
         $this->updated_at = $updated_at ?? new DateTime();
     }
-
-
 
     /**
      * Gets the ID of the user.
@@ -212,20 +218,30 @@ class User
     /**
      * Gets the role of the user.
      *
-     * @return string The role of the user.
+     * @return UserRole The role of the user.
      */
-    public function getRole(): string
+    public function getRole(): UserRole
     {
         return $this->role;
     }
 
     /**
+     * Gets the role of the user as a string.
+     *
+     * @return string The role of the user.
+     */
+    public function getRoleStr(): string
+    {
+        return $this->role->value;
+    }
+
+    /**
      * Sets the role of the user.
      *
-     * @param string $role The new role to set.
+     * @param UserRole $role The new role to set.
      * @return void
      */
-    public function setRole(string $role): void
+    public function setRole(UserRole $role): void
     {
         $this->role = $role;
     }
@@ -304,81 +320,55 @@ class User
     /**
      * Inserts a new user record into the database.
      *
-     * @return bool True if the user was created successfully, false otherwise.
+     * @return int The newly created id if the user was created successfully, -1 otherwise.
      */
-    public function create(): bool
+    public function create(): int
     {
         $user_crud = new Crud('users');
 
-        try {
-            $id = $user_crud->create([
-                'username' => $this->username,
-                'email' => $this->email,
-                'avatar' => $this->avatar,
-                'password' => $this->password_hash,
-                'role' => $this->role,
-            ]);
-            return $id > 0;
-
-        } catch (Exception $e) {
-
-            // LOGGING
-            Logger::log($e->getMessage(), __METHOD__);
-
-            return false;
-        }
+        return $user_crud->create([
+            'username' => $this->username,
+            'email' => $this->email,
+            'avatar' => $this->avatar,
+            'password' => $this->password_hash,
+            'role' => $this->role->value,
+        ]);
     }
 
     /**
      * Updates the user's details in the database.
      *
-     * @return bool True if the user was updated successfully, false otherwise.
+     * @return int The number of rows affected by the update if successful, -1 if an error occurs.
      */
     public function update(): int
     {
         $user_crud = new Crud('users');
 
-        try {
-            return $user_crud->update(
-                [
-                    'username' => $this->username,
-                    'email' => $this->email,
-                    'avatar' => $this->avatar,
-                    'password_hash' => $this->password_hash
-                ],
-                [ 'id' => $this->id ]
-            );
-
-        } catch (\PDOException $e) {
-
-            // LOGGING
-            Logger::log($e->getMessage(), __METHOD__);
-
-            return -1;
-        }
+        return $user_crud->update(
+            [
+                'username' => $this->username,
+                'email' => $this->email,
+                'avatar' => $this->avatar,
+                'password_hash' => $this->password_hash,
+                'role' => $this->role->value,
+            ],
+            [ 'id' => $this->id ]
+        );
     }
 
     /**
      * Deletes a user record from the database by ID.
      *
      * @param int $id The unique identifier of the user to delete.
-     * @return bool True if the user was deleted successfully, false otherwise.
+     * @return int The number of rows affected by the deletion if successful, -1 if an error occurs.
      */
-    public static function delete(int $id): bool
+    public static function delete(int $id): int
     {
         $user_crud = new Crud('users');
 
-        try {
-            $rowCount = $user_crud->delete([ 'id' => $id ]);
-            return $rowCount === 1;
+        $rowCount = $user_crud->delete([ 'id' => $id ]);
 
-        } catch (Exception $e) {
-
-            // LOGGING
-            Logger::log($e->getMessage(), __METHOD__);
-
-            return false;
-        }
+        return $rowCount === 1;
     }
 
     /**
@@ -457,7 +447,7 @@ class User
                 $user = User::get($id);
 
                 // Debug: Print user details
-                Logger::log($user->toString(), __METHOD__, Level::DEBUG);
+                Logger::log($user->__toString(), __METHOD__, Level::DEBUG);
 
                 return $user;
             } catch (Exception $e) {
@@ -589,7 +579,7 @@ class User
                 new DateTime($result['created_at']), // Parse and set the creation timestamp.
                 new DateTime($result['updated_at']), // Parse and set the update timestamp.
                 [],
-                $result['role'],
+                UserRole::from($result['role']),
             );
         }
 
@@ -610,7 +600,7 @@ class User
             new DateTime($result[0]['u.created_at']), // Parse and set the creation timestamp.
             new DateTime($result[0]['u.updated_at']), // Parse and set the update timestamp.
             $skills, // Assign the previously generated array of skills.
-            $result[0]['u.role'],
+            UserRole::from($result[0]['u.role']),
         );
     }
 
@@ -696,14 +686,14 @@ class User
      *
      * @return string A string containing user details.
      */
-    public function toString(): string
+    public function __toString(): string
     {
         return sprintf(
             "User { ID: '%d', Username: '%s', Email: '%s', Role: '%s', Created At: '%s', Updated At: '%s' }",
             $this->id,
             $this->username,
             $this->email,
-            $this->role,
+            $this->role->value,
             $this->created_at->format('Y-m-d H:i:s'),
             $this->updated_at->format('Y-m-d H:i:s')
         );
