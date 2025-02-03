@@ -278,7 +278,7 @@ class Skill
             // LOGGING
             Logger::log($e->getMessage(), __METHOD__);
 
-            return 0;
+            return -1;
         }
     }
 

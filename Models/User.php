@@ -334,12 +334,12 @@ class User
      *
      * @return bool True if the user was updated successfully, false otherwise.
      */
-    public function update(): bool
+    public function update(): int
     {
         $user_crud = new Crud('users');
 
         try {
-            $rowCount = $user_crud->update(
+            return $user_crud->update(
                 [
                     'username' => $this->username,
                     'email' => $this->email,
@@ -348,14 +348,13 @@ class User
                 ],
                 [ 'id' => $this->id ]
             );
-            return $rowCount > 0;
 
         } catch (\PDOException $e) {
 
             // LOGGING
             Logger::log($e->getMessage(), __METHOD__);
 
-            return false;
+            return -1;
         }
     }
 

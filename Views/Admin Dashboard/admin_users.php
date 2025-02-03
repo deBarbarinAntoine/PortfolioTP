@@ -68,7 +68,16 @@ try {
                     echo "<td>" . htmlspecialchars($row['name']) . "</td>";
                     echo "<td>" . htmlspecialchars($row['username']) . "</td>";
                     echo "<td>" . htmlspecialchars($row['email']) . "</td>";
-                    echo "<td>" . htmlspecialchars($row['role']) . "</td>";
+                    echo "<td>
+    <form method='POST' action='update_role.php'>
+        <input type='hidden' name='user_id' value='" . $row['id'] . "'>
+        <input type='hidden' name='csrf_token' value='" . $_SESSION['csrf_token'] . "'>
+        <select name='new_role' onchange='this.form.submit()'>
+            <option value='admin' " . ($row['role'] === 'admin' ? 'selected' : '') . ">Admin</option>
+            <option value='user' " . ($row['role'] === 'user' ? 'selected' : '') . ">User</option>
+        </select>
+    </form>
+</td>";
                     $avatar = !empty($row['avatar']) ? htmlspecialchars($row['avatar']) : 'default-avatar.png';
                     echo "<td><img src='$avatar' alt='Avatar' width='50' height='50'></td>";
                     echo "<td>" . $row['created_at'] . "</td>";
