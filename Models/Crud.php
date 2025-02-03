@@ -338,6 +338,40 @@ class Crud {
         }
     }
 
+    public function searchSkill(?string $search = '', int $limit = 10, int $offset = 0): array {
+        // Base SQL query
+        $sql = "SELECT * FROM $this->table";
+
+        // Add search conditions only if $search is not empty
+        if (!empty($search)) {
+            $sql .= " WHERE name LIKE :search OR description LIKE :search";
+        }
+
+        // Append LIMIT and OFFSET
+        $sql .= " LIMIT :limit OFFSET :offset";
+
+        try {
+            $stmt = $this->pdo->prepare($sql);
+
+            // Bind parameters
+            if (!empty($search)) {
+                $searchTerm = "%$search%";
+                $stmt->bindParam(':search', $searchTerm, PDO::PARAM_STR);
+            }
+            $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+            $stmt->bindParam(':offset', $offset, PDO::PARAM_INT);
+
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+
+            // LOGGING
+            Logger::log("Search Error: " . $e->getMessage(), __METHOD__);
+
+            return [];
+        }
+    }
+
     /**
      * Update: Update records in a table
      *

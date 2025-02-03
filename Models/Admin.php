@@ -52,4 +52,9 @@ class Admin
         }
         return false;
     }
+
+    public static function get_admin_skills(mixed $search, mixed $offset)
+    {
+        return Skill::getAllSkills($search, $offset);
+    }
 }
