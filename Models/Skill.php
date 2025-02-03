@@ -43,6 +43,8 @@ class Skill
      */
     private DateTime $updated_at;
 
+
+
     /**
      * Gets the ID of the skill.
      *
@@ -190,24 +192,6 @@ class Skill
     }
 
     /**
-     * Creates a new Skill object based on user skill data from the database.
-     *
-     * @param array $result An associative array containing user skill data (e.g., skill ID, name, and level).
-     * @return Skill The newly created Skill instance populated with the provided data.
-     */
-    public static function newUserSkill(array $result): Skill
-    {
-        return new Skill(
-            $result['us.skill_id'],
-            $result['s.name'],
-            $result['s.description'],
-            $result['us.level'],
-            $result['us.created_at'],
-            $result['us.updated_at']
-        );
-    }
-
-    /**
      * Creates a new unsaved Skill object with the specified name and description.
      *
      * @param string $name The name of the skill.
@@ -235,13 +219,12 @@ class Skill
         $skill_crud = new Crud('skills');
 
         try {
-            $id = $skill_crud->create(
+            return $skill_crud->create(
                 [
                     'name' => $name,
                     'description' => $description,
                 ]
             );
-            return $id;
 
         } catch (PDOException $e) {
 
@@ -263,8 +246,7 @@ class Skill
         $skill_crud = new Crud('skills');
 
         try {
-            $exists = $skill_crud->exists(['name' => $name]);
-            return $exists;
+            return $skill_crud->exists(['name' => $name]);
         } catch (PDOException $e) {
 
             // LOGGING
@@ -284,14 +266,13 @@ class Skill
         $skill_crud = new Crud('skills');
 
         try {
-            $rowCount = $skill_crud->update(
+            return $skill_crud->update(
                 [
                     'name' => $this->name,
                     'description' => $this->description
                 ],
                 ['id' => $this->id],
             );
-            return $rowCount;
         } catch (PDOException $e) {
 
             // LOGGING
@@ -312,10 +293,9 @@ class Skill
         $skill_crud = new Crud('skills');
 
         try {
-            $rowCount = $skill_crud->delete(
+            return $skill_crud->delete(
                 ['id' => $id],
             );
-            return $rowCount;
         } catch (PDOException $e) {
 
             // LOGGING
@@ -337,12 +317,11 @@ class Skill
 
         try {
             $result = $skill_crud->findBy(['id' => $id]);
-            $skill = new Skill(
+            return new Skill(
                 $result['id'],
                 $result['name'],
                 $result['description']
             );
-            return $skill;
         } catch (PDOException $e) {
 
             // LOGGING
@@ -388,8 +367,8 @@ class Skill
      */
     public static function getCountAll(): mixed
     {
-        $count_user_crud = new Crud('skills');
-        return $count_user_crud->findSingleValueBy();
+        $count_skill_crud = new Crud('skills');
+        return $count_skill_crud->findSingleValueBy();
     }
 
     /**
@@ -397,28 +376,93 @@ class Skill
      *
      * @return array An array of Skill objects representing all available skills in the database.
      */
-    public static function getAllSkills(): array
+    public static function getAllSkills(string $search, int $offset): array
     {
         // Create a new Crud object for 'skills' table
-        $user_crud = new Crud('skills');
-
-        // Define the conditions (empty array to get all skills)
-        $conditions = [];
+        $skill_crud = new Crud('skills');
 
         // Get raw results from the findAllBy method
-        $results = $user_crud->findAllBy();
-
-        // Initialize an empty array to hold Skill objects
-        $skills = [];
-
-        // Map the results to Skill objects
-        foreach ($results as $row) {
-
-            // Assuming each row has 'id', 'name', and 'description' keys
-            $skills[] = new Skill($row['id'], $row['name'], $row['description']);
-        }
+        $results = $skill_crud->searchSkill($search, 10, $offset);
 
         // Return the array of Skill objects
+        return Skill::toSkillArray($results);
+    }
+    private static function toSkillArray(array $results): array
+    {
+        // If no records are found, return an empty array immediately.
+        if (empty($results)) {
+            return [];
+        }
+
+        $skills = [];
+
+        // Check if the results contain a direct list of 'id' keys (i.e., one skill per row).
+        if (isset($results[0]['id'])) {
+
+            // Iterate through each record in the results.
+            foreach ($results as $row) {
+
+                // Convert each row into a skill object.
+                $skill = skill::toSkill($row);
+                if (!empty($skill)) {
+
+                    // Add the skill object to the resulting array if it is valid.
+                    $skills[] = $skill;
+                }
+            }
+        } else {
+
+            // If results don't directly contain 'id', group rows by skill ID.
+            foreach ($results as $row) {
+
+                // Group rows under their respective skill ID.
+                $skills[$row['u.id']][] = $row;
+            }
+
+            $skillList = [];
+
+            // Process each group of rows to create skill objects.
+            foreach ($skills as $skill) {
+
+                // Convert each group of rows corresponding to a skill to a skill object.
+                $skillList[] = skill::toSkill($skill);
+            }
+
+            $skills = $skillList;
+        }
+
+        // Return the fully-processed array of skill objects.
         return $skills;
+    }
+
+    private static function toSkill(array $skill): skill
+    {
+        // Assume the first element in the group contains the skill's data
+        $firstRow = $skill[0];
+
+        // Return a new skill object
+        return new skill(
+            $firstRow['u.id'],           // skill id
+            $firstRow['name'],           // skill name
+            $firstRow['description'] ?? null  // skill description
+        );
+    }
+
+    /**
+     * Creates a new Skill object based on user skill data from the database.
+     *
+     * @param array $result An associative array containing user skill data (e.g., skill ID, name, and level).
+     * @return Skill The newly created Skill instance populated with the provided data.
+     */
+    public static function newUserSkill(array $result): Skill
+    {
+        return new Skill(
+            $result['us.skill_id'],
+            $result['s.name'],
+            $result['s.description'],
+            $result['us.level'],
+            $result['us.created_at'],
+            $result['us.updated_at']
+        );
     }
 }

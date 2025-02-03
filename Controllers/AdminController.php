@@ -26,4 +26,9 @@ class AdminController {
         return Admin::deleteUser($user_id);
     }
 
+    public function get_admin_skills(mixed $search, mixed $offset): array
+    {
+        return Admin::get_admin_skills($search,$offset);
+    }
+
 }

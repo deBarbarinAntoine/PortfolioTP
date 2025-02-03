@@ -82,6 +82,8 @@ class User
         $this->updated_at = $updated_at ?? new DateTime();
     }
 
+
+
     /**
      * Gets the ID of the user.
      *
