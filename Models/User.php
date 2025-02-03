@@ -283,7 +283,7 @@ class User
     public static function new(string $username, string $email, string $password): ?User
     {
         $avatar = 'https://ui-avatars.com/api/?name=' . $username . '&background=random&size=256&rounded=true';
-        $user = new User(
+        $user = new self(
             -1,
             $username,
             $email,

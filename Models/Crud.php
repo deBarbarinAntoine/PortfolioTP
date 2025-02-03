@@ -46,7 +46,7 @@ class Crud {
      * FR: Insère un nouvel enregistrement dans la base de données.
      *
      * @param array $data EN: Associative array of column-value pairs | FR: Tableau associatif de paires colonne-valeur
-     * @return int EN: True on success, false on failure | FR: Vrai si réussi, faux sinon
+     * @return int EN: ID value on success, -1 on failure | FR: Valeur de l'ID si réussi, -1 sinon
      */
     public function create(array $data): int {
         $columns = implode(", ", array_keys($data));

@@ -40,9 +40,9 @@ CREATE TABLE projects
 (
     id            INT PRIMARY KEY AUTO_INCREMENT,
     title         VARCHAR(255) NOT NULL,
-    details       TEXT         NOT NULL,
+    description   TEXT         NOT NULL,
     external_link VARCHAR(255),
-    private       ENUM ('private', 'public') DEFAULT 'private' NOT NULL,
+    visiblity     ENUM ('private', 'public') DEFAULT 'private' NOT NULL,
     created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );

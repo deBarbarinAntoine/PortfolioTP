@@ -216,7 +216,7 @@ class Skill
      */
     public static function new(string $name, string $description): Skill
     {
-        return new Skill(
+        return new self(
             -1,
             $name,
             $description
