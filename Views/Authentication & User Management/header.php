@@ -2,7 +2,9 @@
 
 use Random\RandomException;
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 if (!isset($_SESSION['csrf_token'])) {
     try {
@@ -29,7 +31,11 @@ if (!isset($_SESSION['csrf_token'])) {
     <ul>
         <li><a href="index.php">Accueil</a></li>
         <li><a href="../Project%20Management/projects.php">Projets</a></li>
+
         <?php if (isset($_SESSION['user_id'])): ?>
+            <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+                <li><a href="../Admin%20Dashboard/admin_dashboard.php">Admin Dashboard</a></li>
+            <?php endif; ?>
             <li><a href="profile.php">Mon Profil</a></li>
             <li><a href="logout.php">Déconnexion</a></li>
         <?php else: ?>
