@@ -310,7 +310,7 @@ class User implements ICrud
         $hashedPassword = password_hash($password, PASSWORD_ARGON2ID);
         $user->setPasswordHash(base64_encode($hashedPassword));
 
-        if ($user->create()) {
+        if ($user->create() > 0) {
             return $user;
         }
 
@@ -559,48 +559,44 @@ class User implements ICrud
      * @return User|null A new User object if $result is valid; null otherwise.
      * @throws DateMalformedStringException If either 'created_at' or 'updated_at' fields are invalid.
      */
-    private static function toUser(?array $result): User|null
+    private static function toUser(?array $result): ?User
     {
-        // If the result is empty, return null as it signifies no user data was found.
         if (empty($result)) {
             return null;
         }
 
-        // Check if the result does not include detailed user fields with prefixes like 'u.id'.
-        if (!isset($result['u.id'])) {
-
-            // Extract the user ID from the result and return a simplified User object without skills.
-            $userId = $result['id'];
+        // If the result is not a multi-row dataset, it means no skills are included.
+        if (!isset($result[0]['u.id'])) {
             return new User(
-                $userId,
+                $result['id'],
                 $result['username'],
                 $result['email'],
                 $result['avatar'] ?? null,
-                new DateTime($result['created_at']), // Parse and set the creation timestamp.
-                new DateTime($result['updated_at']), // Parse and set the update timestamp.
+                new DateTime($result['created_at']),
+                new DateTime($result['updated_at']),
                 [],
-                UserRole::from($result['role']),
+                UserRole::from($result['role'])
             );
         }
 
-        // Initialize an empty array to store the user's skills.
+        // Process the skills.
         $skills = [];
         foreach ($result as $row) {
-
-            // Each row is processed to create a new Skill object, which is then added to the skills array.
-            $skills[] = Skill::newUserSkill($row);
+            if (isset($row['skill_id'])) {  // Ensure the skill data exists
+                $skills[] = UserSkill::newUserSkill($row);
+            }
         }
 
-        // Construct and return a comprehensive User object using the first row of the result.
+        // Create a User object from the first row
         return new User(
             $result[0]['u.id'],
             $result[0]['u.username'],
             $result[0]['u.email'],
             $result[0]['u.avatar'] ?? null,
-            new DateTime($result[0]['u.created_at']), // Parse and set the creation timestamp.
-            new DateTime($result[0]['u.updated_at']), // Parse and set the update timestamp.
-            $skills, // Assign the previously generated array of skills.
-            UserRole::from($result[0]['u.role']),
+            new DateTime($result[0]['u.created_at']),
+            new DateTime($result[0]['u.updated_at']),
+            $skills,
+            UserRole::from($result[0]['u.role'])
         );
     }
 
@@ -698,4 +694,37 @@ class User implements ICrud
             $this->updated_at->format('Y-m-d H:i:s')
         );
     }
+
+    public function validatePassword($password): true|string
+    {
+        // Minimum length 8, must contain at least 1 uppercase, 1 lowercase, 1 number, and 1 special character
+        if (strlen($password) < 8) {
+            return "Password must be at least 8 characters long.";
+        }
+
+        if (!preg_match('/[A-Z]/', $password)) {
+            return "Password must contain at least one uppercase letter.";
+        }
+
+        if (!preg_match('/[a-z]/', $password)) {
+            return "Password must contain at least one lowercase letter.";
+        }
+
+        if (!preg_match('/\d/', $password)) {
+            return "Password must contain at least one number.";
+        }
+
+        if (!preg_match('/[!@#$%^&*(),.?":{}|<>]/', $password)) {
+            return "Password must contain at least one special character.";
+        }
+
+        // Check for common passwords
+        $commonPasswords = ['123456', 'password', 'qwerty', 'abc123', 'letmein'];
+        if (in_array($password, $commonPasswords)) {
+            return "This password is too common.";
+        }
+
+        return true; // Valid password
+    }
+
 }

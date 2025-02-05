@@ -31,4 +31,19 @@ class SkillController
         return $skill->delete($skill_id);
     }
 
+    public function getSkillName(mixed $skill)
+    {
+        return $skill->getName();
+    }
+
+    public function getSKillLevel(mixed $skill)
+    {
+        return $skill->getLevel();
+    }
+
+    public function getAllSkills(): array
+    {
+        return Skill::getAll();
+    }
+
 }

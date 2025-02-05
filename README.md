@@ -3,7 +3,7 @@
 ## Présentation du Projet
 Ce projet est une application web développée en PHP & MySQL permettant aux utilisateurs de :
 - [ ] Gérer leur profil (inscription, connexion, mise à jour des informations).
-- [ ] Ajouter et modifier leurs compétences parmi celles définies par un administrateur.
+- [X] Ajouter et modifier leurs compétences parmi celles définies par un administrateur.
 - [ ] Ajouter et gérer leurs projets (titre, description, image et lien).
 - [X] Un administrateur peut gérer les compétences disponibles.
 
@@ -11,15 +11,15 @@ Ce projet est une application web développée en PHP & MySQL permettant aux uti
 
 ### Authentification & Gestion des Comptes
 - [ ] Inscription avec validation des champs
-- [ ] Connexion sécurisée avec sessions et option "Se souvenir de moi"
+- [X] Connexion sécurisée avec sessions et option "Se souvenir de moi"
 - [X] Gestion des rôles (Admin / Utilisateur)
-- [ ] Mise à jour des informations utilisateur
+- [X] Mise à jour des informations utilisateur
 - [ ] Réinitialisation du mot de passe
 - [ ] Déconnexion sécurisée
 
 ### Gestion des Compétences
 - [X] L’administrateur peut gérer les compétences proposées
-- [ ] Un utilisateur peut sélectionner ses compétences parmi celles disponibles
+- [X] Un utilisateur peut sélectionner ses compétences parmi celles disponibles
 - [X] Niveau de compétence défini sur une échelle (débutant → expert)
 
 ### Gestion des Projets
@@ -30,9 +30,9 @@ Ce projet est une application web développée en PHP & MySQL permettant aux uti
 
 ### Sécurité
 - [ ] Protection contre XSS, CSRF et injections SQL
-- [ ] Hachage sécurisé des mots de passe
+- [X] Hachage sécurisé des mots de passe
 - [ ] Gestion des erreurs utilisateur avec affichage des messages et conservation des champs remplis
-- [ ] Expiration automatique de la session après inactivité
+- [X] Expiration automatique de la session après inactivité
 
 ## Installation et Configuration
 

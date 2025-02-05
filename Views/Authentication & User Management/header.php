@@ -1,17 +1,16 @@
 <?php
 
-use Random\RandomException;
-
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-if (!isset($_SESSION['csrf_token'])) {
-    try {
-        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
-    } catch (RandomException $e) {
-        echo $e->getMessage();
-    }
+$session_timeout = 900; // 15 minutes
+// Check if the last activity timestamp is set
+if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY']) > $session_timeout) {
+    // If the session is expired, logout user
+    // Redirect to login page
+    header('Location: logout.php?message=Session expired please login again');
+    exit(); // Make sure to exit to stop further execution
 }
 ?>
 
