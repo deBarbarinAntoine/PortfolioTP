@@ -48,3 +48,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </label>
     <button type="submit">Login</button>
 </form>
+
+
+<?php
+include 'footer.php';
+?>
