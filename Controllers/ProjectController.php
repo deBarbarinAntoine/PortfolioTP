@@ -5,7 +5,8 @@ namespace App\Controllers;
 use App\Models\Project;
 
 class ProjectController {
-    public function getPublicProjects() {
+    public function getPublicProjects(): array
+    {
         return Project::getPublicProjects();
     }
 }

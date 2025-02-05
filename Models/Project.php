@@ -72,6 +72,7 @@ class Project implements ICrud
      */
     private DateTime $updated_at;
 
+
     /**
      * Get the ID of the project.
      *
@@ -539,5 +540,11 @@ class Project implements ICrud
             'created_at' => 'NOW() - INTERVAL 24 HOUR'
         ];
         return $project_crud->findSingleValueBy($conditions);
+    }
+
+    public static function getPublicProjects(): array
+    {
+        $project_crud = new Crud('projects');
+        return $project_crud->findAllBy(['visibility' => 'public']);
     }
 }

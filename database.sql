@@ -42,7 +42,7 @@ CREATE TABLE projects
     title         VARCHAR(255) NOT NULL,
     description   TEXT         NOT NULL,
     external_link VARCHAR(255),
-    visiblity     ENUM ('private', 'public') DEFAULT 'private' NOT NULL,
+    visibility     ENUM ('private', 'public') DEFAULT 'private' NOT NULL,
     created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
