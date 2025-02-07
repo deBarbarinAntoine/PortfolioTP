@@ -2,6 +2,10 @@
 
 namespace App\Models;
 
+use DateMalformedStringException;
+use DateTime;
+use DateTimeZone;
+
 /**
  * The Logger class is responsible for recording log messages of varying severity levels.
  * It allows messages to include a timestamp, location, and specific log level for consistent error tracking.
@@ -59,7 +63,16 @@ class Logger
      */
     public static function log(string|array $message, string $location, Level $level = Level::ERROR): void
     {
-        $datetime = new \DateTime(); // Create a new DateTime object for the current timestamp.
+        $datetime = new DateTime();
+        try {
+            // Create a new DateTime object for the current timestamp.
+            $datetime = new DateTime(timezone: new DateTimeZone('Europe/Paris'));
+        } catch (DateMalformedStringException $e) {
+
+            // LOGGING
+            self::log($e->getMessage(), __METHOD__);
+        }
+
         $logger = new self($message, $datetime->format("Y-m-d H:i:s"), $location, $level); // Initialize a Logger object.
 
         // Check if the log level is not debug. Logs with levels other than debug are always printed.
@@ -84,8 +97,14 @@ class Logger
         // Check if the message is a string. If yes, use it directly. 
         if (gettype($this->message) === 'string') {
             $message = $this->message;
-        } else {
+        } else if (gettype($this->message) === 'array') {
 
+            if (gettype($this->message[0]) === 'array') {
+                foreach ($this->message as $row) {
+                    $this->log($row, $this->location, $this->level);
+                    return;
+                }
+            }
             // If the message is an indexed array, join its elements with commas.
             if (array_is_list($this->message)) {
                 $message = implode(", ", $this->message);
@@ -101,6 +120,7 @@ class Logger
         }
 
         // Log the formatted message with the timestamp, level, and location in JSON format.
-        error_log("{ \"time\": \"$this->datetime\", \"level\": \"$this->level\", \"location\": \"$this->location\", \"message\": \"$message\" }");
+        $level = $this->level->value;
+        error_log("{ \"time\": \"$this->datetime\", \"level\": \"$level\", \"location\": \"$this->location\", \"message\": \"$message\" }");
     }
 }

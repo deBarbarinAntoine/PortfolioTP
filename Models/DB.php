@@ -2,13 +2,10 @@
 
 namespace App\Models;
 
+use DateMalformedStringException;
 use Dotenv\Dotenv;
 use PDO;
 use RuntimeException;
-use function defined;
-
-$dotenv = Dotenv::createImmutable(__DIR__ . '/../.env');
-$dotenv->load();
 
 /**
  * The DB class provides a singleton pattern for managing database connections using PDO.
@@ -51,9 +48,13 @@ class DB
      *
      * @return PDO The existing or newly created PDO instance.
      * @throws RuntimeException If any required database configuration variables are missing.
+     * @throws DateMalformedStringException
      */
     public static function getPDO(): PDO
     {
+        $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
+        $dotenv->load();
+
         // Check if a PDO connection is already established.
         if (isset(self::$pdo) && !empty(self::$pdo)) {
             return self::$pdo;
@@ -66,8 +67,11 @@ class DB
         $username = $_ENV['DB_USER'];
         $password = $_ENV['DB_PASS'];
 
+        // Debug
+        Logger::log("mysql:host=$host;port=$port;dbname=$dbname;username=$username;password=$password", __METHOD__, Level::DEBUG);
+
         // Ensure all required configuration variables are defined.
-        if (!defined('DB_NAME') || !defined('DB_USER') || !defined('DB_PASS')) {
+        if (!isset($host, $port, $dbname, $username, $password)) {
 
             // LOGGING -> Log the missing database configuration problem.
             Logger::log('Missing database configuration variables', __METHOD__);
