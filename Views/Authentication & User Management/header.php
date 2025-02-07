@@ -38,7 +38,7 @@ if (isset($_SESSION['LAST_ACTIVITY'])) {
     <div class="logo">ProjetB2</div>
     <ul>
         <li><a href="index.php">Accueil</a></li>
-        <li><a href="../Project%20Management/projects.php">Projets</a></li>
+        <li><a href="../Project%20Management/project.php">Projets</a></li>
 
         <?php if (isset($_SESSION['user_id'])): ?>
             <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
