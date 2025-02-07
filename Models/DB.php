@@ -48,7 +48,6 @@ class DB
      *
      * @return PDO The existing or newly created PDO instance.
      * @throws RuntimeException If any required database configuration variables are missing.
-     * @throws DateMalformedStringException
      */
     public static function getPDO(): PDO
     {

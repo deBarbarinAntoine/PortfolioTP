@@ -5,6 +5,7 @@ namespace App\Models;
 use DateMalformedStringException;
 use DateTime;
 use DateTimeZone;
+use Dotenv\Dotenv;
 
 /**
  * The Logger class is responsible for recording log messages of varying severity levels.
@@ -44,6 +45,12 @@ class Logger
      */
     private function __construct(string|array $message, string $datetime, string $location, Level $level = Level::ERROR)
     {
+
+        if (!isset($_ENV['ENVIRONMENT'])) {
+            $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
+            $dotenv->load();
+        }
+
         $this->level = $level;
         $this->message = $message;
         $this->datetime = $datetime;
