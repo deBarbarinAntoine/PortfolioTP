@@ -24,9 +24,9 @@ Ce projet est une application web développée en PHP & MySQL permettant aux uti
 
 ### Gestion des Projets
 - [ ] Ajout, modification et suppression de projets
-- [ ] Chaque projet contient : Titre, Description, Image, Lien externe
+- [X] Chaque projet contient : Titre, Description, Image, Lien externe
 - [ ] Upload sécurisé des images avec restrictions de format et taille
-- [ ] Affichage structuré des projets
+- [X] Affichage structuré des projets
 
 ### Sécurité
 - [X] Protection contre XSS, CSRF et injections SQL
