@@ -395,7 +395,7 @@ class User implements ICrud
         // Joins 'user_skills' and 'skills' tables to include user's skill details if available.
         $result = $user_crud->findAllBy(
             conditions: ['id' => $id], // Search for the user based on their unique ID.
-            columns: 'u.id, u.username, u.email, u.avatar, u.role, u.created_at, u.updated_at, us.id, us.skill_id, us.level, us.created_at, us.updated_at, s.name, s.description',
+            columns: 'u.id AS u_id, u.username AS u_username, u.email AS u_email, u.avatar AS u_avatar, u.role AS u_role, u.created_at AS u_created_at, u.updated_at AS u_updated_at, us.id AS us_id, us.skill_id AS us_skill_id, us.level AS us_level, us.created_at AS us_created_at, us.updated_at AS us_updated_at, s.name AS s_name, s.description AS s_description',
             joins: [
                 [
                     'type' => 'left', // Perform LEFT JOIN with 'user_skills' to link user and skills.
@@ -482,7 +482,7 @@ class User implements ICrud
 
         // Execute a query to fetch all user records, joining with related 'user_skills' and 'skills' tables.
         $results = $user_crud->findAllBy(
-            columns: 'u.id, u.username, u.email, u.avatar, u.role, u.created_at, u.updated_at, us.id, us.skill_id, us.level, us.created_at, us.updated_at, s.name, s.description',
+            columns: 'u.id AS u_id, u.username AS u_username, u.email AS u_email, u.avatar AS u_avatar, u.role AS u_role, u.created_at AS u_created_at, u.updated_at AS u_updated_at, us.id AS us_id, us.skill_id AS us_skill_id, us.level AS us_level, us.created_at AS us_created_at, us.updated_at AS us_updated_at, s.name AS s_name, s.description AS s_description',
             joins: [
                 [
                     'type' => 'left', // Perform a LEFT JOIN to include user skills, even if no matching skills exist.
@@ -573,8 +573,11 @@ class User implements ICrud
             return null;
         }
 
+        // Debug
+        Logger::log($result, __METHOD__, Level::DEBUG);
+
         // If the result is not a multi-row dataset, it means no skills are included.
-        if (!isset($result[0]['u.id'])) {
+        if (!isset($result[0]['u_id'])) {
             return new User(
                 $result['id'],
                 $result['username'],
@@ -597,14 +600,14 @@ class User implements ICrud
 
         // Create a User object from the first row
         return new User(
-            $result[0]['u.id'],
-            $result[0]['u.username'],
-            $result[0]['u.email'],
-            $result[0]['u.avatar'] ?? null,
-            new DateTime($result[0]['u.created_at']),
-            new DateTime($result[0]['u.updated_at']),
+            $result[0]['u_id'],
+            $result[0]['u_username'],
+            $result[0]['u_email'],
+            $result[0]['u_avatar'] ?? null,
+            new DateTime($result[0]['u_created_at']),
+            new DateTime($result[0]['u_updated_at']),
             $skills,
-            UserRole::from($result[0]['u.role'])
+            UserRole::from($result[0]['u_role'])
         );
     }
 

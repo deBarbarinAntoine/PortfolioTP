@@ -71,12 +71,12 @@ class UserSkill implements ICrud
     public static function newUserSkill(array $row): UserSkill
     {
         return new UserSkill(
-            $row['id'],
-            $row['user_id'],
-            $row['skill_id'],
-            UserSkillLevel::from($row['level']),
-            new DateTime($row['created_at']),
-            new DateTime($row['updated_at'])
+            $row['us_id'],
+            $row['us_user_id'],
+            $row['us_skill_id'],
+            UserSkillLevel::from($row['us_level']),
+            new DateTime($row['us_created_at']),
+            new DateTime($row['us_updated_at'])
         );
     }
 
