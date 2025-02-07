@@ -110,27 +110,23 @@ class UserController
         }
     }
 
-    public function verifyPassword(mixed $user_id, $updatedPassword): bool
-    {
-        $user = User::get($user_id);
-        if ($user) {
-            $decodedPassword = base64_decode($user->getPasswordHash());
-            if (password_verify($updatedPassword, $decodedPassword)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public function hashPassword(mixed $user_id, string $newPasswordHash): string
     {
-        $user = User::get($user_id);
+        try {
+            $user = User::get($user_id);
+        } catch (DateMalformedStringException $e)
+        {
+            return "";
+        }
         if ($user) {
             return password_hash($newPasswordHash, PASSWORD_ARGON2ID);
         }
         return "";
     }
 
+    /**
+     * @throws DateMalformedStringException
+     */
     public function validatePassword(mixed $user_id, string $Password): bool|string
     {
         $user = User::get($user_id);
@@ -140,4 +136,46 @@ class UserController
         return false;
     }
 
+    public function checkAnyUserHaveEmail(mixed $userEmail): bool
+    {
+        if(User::doesEmailExist($userEmail) == 1)
+        {
+            return true;
+        } else if (User::doesEmailExist($userEmail) > 1) {
+            // log warning as multiple user may have same email
+            return true;
+        }
+        return false;
+    }
+
+    public function getUserIdFromMail(string $TokenMail): int
+    {
+        if ($this->checkAnyUserHaveEmail($TokenMail)) {
+            return User::findUserIdFromMail($TokenMail);
+        } else {
+            return -1;
+        }
+    }
+
+    /**
+     */
+    public function checkOldPassword($oldPassword, string $TokenMail, int $user_id) : bool
+    {
+        try {
+            $user = User::get($user_id);
+        } catch (DateMalformedStringException $e)
+        {
+            return false;
+        }
+        if ($user) {
+            $isHisMail = $user->getEmail();
+            if ($isHisMail == $TokenMail) {
+                $hashedPassword = base64_decode($user->getPasswordHash());
+                if (password_verify($oldPassword, $hashedPassword)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }

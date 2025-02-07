@@ -10,10 +10,19 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 $user_csrf_token = $_SESSION['csrf_token'];
+$_SESSION['previous_page'] = 'edit_profile.php';
 $userController = new UserController();
 
 $user = null;
 $error_message = null;
+$nextPageError = null;
+$nextPageSuccess = null;
+if (isset($_GET['$error_message'])) {
+    $nextPageError = $_GET['$error_message'];
+}
+if (isset($_GET['$success_message'])) {
+    $nextPageSuccess = $_GET['$success_message'];
+}
 $userName = "";
 $userEmail = "";
 $userAvatar = "";
@@ -55,27 +64,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die();
     }
 
-    if ((!empty($oldPassword) && !empty($newPassword)) && !$error_message) {
-        $isPasswordValide = $userController->validatePassword($user_id, $newPassword);
-
-        if (is_string($isPasswordValide)) {
-            // If the return value is a string, it means there was an error
-            $error_message = $isPasswordValide;
-        } else if (!$isPasswordValide) {
-            // If the return value is false (meaning user not found or invalid password)
-            $error_message = "User not found.";
-        }
-
-
-        // Check if old password is correct (e.g., compare against hashed password)
-        if (!$userController->verifyPassword($user_id, $oldPassword)) {
-            $error_message = "The current password is incorrect.";
-            die();
-        } else {
-            // Hash the new password
-            $newPasswordHash = $userController->hashPassword($user_id, $newPassword);
-        }
-    }
     // Process avatar upload (if new file is selected)
     if ($updatedAvatar['error'] === UPLOAD_ERR_OK && !$error_message) {
         // Validate file type and extension
@@ -135,6 +123,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php if ($error_message): ?>
         <p style="color: red;"><?= htmlspecialchars($error_message); ?></p>
     <?php endif; ?>
+    <?php if ($nextPageError): ?>
+        <p style="color: red;"><?= htmlspecialchars($nextPageError); ?></p>
+    <?php endif; ?>
+    <?php if ($nextPageSuccess): ?>
+        <p style="color: green;"><?= htmlspecialchars($nextPageSuccess); ?></p>
+    <?php endif; ?>
 
     <h2>Edit Profile</h2>
     <form method="POST" enctype="multipart/form-data">
@@ -144,12 +138,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <label for="email">Email:</label>
         <input type="email" id="email" name="email" value="<?= htmlspecialchars($userEmail); ?>" required><br>
 
-        <label for="current_password">Password:</label>
-        <input type="password" id="current_password" name="current_password" required>
-
-        <label for="newPassword">New Password:</label>
-        <input type="password" id="newPassword" name="newPassword">
-
         <label for="avatar">Avatar:</label>
         <input type="file" id="avatar" name="avatar"><br>
         <img src="public/img/<?= htmlspecialchars($userAvatar); ?>" alt="Current Avatar" width="100"><br>
@@ -157,6 +145,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($user_csrf_token); ?>">
 
         <button type="submit">Save Changes</button>
+    </form>
+
+    <form method="GET" action="password_reset_mail.php">
+        <input type="hidden" name="email" value="<?= htmlspecialchars($userEmail); ?>">
+        <button type="submit">Change Password</button>
     </form>
 </div>
 

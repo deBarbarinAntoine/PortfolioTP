@@ -12,6 +12,14 @@ if (isset($_SESSION['LAST_ACTIVITY']) && (time() - $_SESSION['LAST_ACTIVITY']) >
     header('Location: logout.php?message=Session expired please login again');
     exit(); // Make sure to exit to stop further execution
 }
+
+
+if (isset($_SESSION['LAST_ACTIVITY'])) {
+    if ((time() - $_SESSION['LAST_ACTIVITY']) > $session_timeout) {
+        header('Location: logout.php?message=' . urlencode("Session expired. Please log in again."));
+        exit;
+    }
+}
 ?>
 
 <!DOCTYPE html>

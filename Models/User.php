@@ -90,6 +90,14 @@ class User implements ICrud
         $this->updated_at = $updated_at ?? new DateTime();
     }
 
+    public static function findUserIdFromMail(mixed $TokenMail): int
+    {
+        $user_crud = new Crud('user');
+        $result = $user_crud->findBy(['email' => $TokenMail], 'id');
+        return $result ? $result['id'] : -1;
+    }
+
+
     /**
      * Gets the ID of the user.
      *
@@ -725,6 +733,12 @@ class User implements ICrud
         }
 
         return true; // Valid password
+    }
+
+    public static function doesEmailExist(mixed $userEmail)
+    {
+        $user_crud = new Crud('users');
+        return $user_crud->findSingleValueBy(['email' => $userEmail]);
     }
 
 }

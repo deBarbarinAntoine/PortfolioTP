@@ -11,7 +11,11 @@ $message = "";
 // Check if the 'message' parameter is set in the URL
 if (isset($_GET['message'])) {
     // Get the message from the URL query parameter
-    $message = $_GET['message'];
+    $message = htmlspecialchars($_GET['message']);
+}
+
+if (isset($_GET['error_message'])) {
+    $error = htmlspecialchars($_GET['error_message']);
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
