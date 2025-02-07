@@ -708,31 +708,39 @@ class User implements ICrud
 
     public function validatePassword($password): true|string
     {
+        // Initialize an array to store error messages
+        $errors = [];
+
         // Minimum length 8, must contain at least 1 uppercase, 1 lowercase, 1 number, and 1 special character
         if (strlen($password) < 8) {
-            return "Password must be at least 8 characters long.";
+            $errors[] = "Password must be at least 8 characters long.";
         }
 
         if (!preg_match('/[A-Z]/', $password)) {
-            return "Password must contain at least one uppercase letter.";
+            $errors[] = "Password must contain at least one uppercase letter.";
         }
 
         if (!preg_match('/[a-z]/', $password)) {
-            return "Password must contain at least one lowercase letter.";
+            $errors[] = "Password must contain at least one lowercase letter.";
         }
 
         if (!preg_match('/\d/', $password)) {
-            return "Password must contain at least one number.";
+            $errors[] = "Password must contain at least one number.";
         }
 
         if (!preg_match('/[!@#$%^&*(),.?":{}|<>]/', $password)) {
-            return "Password must contain at least one special character.";
+            $errors[] = "Password must contain at least one special character.";
         }
 
         // Check for common passwords
         $commonPasswords = ['123456', 'password', 'qwerty', 'abc123', 'letmein'];
         if (in_array($password, $commonPasswords)) {
-            return "This password is too common.";
+            $errors[] = "This password is too common.";
+        }
+
+        // If there are any errors, concatenate and return them
+        if (!empty($errors)) {
+            return implode(" ", $errors); // Concatenate the error messages with a space
         }
 
         return true; // Valid password

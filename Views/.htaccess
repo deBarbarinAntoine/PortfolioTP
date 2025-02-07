@@ -1,0 +1,43 @@
+RewriteEngine On
+
+# Check if the requested file exists inside any subfolder of /view/
+RewriteCond %{REQUEST_URI} ^/([^/]+)\.php$
+RewriteCond /view/.*%1\.php -f
+RewriteRule ^([^/]+)\.php$ /%1.php [L]
+
+#RewriteEngine On
+#This line enables the mod_rewrite module in Apache, which allows for URL rewriting. This is necessary to apply any subsequent rewrite rules.
+#
+#RewriteCond %{REQUEST_URI} ^/([^/]+)\.php$
+#This is a condition that checks the requested URI (i.e., the part of the URL after the domain name).
+#
+#^/([^/]+)\.php$ is a regular expression that matches a URL that ends with .php.
+#([^/]+) captures a portion of the URL (everything before .php), which can be referred to as %1 in the following rules. This part ensures the rule only applies if the request is for a .php file, like /page.php.
+#RewriteCond /view/.*%1\.php -f
+#This condition checks if a .php file corresponding to the captured portion of the URL (the %1 variable from the previous condition) exists in the /view/ subfolder.
+#
+#.*%1\.php means that it will match any .php file in the /view/ folder (like /view/somefile.php).
+#-f checks if that file actually exists.
+#RewriteRule ^([^/]+)\.php$ /%1.php [L]
+#This rule takes effect if both previous conditions are true.
+#
+#It matches the .php files in the request and replaces the URL with /view/{filename}.php, where {filename} is the part captured by ([^/]+).
+#[L] at the end means "last" — stop processing any further rewrite rules if this one matches.
+
+# Redirect if the requested file does not exist in /view/
+RewriteCond %{REQUEST_URI} ^/([^/]+)\.php$
+RewriteCond /view/.*%1\.php !-f
+RewriteRule ^([^/]+)\.php$ /error.php [R=301,L]
+
+#RewriteCond /view/.*%1\.php !-f
+#This condition checks if the corresponding .php file does not exist in the /view/ folder (using !-f, which means "not a regular file").
+#
+#RewriteRule ^([^/]+)\.php$ /404.php [R=301,L]
+#If the conditions are met (i.e., the file does not exist in /view/), this rule will redirect the user to /404.php.
+#
+#R=301 specifies a permanent redirect (you can change this to R=302 for a temporary redirect).
+#L means this is the last rule to be processed, stopping further rule evaluation.
+
+#Summary:
+#If the requested file exists in /view/, it will be rewritten as /view/{filename}.php.
+#If the requested file does not exist in /view/, the user will be redirected to /404.php (or any other page you specify).
