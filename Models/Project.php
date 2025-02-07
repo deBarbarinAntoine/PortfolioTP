@@ -4,6 +4,7 @@ namespace App\Models;
 
 use DateMalformedStringException;
 use DateTime;
+use Exception;
 
 /**
  * Represents a project within the application.
@@ -71,6 +72,8 @@ class Project implements ICrud
      * @var DateTime
      */
     private DateTime $updated_at;
+
+
 
 
     /**
@@ -542,9 +545,88 @@ class Project implements ICrud
         return $project_crud->findSingleValueBy($conditions);
     }
 
+    /**
+     * @throws DateMalformedStringException
+     */
     public static function getPublicProjects(): array
     {
         $project_crud = new Crud('projects');
-        return $project_crud->findAllBy(['visibility' => 'public']);
+        $results = $project_crud->findAllBy(['visibility' => 'public']);
+
+        return self::mapResultsToProjects($results);
     }
+
+    /**
+     * @throws DateMalformedStringException
+     */
+    public static function getProjects(int $user_id): array
+    {
+        $project_crud = new Crud('projects');
+        $results = $project_crud->findAllByUser($user_id);
+
+        return self::mapResultsToProjects($results);
+    }
+
+    /**
+     * @throws DateMalformedStringException
+     */
+    private static function mapResultsToProjects(array $results): array
+    {
+        $projects = [];
+
+        foreach ($results as $result) {
+            try {
+                // Handling DateTime safely
+                $createdAt = new DateTime($result['created_at']);
+                $updatedAt = new DateTime($result['updated_at']);
+            } catch (\Exception $e) {
+                // Log or handle the DateTime error
+                Logger::log("Invalid DateTime format: " . $e->getMessage(), __METHOD__);
+                throw new DateMalformedStringException("Invalid DateTime format: " . $e->getMessage());
+            }
+
+            // Create the Project object
+            $projects[] = new self(
+                id: $result['id'],
+                title: $result['title'],
+                description: $result['description'],
+                external_link: $result['external_link'],
+                visibility: Visibility::from($result['visibility']),
+                created_at: $createdAt,
+                updated_at: $updatedAt,
+                images: [] // Handle images separately if needed
+            );
+        }
+
+        return $projects;
+    }
+
+    /**
+     * @throws Exception
+     */
+    public static function getProject(string $projectId, string $projectName): ?self
+    {
+        $project_crud = new Crud('projects');
+        $project = $project_crud->findBy(["title" => $projectName, "id" => $projectId]);
+
+        if (!$project) {
+            throw new Exception("Project not found.");
+        }
+
+        $project_Image_crud = new Crud('project_images');
+        $projectImages = $project_Image_crud->findAllBy(["project_id" => $projectId]) ?? [];
+
+        return new self(
+            id: $projectId,
+            title: $projectName,
+            description: $project['description'] ?? '',
+            external_link: $project['external_link'] ?? null,
+            visibility: Visibility::tryFrom($project['visibility']) ?? Visibility::PRIVATE,
+            created_at: $project['created_at'] ?? null,
+            updated_at: $project['updated_at'] ?? null,
+            images: $projectImages
+        );
+    }
+
+
 }

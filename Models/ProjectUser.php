@@ -24,6 +24,8 @@ class ProjectUser
     /** @var Project The associated project. */
     private Project $project;
 
+
+
     /**
      * Gets the id of the ProjectUser.
      *
@@ -183,4 +185,23 @@ class ProjectUser
     {
         return new self($id, $role, $created_at, $updated_at, $project);
     }
+
+    public static function getUserProject(int $user_id): array
+    {
+        $userProjectCrud = new Crud('project_users');
+
+        // Initialize an empty array to hold the results for each role.
+        $projectsByRole = [];
+
+        // Loop through all the roles in the ProjectRole enum dynamically.
+        foreach (ProjectRole::cases() as $role) {
+            // Fetch the data for the current role and store it in the array.
+            $projectsByRole[$role->value] = $userProjectCrud->findAllBy(['user_id' => $user_id, 'role' => $role->value]);
+        }
+
+        // Return the projects grouped by role
+        return $projectsByRole;
+    }
+
+
 }

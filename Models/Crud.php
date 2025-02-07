@@ -620,7 +620,49 @@ class Crud {
         }
         return $sql;
     }
+
+    public function findAllByUser(int $user_id, array $conditions = [], string $columns = "*", ?string $orderBy = null, ?string $Ascend = null, ?int $limit = null, ?int $offset = null): array
+    {
+        $joins = [
+            "LEFT JOIN project_users pu ON projects.id = pu.project_id"
+        ];
+
+        // Add condition for public projects OR projects where user has a role
+        $conditions[] = "(projects.visibility = 'public' OR pu.user_id = :user_id)";
+
+        $sql = $this->getSql($columns, $joins, $conditions, $orderBy, $Ascend);
+
+        // Handle LIMIT
+        if ($limit) {
+            $sql .= " LIMIT $limit";
+            if ($offset) {
+                $sql .= " OFFSET $offset";
+            }
+        }
+
+        // Debugging output for the query
+        Logger::log($sql, __METHOD__, Level::DEBUG);
+
+        try {
+            $stmt = $this->pdo->prepare($sql);
+
+            // Bind user_id manually since it's not inside $conditions
+            $stmt->bindValue(':user_id', $user_id, PDO::PARAM_INT);
+
+            // Bind other conditions safely
+            $this->bindConditions($stmt, $conditions);
+
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC); // Fetch as associative array
+        } catch (PDOException $e) {
+            Logger::log("Read Error: " . $e->getMessage(), __METHOD__);
+            return []; // Return an empty array in case of error
+        }
+    }
+
 }
+
+
 
 
 // exemple usage
