@@ -124,12 +124,14 @@ class UserController
         return "";
     }
 
-    /**
-     * @throws DateMalformedStringException
-     */
     public function validatePassword(mixed $user_id, string $Password): bool|string
     {
-        $user = User::get($user_id);
+        try {
+            $user = User::get($user_id);
+        } catch (DateMalformedStringException $e) {
+            return false;
+        }
+
         if ($user) {
             return $user->validatePassword($Password);
         }
@@ -142,7 +144,7 @@ class UserController
         {
             return true;
         } else if (User::doesEmailExist($userEmail) > 1) {
-            // log warning as multiple user may have same email
+            Logger::log("Multiple users avec same email", __METHOD__, Level::WARNING);
             return true;
         }
         return false;
@@ -175,6 +177,26 @@ class UserController
                     return true;
                 }
             }
+        }
+        return false;
+    }
+
+    public function updateUserPassword(int $user_id, $newPassword): bool
+    {
+        try {
+            $user = User::get($user_id);
+        } catch (DateMalformedStringException $e)
+        {
+            return false;
+        }
+        if ($user) {
+            $hashedPassword = password_hash($newPassword, PASSWORD_ARGON2ID);
+            $user->setPasswordHash($hashedPassword);
+            $affectedRow = $user->update();
+            if ($affectedRow > 0) {
+                return true;
+            }
+            return false;
         }
         return false;
     }
