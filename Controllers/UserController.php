@@ -114,8 +114,7 @@ class UserController
     {
         try {
             $user = User::get($user_id);
-        } catch (DateMalformedStringException $e)
-        {
+        } catch (DateMalformedStringException $e) {
             return "";
         }
         if ($user) {
@@ -138,18 +137,6 @@ class UserController
         return false;
     }
 
-    public function checkAnyUserHaveEmail(mixed $userEmail): bool
-    {
-        if(User::doesEmailExist($userEmail) == 1)
-        {
-            return true;
-        } else if (User::doesEmailExist($userEmail) > 1) {
-            Logger::log("Multiple users avec same email", __METHOD__, Level::WARNING);
-            return true;
-        }
-        return false;
-    }
-
     public function getUserIdFromMail(string $TokenMail): int
     {
         if ($this->checkAnyUserHaveEmail($TokenMail)) {
@@ -159,14 +146,24 @@ class UserController
         }
     }
 
+    public function checkAnyUserHaveEmail(mixed $userEmail): bool
+    {
+        if (User::doesEmailExist($userEmail) == 1) {
+            return true;
+        } else if (User::doesEmailExist($userEmail) > 1) {
+            Logger::log("Multiple users avec same email", __METHOD__, Level::WARNING);
+            return true;
+        }
+        return false;
+    }
+
     /**
      */
-    public function checkOldPassword($oldPassword, string $TokenMail, int $user_id) : bool
+    public function checkOldPassword($oldPassword, string $TokenMail, int $user_id): bool
     {
         try {
             $user = User::get($user_id);
-        } catch (DateMalformedStringException $e)
-        {
+        } catch (DateMalformedStringException $e) {
             return false;
         }
         if ($user) {
@@ -185,8 +182,7 @@ class UserController
     {
         try {
             $user = User::get($user_id);
-        } catch (DateMalformedStringException $e)
-        {
+        } catch (DateMalformedStringException $e) {
             return false;
         }
         if ($user) {
@@ -200,4 +196,38 @@ class UserController
         }
         return false;
     }
+
+    public function checkEmailValidity(string $email): string
+    {
+        if (!$this->isMailAlreadyUsed($email)) {
+            return "Mail already in use";
+        }
+        return "";
+    }
+
+    public function isMailAlreadyUsed(string $email): bool
+    {
+        if (!$this->checkAnyUserHaveEmail($email)) {
+            return false;
+        }
+        return true;
+    }
+
+    public function createUser(string $username, string $email, string $password): bool
+    {
+        $create = User::new($username, $email, $password);
+        if ($create == null) {
+            return false;
+        }
+        return true;
+    }
+
+    public function checkUsernameValidity(string $username): string
+    {
+        if (strlen($username) < 2 || strlen($username) > 30) {
+            return "Username must be between 2 and 30 char long"; // Invalid username
+        }
+        return ""; // Valid username
+    }
+
 }

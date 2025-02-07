@@ -1,2 +1,0 @@
-<?php
-// Introduction and navigation.
