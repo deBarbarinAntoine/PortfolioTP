@@ -1,11 +1,18 @@
 <?php
 
 use App\Controllers\ProjectController;
+use App\Models\Level;
+use App\Models\Logger;
 
-include 'header.php';
+include "Views/templates/header.php";
 
 $projectController = new ProjectController();
-$projects = $projectController->getPublicProjects();
+try {
+    $projects = $projectController->getPublicProjects();
+} catch (DateMalformedStringException $e) {
+    // Debug
+    Logger::log($e->getMessage(), __FILE__, Level::DEBUG);
+}
 ?>
 
     <!-- Welcome Section -->
@@ -37,5 +44,5 @@ $projects = $projectController->getPublicProjects();
 </section>
 
 <?php
-include 'footer.php';
+include 'Views/templates/footer.php';
 ?>

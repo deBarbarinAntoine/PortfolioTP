@@ -32,8 +32,10 @@ $routes[] = ['GET', '/favicon', '/Views/favicon.php'];
 // Authentication routes
 $routes[] = ['GET', '/', '/Views/user/index.php'];
 $routes[] = ['GET', '/login', '/Views/user/login.php'];
+$routes[] = ['POST', '/login', '/Views/user/login.php'];
 $routes[] = ['GET', '/logout', '/Views/user/logout.php'];
 $routes[] = ['GET', '/register', '/Views/user/register.php'];
+$routes[] = ['POST', '/register', '/Views/user/register.php'];
 $routes[] = ['GET', '/reset', '/Views/user/reset_password.php'];
 $routes[] = ['POST', '/reset', '/Views/user/change_password.php'];
 $routes[] = ['GET', '/reset/mail', '/Views/user/password_reset_mail.php'];
@@ -90,7 +92,7 @@ $dispatcher = FastRoute\simpleDispatcher(function (RouteCollector $r) use ($rout
 
 // Retrieve the HTTP method (e.g., GET, POST) and requested URI from the incoming request.
 $httpMethod = $_SERVER['REQUEST_METHOD'];
-$uri = $_SERVER['REQUEST_URI'];
+$uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
 // Dispatch the request
 $routeInfo = $dispatcher->dispatch($httpMethod, $uri);

@@ -388,13 +388,16 @@ class User implements ICrud
      */
     public static function get(int $id): ?User
     {
+        // Debug
+        Logger::log("Fetching user with id '$id'", __METHOD__, Level::DEBUG);
+
         // Create a CRUD instance for the 'users' table (aliased as 'u') to prepare for querying.
         $user_crud = new Crud('users u');
 
         // Query the database to fetch user information with related interests and skills.
         // Joins 'user_skills' and 'skills' tables to include user's skill details if available.
         $result = $user_crud->findAllBy(
-            conditions: ['id' => $id], // Search for the user based on their unique ID.
+            conditions: ['u.id' => $id], // Search for the user based on their unique ID.
             columns: 'u.id AS u_id, u.username AS u_username, u.email AS u_email, u.avatar AS u_avatar, u.role AS u_role, u.created_at AS u_created_at, u.updated_at AS u_updated_at, us.id AS us_id, us.skill_id AS us_skill_id, us.level AS us_level, us.created_at AS us_created_at, us.updated_at AS us_updated_at, s.name AS s_name, s.description AS s_description',
             joins: [
                 [
@@ -446,16 +449,23 @@ class User implements ICrud
         }
 
         $id = $result['id'];
-        $hashedPassword = base64_decode($result['password_hash']);
+        $hashedPassword = base64_decode($result['password']);
 
         // Validate the supplied password against the hashed password
-        if (password_verify($password, $hashedPassword)) {
+        if (isset($id) && password_verify($password, $hashedPassword)) {
             try {
                 // Fetch and return the User object on successful password validation
                 $user = User::get($id);
 
-                // Debug: Print user details
-                Logger::log($user->__toString(), __METHOD__, Level::DEBUG);
+                if (!empty($user)) {
+
+                    // Debug: Print user details
+                    Logger::log($user->__toString(), __METHOD__, Level::DEBUG);
+                } else {
+
+                    // Debug
+                    Logger::log("User '$email' not found", __METHOD__, Level::DEBUG);
+                }
 
                 return $user;
             } catch (Exception $e) {
@@ -706,7 +716,7 @@ class User implements ICrud
         );
     }
 
-    public function validatePassword($password): true|string
+    public static function validatePassword($password): true|string
     {
         // Initialize an array to store error messages
         $errors = [];

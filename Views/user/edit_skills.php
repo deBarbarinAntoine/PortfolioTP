@@ -1,6 +1,6 @@
 <?php
 // skill management from here
-include 'header.php';
+include "Views/templates/header.php";
 
 use App\Controllers\SkillController;
 use App\Controllers\User_SkillController;
@@ -183,5 +183,5 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 </div>
 
 <?php
-include 'footer.php';
+include 'Views/templates/footer.php';
 ?>

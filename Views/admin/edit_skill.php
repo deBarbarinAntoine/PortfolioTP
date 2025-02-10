@@ -1,7 +1,7 @@
 <?php
 use App\Controllers\SkillController;
 
-include "../user/header.php";
+include "Views/templates/header.php";
 
 $skillController = new SkillController();
 
@@ -41,4 +41,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_skill'])) {
     </form>
 </div>
 
-<?php include "../user/footer.php"; ?>
+<?php include 'Views/templates/footer.php'; ?>

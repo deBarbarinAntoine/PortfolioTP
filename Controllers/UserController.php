@@ -37,9 +37,9 @@ class UserController
         return $user->getId();
     }
 
-    public function getUserRole(User $user): UserRole
+    public function getUserRole(User $user): string
     {
-        return $user->getRole();
+        return $user->getRoleStr();
     }
 
     /**
@@ -132,7 +132,7 @@ class UserController
         }
 
         if ($user) {
-            return $user->validatePassword($Password);
+            return User::validatePassword($Password);
         }
         return false;
     }
@@ -219,7 +219,10 @@ class UserController
         if ($create == null) {
             return false;
         }
-        return true;
+
+        $id = $create->create();
+
+        return $id !== -1;
     }
 
     public function checkUsernameValidity(string $username): string

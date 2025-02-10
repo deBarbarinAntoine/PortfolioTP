@@ -3,7 +3,7 @@
 use App\Controllers\UserController;
 use Random\RandomException;
 
-include 'header.php';
+include "Views/templates/header.php";
 
 $error = "";
 $message = "";
@@ -33,7 +33,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $error = "Couldn't set csrf_token" . $e->getMessage();
         }
         $_SESSION['user_id'] = $loginController->getUserId($user);// Store user ID in session
-        $_SESSION['role'] = $loginController->getUserRole($user);
+        $_SESSION['user_role'] = $loginController->getUserRole($user);
         $_SESSION['LAST_ACTIVITY'] = time();
 
         if ($remember) {
@@ -42,7 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($error){
             $_SESSION = [];
         } else {
-            header("Location: /index"); // Redirect on successful login
+            header("Location: /"); // Redirect on successful login
             exit();
         }
 
@@ -72,5 +72,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 
 <?php
-include 'footer.php';
+include 'Views/templates/footer.php';
 ?>

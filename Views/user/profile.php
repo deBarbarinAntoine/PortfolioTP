@@ -1,6 +1,7 @@
 <?php
 // User profile display with a button to go to management of his account (edit name, email, etc.)
-include 'header.php';
+include "Views/templates/header.php";
+
 // Ensure the user is logged in
 use App\Controllers\SkillController;
 use App\Controllers\UserController;
@@ -50,7 +51,7 @@ if (!$user) {
             <a href="/login"><button>Login Again</button></a>
         <?php else: ?>
             <h2>Welcome, <?= htmlspecialchars($userName); ?></h2>
-            <img src="public/img/<?= htmlspecialchars($userAvatar); ?>" alt="Avatar" width="100">
+            <img src="<?= htmlspecialchars($userAvatar); ?>" alt="Avatar" width="100">
             <p>Email: <?= htmlspecialchars($userEmail); ?></p>
             <p>Role: <?= htmlspecialchars($userRole); ?></p>
             <p>Member since: <?= $userSince ? $userSince->format('Y-m-d') : 'Date not available'; ?></p>
@@ -79,5 +80,5 @@ if (!$user) {
     </div>
 
 <?php
-include 'footer.php';
+include 'Views/templates/footer.php';
 ?>

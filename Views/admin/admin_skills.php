@@ -3,10 +3,10 @@
 use App\Controllers\AdminController;
 use App\Controllers\SkillController;
 
-include "../user/header.php";
+include "Views/templates/header.php";
 
 // Check if the user is an admin
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
     header("Location: /login");
     exit();
 }
@@ -124,4 +124,4 @@ if (isset($_SESSION['success_message'])) {
     </div>
 </div>
 
-<?php include "../user/footer.php"; ?>
+<?php include 'Views/templates/footer.php'; ?>

@@ -1,11 +1,18 @@
 <?php
 // Overview of site stats, users, and skills.
 use App\Controllers\AdminController;
+use App\Models\Level;
+use App\Models\Logger;
 
-include "../user/header.php";
+include "Views/templates/header.php";
+
+// Debug
+$id = $_SESSION['user_id'];
+$role = $_SESSION['user_role'];
+Logger::log("id: $id | role: $role", __FILE__, Level::DEBUG);
 
 // Check if the user is an admin
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
     header("Location: /login");
     exit();
 }
@@ -46,7 +53,7 @@ extract($admin_dashboard);
                 <td><?php echo htmlspecialchars($user['id']); ?></td>
                 <td><?php echo htmlspecialchars($user['username']); ?></td>
                 <td><?php echo htmlspecialchars($user['email']); ?></td>
-                <td><?php echo htmlspecialchars($user['role']); ?></td>
+                <td><?php echo htmlspecialchars($user['user_role']); ?></td>
                 <td><?php echo date("F j, Y, g:i a", strtotime($user['created_at'])); ?></td>
             </tr>
         <?php endforeach; ?>
@@ -63,4 +70,4 @@ extract($admin_dashboard);
 
 
 <?php
-include "../user/footer.php";
+include 'Views/templates/footer.php';

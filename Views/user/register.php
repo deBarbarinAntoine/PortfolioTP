@@ -2,8 +2,9 @@
 // User registration form.
 
 use App\Controllers\UserController;
+use App\Models\User;
 
-include 'header.php';
+include "Views/templates/header.php";
 
 $errorMessages = [];
 
@@ -33,6 +34,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $errorMessages[] = $msg;
         }
         if ($msg = $registerController->checkEmailValidity($email)) {
+            $errorMessages[] = $msg;
+        }
+        if ($msg = User::validatePassword($password)) {
             $errorMessages[] = $msg;
         }
         if (empty($errorMessages)) {
@@ -74,5 +78,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 </form>
 
 <?php
-include 'footer.php';
+include 'Views/templates/footer.php';
 ?>

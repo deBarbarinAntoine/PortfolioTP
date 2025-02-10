@@ -1,6 +1,6 @@
 <?php
 
-if (session_status() === PHP_SESSION_NONE) {
+if (session_status() !== PHP_SESSION_ACTIVE) {
     session_start();
 }
 
@@ -41,7 +41,7 @@ if (isset($_SESSION['LAST_ACTIVITY'])) {
         <li><a href="/projects">Projets</a></li>
 
         <?php if (isset($_SESSION['user_id'])): ?>
-            <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'admin'): ?>
+            <?php if (isset($_SESSION['user_role']) && $_SESSION['user_role'] === 'admin'): ?>
                 <li><a href="/admin">Admin Dashboard</a></li>
             <?php endif; ?>
             <li><a href="/profile">Mon Profil</a></li>

@@ -333,7 +333,11 @@ class Crud {
     {
         $conditionClauses = [];
         foreach ($conditions as $key => $value) {
-            $conditionClauses[] = "$key = :$key"; // Use named placeholders for binding
+
+            // replacing '.' by '_' for the placeholder
+            $placeHolder = str_replace('.', '_', $key);
+
+            $conditionClauses[] = "$key = :$placeHolder"; // Use named placeholders for binding
         }
         return $sql . " WHERE " . implode(" AND ", $conditionClauses);
     }
@@ -352,7 +356,14 @@ class Crud {
     private function bindConditions($stmt, array $conditions): void
     {
         foreach ($conditions as $key => $value) {
-            $stmt->bindValue(":$key", $value); // Bind values safely
+
+            // replacing '.' by '_' for the placeholder
+            $placeHolder = str_replace('.', '_', $key);
+
+            // Debug
+            Logger::log("Binding :$placeHolder to '$value'", __METHOD__, Level::DEBUG);
+
+            $stmt->bindValue(":$placeHolder", $value); // Bind values safely
         }
     }
 
