@@ -13,7 +13,7 @@ $projects = $projectController->getPublicProjects();
         <h1>Bienvenue sur ProjetB2</h1>
         <p>Une plateforme pour gérer vos compétences et projets.</p>
         <?php if (!isset($_SESSION['user_id'])): ?>
-            <a href="register.php" class="btn">S'inscrire</a>
+            <a href="/register" class="btn">S'inscrire</a>
         <?php endif; ?>
     </header>
 

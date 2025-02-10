@@ -14,7 +14,7 @@ if (session_status() === PHP_SESSION_NONE) {
 use App\Controllers\UserController;
 use App\Controllers\PasswordResetController;
 
-$previousPage = $_SESSION['previous_page'] ?? 'login.php'; // previous_page = edit_profile
+$previousPage = $_SESSION['previous_page'] ?? '/login'; // previous_page = edit_profile
 
 $userController = new UserController();
 $resetPasswordController = new PasswordResetController();

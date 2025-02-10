@@ -4,7 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$previousPage = $_SESSION['previous_page'] ?? 'login.php'; // previous page should be edit_profile.php
+$previousPage = $_SESSION['previous_page'] ?? '/login'; // previous page should be edit_profile.php
 $previousPage = filter_var($previousPage, FILTER_SANITIZE_URL);
 
 if (!isset($_GET['email'])) {
@@ -24,6 +24,7 @@ if (!filter_var($userEmail, FILTER_VALIDATE_EMAIL)) {
 // Import necessary classes
 use App\Controllers\PasswordResetController;
 // Import PHPMailer classes
+use App\Models\Logger;
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 use App\Controllers\UserController;
@@ -41,6 +42,8 @@ require 'vendor/autoload.php'; // Include PHPMailer's autoload
 $passwordResetController = new PasswordResetController();
 
 // Get the environment variables
+$mailSender = $_ENV['MAIL_SENDER'];
+$mailAddress= $_ENV['MAIL_ADDRESS'];
 $mailUsername = $_ENV['MAIL_USERNAME'];
 $mailPassword = $_ENV['MAIL_PASSWORD'];
 $mailHost = $_ENV['MAIL_HOST'];
@@ -55,6 +58,24 @@ if (!$mailUsername || !$mailPassword || !$mailHost || !$mailPort || !$mailEncryp
     exit;
 }
 
+function getServerURL(): string
+{
+    $server_name = $_SERVER['SERVER_NAME'];
+
+    if (!in_array($_SERVER['SERVER_PORT'], [80, 443])) {
+        $port = ":$_SERVER[SERVER_PORT]";
+    } else {
+        $port = '';
+    }
+
+    if (!empty($_SERVER['HTTPS']) && (strtolower($_SERVER['HTTPS']) == 'on' || $_SERVER['HTTPS'] == '1')) {
+        $scheme = 'https';
+    } else {
+        $scheme = 'http';
+    }
+    return $scheme.'://'.$server_name.$port;
+}
+
 try {
     // Generate a password reset token
     $resetToken = $passwordResetController->generateResetToken($userEmail);
@@ -64,9 +85,7 @@ try {
         header("Location: " . htmlspecialchars($previousPage) . "?error_message=" . $error_message);
         exit;
     }
-
-    $port = $_ENV['DB_PORT'] ?? '8000'; // Default port for local testing
-    $resetLink = "http://localhost:" . htmlspecialchars($port) . "/reset_password.php?token=" . urlencode($resetToken);
+    $resetLink = getServerURL() . "/reset?token=" . urlencode($resetToken);
 
     // Send email using mail() , replace $mail->send() lower to mail(); keep in mind that mail(); use your php.ini config
     //    $subject = "Password Reset Request";
@@ -90,7 +109,7 @@ try {
     $mail->Port = $mailPort; // Port for TLS
 
     // Sender and recipient details
-    $mail->setFrom('no-reply@PortofolioTp.com', 'No Reply');
+    $mail->setFrom($mailAddress, $mailSender);
     $mail->addAddress($userEmail);  // Add recipient's email
 
     // Set email format to HTML
@@ -108,7 +127,10 @@ try {
     }
     exit;
 } catch (Exception $e) {
-    error_log("Error: " . $e->getMessage()); // Log error for debugging
+
+    // LOGGING
+    Logger::log("Failed to send the password reset email: " . $e->getMessage(), __FILE__);
+
     $error_message = urlencode("An error occurred. Please try again later.");
     header("Location: " . htmlspecialchars($previousPage) . "?error_message=" . $error_message);
     exit;

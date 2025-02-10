@@ -6,7 +6,7 @@ use App\Controllers\SkillController;
 use App\Controllers\UserController;
 
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+    header("Location: /login");
     exit();
 }
 
@@ -47,7 +47,7 @@ if (!$user) {
         <?php endif; ?>
         <?php if ($error_message): ?>
             <p style="color: red;"><?= htmlspecialchars($error_message); ?></p>
-            <a href="login.php"><button>Login Again</button></a>
+            <a href="/login"><button>Login Again</button></a>
         <?php else: ?>
             <h2>Welcome, <?= htmlspecialchars($userName); ?></h2>
             <img src="public/img/<?= htmlspecialchars($userAvatar); ?>" alt="Avatar" width="100">
@@ -73,8 +73,8 @@ if (!$user) {
                 <?php endif; ?>
             </ul>
 
-            <a href="edit_profile.php"><button>Edit Profile</button></a>
-            <a href="edit_skills.php"><button>Edit Skills</button> </a>
+            <a href="/profile/update"><button>Edit Profile</button></a>
+            <a href="/profile/skills"><button>Edit Skills</button> </a>
         <?php endif; ?>
     </div>
 

@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         try {
             $success = $user_skillController->deleteSkillFromUser($UserSkillId);
             if ($success === true) {
-                header("Location: edit_profile.php?message=Skill deleted successfully!");
+                header("Location: /profile/update?message=Skill deleted successfully!");
                 exit();
             } else {
                 $error_message = "Failed to delete the skill: " . $success;
@@ -78,7 +78,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 if ($skillId && $newLevel && $userSkillId) {
                     $success = $user_skillController->updateUserSkillLevel($userSkillId,$skillId, $newLevel);
                     if ($success === true) {
-                        header("Location: edit_profile.php?message=Skill updated successfully!");
+                        header("Location: /profile/update?message=Skill updated successfully!");
                         exit();
                     } else {
                         $error_message = "Failed to update the skill: " . $success;
@@ -101,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $success = $user_skillController->addSkillToUser($user_id, $newSkillId, $newSkillLevel);
                 if ($success === true) {
-                    header("Location: edit_profile.php?message=New skill added successfully!");
+                    header("Location: /profile/update?message=New skill added successfully!");
                     exit();
                 } else {
                     $error_message = "Failed to add the new skill." . $success;
@@ -121,7 +121,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php endif; ?>
 
     <h3>Your Skills</h3>
-    <form method="POST">
+    <form method="POST" action="/profile/update">
         <ul>
             <?php if (!empty($userSkills)): ?>
                 <?php foreach ($userSkills as $userSkill): ?>
@@ -159,7 +159,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </form>
 
     <h3>Add a New Skill</h3>
-    <form method="POST">
+    <form method="POST" action="/profile/update">
         <label for="new_skill_id">Skill:</label>
         <select id="new_skill_id" name="new_skill_id" required>
             <?php

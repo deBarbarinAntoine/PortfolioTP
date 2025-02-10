@@ -2,7 +2,7 @@
 
 if (!isset($_GET['token'])) {
     $error_message = urlencode("Invalid request.");
-    header("Location: login.php?error_message=" . $error_message);
+    header("Location: /login?error_message=" . $error_message);
     exit;
 }
 
@@ -10,7 +10,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-$previousPage = $_SESSION['previous_page'] ?? 'login.php'; // previous_page = edit_profile
+$previousPage = $_SESSION['previous_page'] ?? '/login'; // previous_page = edit_profile
 
 
 use App\Controllers\PasswordResetController;
@@ -22,7 +22,7 @@ $resetPasswordController = new PasswordResetController();
 if (strlen($reset_password_token) !== 64 || !ctype_xdigit($reset_password_token)) {
     // Invalid token format
     $error_message = urlencode("token timed out or invalid , please try again.");
-    header("Location: login.php?error_message=" . $error_message);
+    header("Location: /login?error_message=" . $error_message);
     exit;
 }
 
@@ -42,7 +42,7 @@ $error_message = htmlspecialchars($_GET['error_message']);
 <?php if ($error_message): ?>
     <p style="color: red;"><?= htmlspecialchars($error_message); ?></p>
 <?php endif; ?>
-<form method="POST" action="change_password.php">
+<form method="POST" action="/reset">
     <label for="current_password">Password:</label>
     <input type="password" id="current_password" name="current_password" required>
 

@@ -35,14 +35,15 @@ $routes[] = ['GET', '/login', '/Views/user/login.php'];
 $routes[] = ['GET', '/logout', '/Views/user/logout.php'];
 $routes[] = ['GET', '/register', '/Views/user/register.php'];
 $routes[] = ['GET', '/reset', '/Views/user/reset_password.php'];
+$routes[] = ['POST', '/reset', '/Views/user/change_password.php'];
 $routes[] = ['GET', '/reset/mail', '/Views/user/password_reset_mail.php'];
 
 // User Management routes
 $routes[] = ['GET', '/profile', '/Views/user/profile.php'];
-$routes[] = ['GET', '/profile/reset', '/Views/user/change_password.php'];
 $routes[] = ['GET', '/profile/update', '/Views/user/edit_profile.php'];
 $routes[] = ['POST', '/profile/update', '/Views/user/edit_profile.php'];
 $routes[] = ['GET', '/profile/skills', '/Views/user/edit_skills.php'];
+$routes[] = ['POST', '/profile/skills', '/Views/user/edit_skills.php'];
 
 // Project Management routes
 $routes[] = ['GET', '/projects', '/Views/project/my_projects.php'];

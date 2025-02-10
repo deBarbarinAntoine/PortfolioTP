@@ -42,7 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($error){
             $_SESSION = [];
         } else {
-            header("Location: index.php"); // Redirect on successful login
+            header("Location: /index"); // Redirect on successful login
             exit();
         }
 
@@ -52,7 +52,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 ?>
 
-    <form method="post">
+    <form method="POST" action="/login">
         <h2>Login</h2>
         <?php if (!empty($error)) echo "<p style='color: red;'>$error</p>"; ?>
         <?php if (!empty($message)) echo "<p style='color: green;'>$message</p>"; ?>

@@ -42,7 +42,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             } else {
                 setcookie("username", "", time() - 3600, "/");
                 setcookie("email", "", time() - 3600, "/");
-                header("Location: login.php?message=User created");
+                header("Location: /login?message=User created");
             }
         }
         exit;
@@ -51,7 +51,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 ?>
 
-<form method="POST">
+<form method="POST" action="/register">
     <h2>Register</h2>
     <?php foreach ($errorMessages as $error) : ?>
         <p style="color: red;"><?= htmlspecialchars($error) ?></p>

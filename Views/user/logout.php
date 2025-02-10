@@ -8,6 +8,6 @@ if (isset($_COOKIE[session_name()])) {
 }
 // Redirect to the login page with a message
 $message = $_GET['message'] ?? 'You have been logged out successfully';
-header("Location: login.php?message=" . urlencode($message));
+header("Location: /login?message=" . urlencode($message));
 exit();
 ?>

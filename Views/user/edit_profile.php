@@ -149,7 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     <form method="GET" action="/reset/mail">
         <input type="hidden" name="email" value="<?= htmlspecialchars($userEmail); ?>">
-        <button type="submit">Change Password</button>
+        <button type="submit">Reset Password</button>
     </form>
 </div>
 
