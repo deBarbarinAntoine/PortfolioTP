@@ -5,12 +5,12 @@ use App\Controllers\ProjectController;
 $previousPage = "";
 $previousPage = $_SESSION['previousPage'] ?? "";
 if ($previousPage == "") {
-    $previousPage = 'index.php';
+    $previousPage = '/';
 }
 
 if (!isset($_GET['name']) || !isset($_GET['id'])) {
     $errorMessage = 'Please select a valid project';
-    header('Location: '.$previousPage.'?error_message=' . $errorMessage);
+    header("Location: $previousPage?error_message=$errorMessage");
     exit;
 }
 $projectName= htmlspecialchars($_GET['name']);
@@ -53,5 +53,5 @@ try {
         <?php endif; ?>
     </div>
 
-    <a href="<?php echo htmlspecialchars($previousPage); ?>" class="back-link">⬅ Back</a>
+    <a href="<?= htmlspecialchars($previousPage) ?>" class="back-link">⬅ Back</a>
 </div>

@@ -17,9 +17,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $adminController = new AdminController();
 
     if ($adminController->deleteUser($user_id)) {
-        header("Location: admin_users.php?msg=User Deleted Successfully");
+        header("Location: /admin/users?msg=User Deleted Successfully");
     } else {
-        header("Location: admin_users.php?msg=User Not Deleted");
+        header("Location: /admin/users?msg=User Not Deleted");
     }
 }
 ?>

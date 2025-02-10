@@ -3,14 +3,13 @@
 use App\Controllers\AdminController;
 use App\Controllers\SkillController;
 
-include "../Authentication & User Management/header.php";
+include "../user/header.php";
 
 // Check if the user is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header("Location: login.php");
+    header("Location: /login");
     exit();
 }
-
 
 $adminController = new AdminController();
 $skillController = new SkillController();
@@ -42,23 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_skill'])) {
     }
 
     // Redirect back to the admin_skills.php page to show the success or error message
-    header("Location: admin_skills.php");
-    exit();
-}
-
-// Handle Delete Skill
-if (isset($_GET['delete_skill'])) {
-    $skill_id = $_GET['delete_skill'];
-    $success = $skillController->deleteSkill($skill_id);
-
-    // Store the success message in the session if creation was successful
-    if ($success > 0) {
-        $_SESSION['success_message'] = "Skill deleted successfully! (Deleted Rows: $success)";
-    } else {
-        $_SESSION['error_message'] = "Failed to delete skill. (Affected Rows: $success) Please try again.";
-    }
-
-    header("Location: admin_skills.php"); // Refresh the page to see the updated list
+    header("Location: /admin/skills");
     exit();
 }
 
@@ -78,7 +61,7 @@ if (isset($_SESSION['success_message'])) {
     <h1>Admin Dashboard</h1>
 
     <!-- Search form -->
-    <form method="GET" action="admin_skills.php">
+    <form method="GET" action="/admin/skills">
         <label>
             <input type="text" name="search" placeholder="Search skills..." value="<?= htmlspecialchars($search) ?>">
         </label>
@@ -87,7 +70,7 @@ if (isset($_SESSION['success_message'])) {
 
     <!-- Create Skill form -->
     <h2>Create Skill</h2>
-    <form method="POST" action="admin_skills.php">
+    <form method="POST" action="/admin/skills">
         <label>
             <input type="text" name="name" placeholder="Skill Name" required>
         </label>
@@ -115,9 +98,12 @@ if (isset($_SESSION['success_message'])) {
                     <td><?= htmlspecialchars($skill['description']) ?></td>
                     <td>
                         <!-- Edit Skill -->
-                        <a href="edit_skill.php?id=<?= $skill['id'] ?>&name=<?= $skill['name'] ?>&desc=<?= $skill['description'] ?>">Edit</a> |
+                        <a href="/admin/skill/<?= $skill['id'] ?>/update?name=<?= $skill['name'] ?>&desc=<?= $skill['description'] ?>">Edit</a> |
                         <!-- Delete Skill -->
-                        <a href="admin_skills.php?delete_skill=<?= $skill['id'] ?>" onclick="return confirm('Are you sure you want to delete this skill?')">Delete</a>
+                        <form action="/admin/skill/<?= $skill['id'] ?>/delete" method="POST">
+                            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                            <button type="submit" onclick="return confirm('Are you sure you want to delete this skill?')">Delete</button>
+                        </form>
                     </td>
                 </tr>
             <?php endforeach; ?>
@@ -130,12 +116,12 @@ if (isset($_SESSION['success_message'])) {
     <!-- Pagination -->
     <div class="pagination">
         <?php if ($offset > 0): ?>
-            <a href="admin_skills.php?offset=<?php echo max(0, $offset - 10); ?>&search=<?= urlencode($search) ?>">Previous</a>
+            <a href="/admin/skills?offset=<?php echo max(0, $offset - 10); ?>&search=<?= urlencode($search) ?>">Previous</a>
         <?php endif; ?>
         <?php if ($offset + 10 < $total_skills): ?>
-            <a href="admin_skills.php?offset=<?= $offset + 10 ?>&search=<?= urlencode($search) ?>">Next</a>
+            <a href="/admin/skills?offset=<?= $offset + 10 ?>&search=<?= urlencode($search) ?>">Next</a>
         <?php endif; ?>
     </div>
 </div>
 
-<?php include "../Authentication & User Management/footer.php"; ?>
+<?php include "../user/footer.php"; ?>

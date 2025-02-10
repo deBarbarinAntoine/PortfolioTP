@@ -2,11 +2,11 @@
 // Overview of site stats, users, and skills.
 use App\Controllers\AdminController;
 
-include "../Authentication & User Management/header.php";
+include "../user/header.php";
 
 // Check if the user is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header("Location: login.php");
+    header("Location: /login");
     exit();
 }
 $adminController = new AdminController();
@@ -63,4 +63,4 @@ extract($admin_dashboard);
 
 
 <?php
-include "../Authentication & User Management/footer.php";
+include "../user/footer.php";

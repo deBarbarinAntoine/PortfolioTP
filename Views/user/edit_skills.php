@@ -7,7 +7,7 @@ use App\Controllers\User_SkillController;
 use App\Controllers\UserController;
 
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+    header("Location: /login");
     exit();
 }
 

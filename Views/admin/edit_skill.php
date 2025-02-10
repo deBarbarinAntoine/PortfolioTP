@@ -1,11 +1,11 @@
 <?php
 use App\Controllers\SkillController;
 
-include "../Authentication & User Management/header.php";
+include "../user/header.php";
 
 $skillController = new SkillController();
 
-$skill_id = $_GET['id'] ?? '';
+$skill_id = $ParamID ?? '';
 $name = $_GET['name'] ?? '';
 $desc = $_GET['desc'] ?? '';
 
@@ -17,12 +17,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_skill'])) {
     $success = $skillController->updateSkill($skill_id, $name, $description);
 
     if ($success > 0) {
-        $_SESSION['success_message'] = 'Skill updated successfully! (Affected Rows: $success)';
+        $_SESSION['success_message'] = "Skill updated successfully! (Affected Rows: $success)";
     } else {
-        $_SESSION['error_message'] = 'Failed to update skill. (Affected Rows: $success) Please try again.';
+        $_SESSION['error_message'] = "Failed to update skill. (Affected Rows: $success) Please try again.";
     }
 
-    header("Location: admin_skills.php");
+    header("Location: /admin/skills");
     exit();
 }
 ?>
@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_skill'])) {
 <div class="container">
     <h1>Edit Skill</h1>
 
-    <form method="POST" action="edit_skill.php?id=<?= htmlspecialchars($skill_id) ?>">
+    <form method="POST" action="/admin/skill/<?= $skill_id ?>/update">
         <label>
             <input type="text" name="name" value="<?= htmlspecialchars($name) ?>" required>
         </label>
@@ -41,4 +41,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_skill'])) {
     </form>
 </div>
 
-<?php include "../Authentication & User Management/footer.php"; ?>
+<?php include "../user/footer.php"; ?>

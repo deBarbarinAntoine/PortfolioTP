@@ -3,11 +3,11 @@
 use App\Controllers\AdminController;
 use App\Controllers\UserController;
 
-include "../Authentication & User Management/header.php";
+include "../user/header.php";
 
 // Check if the user is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
-    header("Location: login.php");
+    header("Location: /login");
     exit();
 }
 $adminController = new AdminController();
@@ -39,7 +39,7 @@ try {
         <h1>User Management</h1>
 
         <!-- Search Bar -->
-        <form method="GET" action="admin_users.php">
+        <form method="GET" action="/admin/users">
             <label>
                 <input type="text" name="search" value="<?php echo htmlspecialchars($search); ?>"
                        placeholder="Search by name, username, or email">
@@ -68,8 +68,9 @@ try {
                     echo "<td>" . htmlspecialchars($row['name']) . "</td>";
                     echo "<td>" . htmlspecialchars($row['username']) . "</td>";
                     echo "<td>" . htmlspecialchars($row['email']) . "</td>";
+                    $id = $row['id'];
                     echo "<td>
-    <form method='POST' action='update_role.php'>
+    <form method='POST' action='/admin/role/$id/update'>
         <input type='hidden' name='user_id' value='" . $row['id'] . "'>
         <input type='hidden' name='csrf_token' value='" . $_SESSION['csrf_token'] . "'>
         <select name='new_role' onchange='this.form.submit()'>
@@ -83,7 +84,7 @@ try {
                     echo "<td>" . $row['created_at'] . "</td>";
                     echo "<td>" . $row['updated_at'] . "</td>";
                     echo "<td>
-                <form method='POST' action='delete_user.php' onsubmit=\"return confirm('Are you sure you want to delete this user?');\">
+                <form method='POST' action='/admin/user/$id/delete' onsubmit=\"return confirm('Are you sure you want to delete this user?');\">
                     <input type='hidden' name='user_id' value='" . $row['id'] . "'>
                     <input type='hidden' name='csrf_token' value='" . $_SESSION['csrf_token'] . "'>
                     <button type='submit' class='delete-btn' style='background-color: red; color: white; border: none; padding: 5px 10px; cursor: pointer;'>Delete</button>
@@ -114,5 +115,5 @@ try {
     </body>
 
 <?php
-include "../Authentication & User Management/footer.php";
+include "../user/footer.php";
 ?>

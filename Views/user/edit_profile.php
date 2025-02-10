@@ -4,13 +4,13 @@ include 'header.php';
 use App\Controllers\UserController;
 
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+    header("Location: /login");
     exit();
 }
 
 $user_id = $_SESSION['user_id'];
 $user_csrf_token = $_SESSION['csrf_token'];
-$_SESSION['previous_page'] = 'edit_profile.php';
+$_SESSION['previous_page'] = '/profile/update';
 $userController = new UserController();
 
 $user = null;
@@ -106,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $success = $userController->updateUser($user_id, $updatedName, $updatedEmail, $avatarPath);
             if ($success) {
                 move_uploaded_file($updatedAvatar['tmp_name'], $avatarPath);
-                header("Location: profile.php?message=Profile updated successfully!");
+                header("Location: /profile?message=Profile updated successfully!");
                 exit();
             } else {
                 $error_message = "An unexpected error occurred while updating your profile. Please try again later.";
@@ -131,7 +131,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php endif; ?>
 
     <h2>Edit Profile</h2>
-    <form method="POST" enctype="multipart/form-data">
+    <form method="POST" action="/profile/update" enctype="multipart/form-data">
         <label for="name">Name:</label>
         <input type="text" id="name" name="name" value="<?= htmlspecialchars($userName); ?>" required><br>
 
@@ -147,7 +147,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         <button type="submit">Save Changes</button>
     </form>
 
-    <form method="GET" action="password_reset_mail.php">
+    <form method="GET" action="/reset/mail">
         <input type="hidden" name="email" value="<?= htmlspecialchars($userEmail); ?>">
         <button type="submit">Change Password</button>
     </form>
