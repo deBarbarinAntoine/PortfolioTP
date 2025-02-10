@@ -7,14 +7,14 @@ use PDOException;
 
 class Admin
 {
-    public static function getAdminDashboard()
+    public static function getAdminDashboard(string $search, int $offset )
     {
         try {
             $users_count = User::getCountAll();
             $users_count_last24hours = User::getCountLastUsers();
             $latest_users = User::get5LastUsers();
             $skills_count = Skill::getCountAll();
-            $skills = Skill::getAllSkills();
+            $skills = Skill::getAllSkills($search, $offset);
             $projects_count = Project::getCountAll();
             $projects_count_last24hours = Project::getCountLastProject();
 
@@ -53,7 +53,7 @@ class Admin
         return false;
     }
 
-    public static function get_admin_skills(mixed $search, mixed $offset)
+    public static function get_admin_skills(mixed $search, mixed $offset): array
     {
         return Skill::getAllSkills($search, $offset);
     }

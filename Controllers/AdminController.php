@@ -7,9 +7,9 @@ use App\Models\Admin;
 require_once __DIR__ . '/../Models/Admin.php';
 
 class AdminController {
-    public function getAdminDashboard(): ?array
+    public function getAdminDashboard(string $search , int $offset): ?array
     {
-        return Admin::getAdminDashboard();
+        return Admin::getAdminDashboard($search, $offset);
     }
 
     /**

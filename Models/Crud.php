@@ -116,10 +116,12 @@ class Crud {
         ?string $Ascend = null,
         ?int    $limit = null,
         ?int    $offset = null,
-        ?array  $joins = null
+        ?array  $joins = null,
+        string $symbole = "",
+        ?bool $isString = false
     ): array
     {
-        $sql = $this->getSql($columns, $joins, $conditions, $orderBy, $Ascend);
+        $sql = $this->getSql($columns, $joins, $conditions, $orderBy, $Ascend, $symbole, $isString);
 
         // Handle LIMIT
         if ($limit) {
@@ -134,9 +136,6 @@ class Crud {
 
         try {
             $stmt = $this->pdo->prepare($sql);
-
-            // Bind parameters safely
-            $this->bindConditions($stmt, $conditions);
 
             $stmt->execute();
             return $stmt->fetchAll(PDO::FETCH_ASSOC); // Fetch as associative array
@@ -183,19 +182,20 @@ class Crud {
         string  $columns = "*",
         ?string $orderBy = null,
         ?string $Ascend = null,
-        ?array  $joins = null
+        ?array  $joins = null,
+        string $symbole = "",
+        ?bool $isString = false
     ): ?array
     {
-        $sql = $this->getSql($columns, $joins, $conditions, $orderBy, $Ascend);
+        $sql = $this->getSql($columns, $joins, $conditions, $orderBy, $Ascend, $symbole, $isString);
 
         // Limit to 1 result since it's findBy
         $sql .= " LIMIT 1";
 
+        var_dump($sql);
+
         try {
             $stmt = $this->pdo->prepare($sql);
-
-            // Bind parameters using bindValue to avoid passing by reference
-            $this->bindConditions($stmt, $conditions);
 
             $stmt->execute();
             return $stmt->fetch(PDO::FETCH_ASSOC); // Fetch as an associative array
@@ -260,7 +260,7 @@ class Crud {
 
         // Handle conditions (WHERE)
         if (!empty($conditions)) {
-            $sql = $this->addConditionsToQuery($sql, $conditions);
+            $sql = $this->addConditionsToQuery($sql, $conditions, '');
         }
 
         // Handle ORDER BY
@@ -284,9 +284,6 @@ class Crud {
         // Execute the query and fetch the result
         try {
             $stmt = $this->pdo->prepare($sql);
-
-            // Bind the parameters if necessary
-            $this->bindConditions($stmt, $conditions);
 
             $stmt->execute();
             return $stmt->fetchColumn(); // Fetch the single column value (e.g., COUNT, SUM)
@@ -334,15 +331,20 @@ class Crud {
      *                          | FR: Tableau associatif des conditions (par ex., colonne → valeur).
      * @return string EN: Modified SQL query with WHERE conditions | FR: Requête SQL modifiée avec des conditions WHERE.
      */
-    private function addConditionsToQuery(string $sql, array $conditions): string
+    private function addConditionsToQuery(string $sql, array $conditions, string $symbole, bool $isString = false): string
     {
+        if ($symbole == '') {
+            $symbole = '=';
+        }
         $conditionClauses = [];
         foreach ($conditions as $key => $value) {
+            // Add the condition to the clauses array
+            if ($isString) {
+                $conditionClauses[] = "$key $symbole '$value'";
+            } else {
 
-            // replacing '.' by '_' for the placeholder
-            $placeHolder = str_replace('.', '_', $key);
-
-            $conditionClauses[] = "$key = :$placeHolder"; // Use named placeholders for binding
+                $conditionClauses[] = "$key $symbole $value";
+            }
         }
         return $sql . " WHERE " . implode(" AND ", $conditionClauses);
     }
@@ -609,7 +611,7 @@ class Crud {
      * @param bool|null $isAscend EN: True for ASC, False for DESC, or null for default order | FR: True pour ASC, False pour DESC, ou null pour l'ordre par défaut.
      * @return string EN: The constructed SQL query string | FR: La chaîne de requête SQL construite.
      */
-    public function getSql(string $columns, ?array $joins, array $conditions, ?string $orderBy, ?bool $isAscend): string
+    public function getSql(string $columns, ?array $joins, array $conditions, ?string $orderBy, ?bool $isAscend , string $symbole, ?bool $isString): string
     {
         $sql = "SELECT $columns FROM $this->table";
 
@@ -622,7 +624,7 @@ class Crud {
 
         // Handle conditions (WHERE)
         if (!empty($conditions)) {
-            $sql = $this->addConditionsToQuery($sql, $conditions);
+            $sql = $this->addConditionsToQuery($sql, $conditions ,$symbole, $isString);
         }
 
         // Handle ORDER BY
@@ -637,7 +639,7 @@ class Crud {
         return $sql;
     }
 
-    public function findAllByUser(int $user_id, array $conditions = [], string $columns = "*", ?string $orderBy = null, ?string $Ascend = null, ?int $limit = null, ?int $offset = null): array
+    public function findAllByUser(int $user_id, array $conditions = [], string $columns = "*", ?string $orderBy = null, ?string $Ascend = null, ?int $limit = null, ?int $offset = null, $symbole = ''): array
     {
         $joins = [
             "LEFT JOIN project_users pu ON projects.id = pu.project_id"
@@ -646,7 +648,7 @@ class Crud {
         // Add condition for public projects OR projects where user has a role
         $conditions[] = "(projects.visibility = 'public' OR pu.user_id = :user_id)";
 
-        $sql = $this->getSql($columns, $joins, $conditions, $orderBy, $Ascend);
+        $sql = $this->getSql($columns, $joins, $conditions, $orderBy, $Ascend, $symbole);
 
         // Handle LIMIT
         if ($limit) {

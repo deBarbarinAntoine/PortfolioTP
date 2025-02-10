@@ -437,7 +437,7 @@ class User implements ICrud
     {
         $user_crud = new Crud('users');
 
-        $result = $user_crud->findBy([ 'email' => $email ]);
+        $result = $user_crud->findBy([ 'email' => $email ], "*" ,null,null,null, '', true);
 
         // If no matching email is found, return null, signaling authentication failure
         if (empty($result)) {
@@ -450,6 +450,7 @@ class User implements ICrud
 
         $id = $result['id'];
         $hashedPassword = base64_decode($result['password']);
+
 
         // Validate the supplied password against the hashed password
         if (isset($id) && password_verify($password, $hashedPassword)) {
@@ -525,11 +526,11 @@ class User implements ICrud
         $user_crud = new Crud('users');
         // Set the condition for the query
         $conditions = [
-            'created_at' => 'NOW() - INTERVAL 24 HOUR'
+            'created_at' => 'DATE_SUB(NOW(), INTERVAL 24 HOUR)'
         ];
 
         // Call the findAllBy method with the necessary parameters
-        $results = $user_crud->findAllBy($conditions, "*", 'created_at', false, 5);
+        $results = $user_crud->findAllBy($conditions, "*", 'created_at', false, 5, null,null , '>');
 
         return User::toUserArray($results);
     }
