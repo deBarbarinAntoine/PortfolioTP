@@ -1,24 +1,20 @@
 <?php
 // projects with details.
-use App\Controllers\ProjectController;
+include "../user/header.php";
 
-$previousPage = "";
-$previousPage = $_SESSION['previousPage'] ?? "";
-if ($previousPage == "") {
-    $previousPage = '/';
-}
+use App\Controllers\ProjectController;
 
 if (!isset($_GET['name']) || !isset($_GET['id'])) {
     $errorMessage = 'Please select a valid project';
-    header("Location: $previousPage?error_message=$errorMessage");
+    header("Location: index.php?error_message=$errorMessage");
     exit;
 }
-$projectName= htmlspecialchars($_GET['name']);
+
 $projectId= htmlspecialchars($_GET['id']);
 
 $projectController = new ProjectController();
 try {
-    $projectData = $projectController->getProject($projectId, $projectName);
+    $projectData = $projectController->getProject($projectId);
 } catch (Exception $e) {
     $errorMessage = "Failed to find the project ".$e->getMessage();
     exit;
@@ -53,5 +49,6 @@ try {
         <?php endif; ?>
     </div>
 
-    <a href="<?= htmlspecialchars($previousPage) ?>" class="back-link">⬅ Back</a>
 </div>
+
+<?php include "../user/footer.php"; ?>

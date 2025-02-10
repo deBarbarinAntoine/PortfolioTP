@@ -25,7 +25,6 @@ class ProjectUser
     private Project $project;
 
 
-
     /**
      * Gets the id of the ProjectUser.
      *
@@ -203,5 +202,26 @@ class ProjectUser
         return $projectsByRole;
     }
 
+    public static function isOwner(string $projectId, mixed $userId): bool
+    {
+        $userProjectCrud = new Crud('project_users');
+        $user_Project = $userProjectCrud->findBy(['project_id' => $projectId, 'user_id' => $userId]);
+        if ($user_Project == null || $user_Project['role'] !== 'owner') {
+
+            return false;
+        }
+        return true;
+    }
+
+    public static function isContributor(string $projectId, mixed $userId): bool
+    {
+        $userProjectCrud = new Crud('project_users');
+        $user_Project = $userProjectCrud->findBy(['project_id' => $projectId, 'user_id' => $userId]);
+        if ($user_Project == null || $user_Project['role'] !== 'contributor') {
+
+            return false;
+        }
+        return true;
+    }
 
 }
