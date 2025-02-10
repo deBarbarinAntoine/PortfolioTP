@@ -30,26 +30,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     } else {
         $registerController = new UserController();
 
-        if ($msg = $registerController->checkUsernameValidity($username)) {
+        $msg = $registerController->checkUsernameValidity($username);
+        if (!empty($msg)) {
             $errorMessages[] = $msg;
         }
-        if ($msg = $registerController->checkEmailValidity($email)) {
+
+        if (!$registerController->checkEmailValidity($email)) {
+            $errorMessages[] = 'Mail address already exists.';
+        }
+
+        $msg = User::validatePassword($password);
+        if (is_string($msg)) {
             $errorMessages[] = $msg;
         }
-        if ($msg = User::validatePassword($password)) {
-            $errorMessages[] = $msg;
-        }
+
         if (empty($errorMessages)) {
-            $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-            if (!$registerController->createUser($username, $email, $hashedPassword)) {
+            if (!$registerController->createUser($username, $email, $password)) {
                 $errorMessages[] = "Error creating user.";
             } else {
                 setcookie("username", "", time() - 3600, "/");
                 setcookie("email", "", time() - 3600, "/");
                 header("Location: /login?message=User created");
+                die();
             }
         }
-        exit;
     }
 }
 

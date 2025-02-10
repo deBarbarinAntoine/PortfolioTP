@@ -59,10 +59,15 @@ class Crud {
         $columns = implode(", ", array_keys($data));
         $placeholders = ":" . implode(", :", array_keys($data));
         $sql = "INSERT INTO $this->table ($columns) VALUES ($placeholders)";
+
+        // Debug
+        Logger::log($sql, __METHOD__, Level::DEBUG);
+
         $stmt = $this->pdo->prepare($sql);
 
         try {
-            $stmt->execute($data);
+            $this->bindConditions($stmt, $data);
+            $stmt->execute();
             return $this->pdo->lastInsertId() ;
         } catch (PDOException $e) {
 

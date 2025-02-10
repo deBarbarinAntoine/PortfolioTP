@@ -110,19 +110,6 @@ class UserController
         }
     }
 
-    public function hashPassword(mixed $user_id, string $newPasswordHash): string
-    {
-        try {
-            $user = User::get($user_id);
-        } catch (DateMalformedStringException $e) {
-            return "";
-        }
-        if ($user) {
-            return password_hash($newPasswordHash, PASSWORD_ARGON2ID);
-        }
-        return "";
-    }
-
     public function validatePassword(mixed $user_id, string $Password): bool|string
     {
         try {
@@ -197,12 +184,12 @@ class UserController
         return false;
     }
 
-    public function checkEmailValidity(string $email): string
+    public function checkEmailValidity(string $email): bool
     {
-        if (!$this->isMailAlreadyUsed($email)) {
-            return "Mail already in use";
+        if ($this->isMailAlreadyUsed($email)) {
+            return false;
         }
-        return "";
+        return true;
     }
 
     public function isMailAlreadyUsed(string $email): bool
@@ -215,14 +202,12 @@ class UserController
 
     public function createUser(string $username, string $email, string $password): bool
     {
-        $create = User::new($username, $email, $password);
-        if ($create == null) {
+        $user = User::new($username, $email, $password);
+        if ($user === null) {
             return false;
         }
 
-        $id = $create->create();
-
-        return $id !== -1;
+        return true;
     }
 
     public function checkUsernameValidity(string $username): string
