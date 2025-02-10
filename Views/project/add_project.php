@@ -1,5 +1,7 @@
 <?php
 //  Form to add a new project.
+include 'Views/templates/header.php';
+
 
 if (!isset($_SESSION['user_id'])){
     $error_message = "Please Log In First";
@@ -7,15 +9,14 @@ if (!isset($_SESSION['user_id'])){
     exit;
 }
 
-include '../user/header.php';
-
 $errorMessages = [];
 $title = $description = $externalLink = $visibility = "";
+$user_id = $_SESSION['user_id'];
 
 use App\Controllers\ProjectController;
+use App\Controllers\User_ProjectController;
 
 $projectController = new ProjectController();
-
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $title = isset($_POST["title"]) ? trim($_POST["title"]) : "";
@@ -35,7 +36,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ($projectId <= 0) {
             $errorMessages[] = "Project Creation Failed";
         } else {
-            header('Location: projects.php?id='. $projectId);
+            $user_projectController = new User_ProjectController();
+            $setOwner = $user_projectController->create($user_id, $projectId);
+            header("Location: /project/$projectId");
             exit;
         }
     }
@@ -78,4 +81,4 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <button type="submit">Create Project</button>
 </form>
 
-<?php include '../user/footer.php'; ?>
+<?php include 'Views/templates/footer.php'; ?>

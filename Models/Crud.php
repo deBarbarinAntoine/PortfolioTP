@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use DateTime;
 use Exception;
 use PDO;
 use PDOException;
@@ -63,17 +64,20 @@ class Crud {
         // Debug
         Logger::log($sql, __METHOD__, Level::DEBUG);
 
+        // Convert DateTime objects to strings
+        foreach ($data as $key => $value) {
+            if (in_array($key, ['created_at', 'updated_at'], true) && $value instanceof DateTime) {
+                $data[$key] = $value->format('Y-m-d H:i:s');
+            }
+        }
+
         $stmt = $this->pdo->prepare($sql);
 
         try {
-            $this->bindConditions($stmt, $data);
-            $stmt->execute();
-            return $this->pdo->lastInsertId() ;
+            $stmt->execute($data); // Pass data to execute
+            return $this->pdo->lastInsertId();
         } catch (PDOException $e) {
-
-            // LOGGING
             Logger::log("Create Error: " . $e->getMessage(), __METHOD__);
-
             return -1;
         }
     }
@@ -185,14 +189,13 @@ class Crud {
         ?array  $joins = null,
         string $symbole = "",
         ?bool $isString = false
-    ): ?array
+    ): array | false | null
     {
         $sql = $this->getSql($columns, $joins, $conditions, $orderBy, $Ascend, $symbole, $isString);
 
         // Limit to 1 result since it's findBy
         $sql .= " LIMIT 1";
 
-        var_dump($sql);
 
         try {
             $stmt = $this->pdo->prepare($sql);
@@ -360,7 +363,7 @@ class Crud {
      * @param array $conditions EN: Associative array of conditions (key → value) to be bound | FR: Tableau associatif des conditions (clé → valeur) à lier.
      * @return void
      */
-    private function bindConditions($stmt, array $conditions): void
+    private function bindConditions(PDOStatement $stmt, array $conditions): void
     {
         foreach ($conditions as $key => $value) {
 
@@ -639,7 +642,7 @@ class Crud {
         return $sql;
     }
 
-    public function findAllByUser(int $user_id, array $conditions = [], string $columns = "*", ?string $orderBy = null, ?string $Ascend = null, ?int $limit = null, ?int $offset = null, $symbole = ''): array
+    public function findAllByUser(int $user_id, array $conditions = [], string $columns = "*", ?string $orderBy = null, ?string $Ascend = null, ?int $limit = null, ?int $offset = null, string $symbole = '', ?bool $isString = false): array
     {
         $joins = [
             "LEFT JOIN project_users pu ON projects.id = pu.project_id"
@@ -648,7 +651,7 @@ class Crud {
         // Add condition for public projects OR projects where user has a role
         $conditions[] = "(projects.visibility = 'public' OR pu.user_id = :user_id)";
 
-        $sql = $this->getSql($columns, $joins, $conditions, $orderBy, $Ascend, $symbole);
+        $sql = $this->getSql($columns, $joins, $conditions, $orderBy, $Ascend, $symbole, $isString);
 
         // Handle LIMIT
         if ($limit) {

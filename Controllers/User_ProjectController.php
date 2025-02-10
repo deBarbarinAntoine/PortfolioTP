@@ -39,6 +39,11 @@ class User_ProjectController
 
     public function addUserToProject(string $email, string $role, string $projectId): int
     {
-        return ProjectUser::create($email, $role, $projectId);
+        return ProjectUser::createAdd($email, $role, $projectId);
+    }
+
+    public function create(mixed $user_id, int $projectId): int
+    {
+        return ProjectUser::create($user_id, $projectId);
     }
 }

@@ -5,19 +5,39 @@ include "Views/templates/header.php";
 use App\Controllers\ProjectController;
 use App\Controllers\User_ProjectController;
 
-if (!isset($_GET['name']) || !isset($_GET['id'])) {
-    $errorMessage = 'Please select a valid project';
-    header("Location: index.php?error_message=$errorMessage");
+if (isset($paramID['id'])) {
+    $projectID = $paramID['id'];
+}
+
+if (isset($_GET['error_message'])) {
+    $error = htmlspecialchars($_GET['error_message']);
+}
+
+if (isset($_GET['success_message'])) {
+    $success = htmlspecialchars($_GET['success_message']);
+}
+
+if (!isset($projectID)) {
+    $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH); // Extracts only the path, ignoring query parameters
+    $segments = explode('/', trim($uri, '/'));
+    $projectID = end($segments); // Get the last segment
+}
+
+
+
+if (!isset($paramID['id']) && !isset($projectID)) {
+    $errorMessage = 'Please select a valid project, selected id =  ' . $projectID ;
+    header("Location: /?error_message=$errorMessage");
     exit;
 }
 
-$projectId= htmlspecialchars($_GET['id']);
+$projectId = $projectID ?? "";
 $isOwner = false;
 $projectController = new ProjectController();
 $user_projectController = new User_ProjectController();
 try {
     $projectData = $projectController->getProject($projectId);
-    if (!isset($_SESSION['user_id'])) {
+    if (isset($_SESSION['user_id'])) {
         $userId = $_SESSION['user_id'];
         $isOwner = $user_projectController->getIsOwner($projectId, $userId);
     }
@@ -27,7 +47,8 @@ try {
 }
 
 ?>
-
+    <?php if (!empty($error)) echo "<p style='color: red;'>$error</p>"; ?>
+    <?php if (!empty($success)) echo "<p style='color: green;'>$success</p>"; ?>
     <div class="project-container">
         <h1 class="project-title"><?php echo htmlspecialchars($projectData->getTitle()); ?></h1>
 
@@ -41,8 +62,13 @@ try {
                 </a></p>
         <?php endif; ?>
 
-        <p><strong>Created At:</strong> <?php echo htmlspecialchars($projectData->getCreatedAt() ?? "Unknown"); ?></p>
-        <p><strong>Last Updated:</strong> <?php echo htmlspecialchars($projectData->getUpdatedAt() ?? "Unknown"); ?></p>
+        <p><strong>Created At:</strong>
+            <?php echo htmlspecialchars($projectData->getCreatedAt()?->format('Y-m-d H:i:s') ?? "Unknown"); ?>
+        </p>
+
+        <p><strong>Last Updated:</strong>
+            <?php echo htmlspecialchars($projectData->getUpdatedAt()?->format('Y-m-d H:i:s') ?? "Unknown"); ?>
+        </p>
 
         <h3>Project Images:</h3>
         <div class="project-images">
@@ -58,8 +84,8 @@ try {
         <?php if ($isOwner): ?>
             <!-- Owner Form to Add User to Project -->
             <h3>Add User to Project</h3>
-            <form action="add_user_to_project.php" method="POST">
-                <div>
+            <form action="<?php echo '/project/' . $projectID . '/add'; ?>" method="POST">
+            <div>
                     <label for="email">User Email:</label>
                     <input type="email" id="email" name="email" required>
                 </div>
@@ -78,4 +104,4 @@ try {
     </div>
 
 
-<?php include "../templates/footer.php"; ?>
+<?php include "Views/templates/footer.php"; ?>

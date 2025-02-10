@@ -25,6 +25,8 @@ class ProjectUser
     private Project $project;
 
 
+
+
     /**
      * Gets the id of the ProjectUser.
      *
@@ -188,6 +190,7 @@ class ProjectUser
     public static function getUserProject(int $user_id): array
     {
         $userProjectCrud = new Crud('project_users');
+        $projectCrud = new Crud('projects');
 
         // Initialize an empty array to hold the results for each role.
         $projectsByRole = [];
@@ -195,7 +198,27 @@ class ProjectUser
         // Loop through all the roles in the ProjectRole enum dynamically.
         foreach (ProjectRole::cases() as $role) {
             // Fetch the data for the current role and store it in the array.
-            $projectsByRole[$role->value] = $userProjectCrud->findAllBy(['user_id' => $user_id, 'role' => $role->value]);
+            $projects = $userProjectCrud->findAllBy(['user_id' => $user_id, 'role' => $role->value], "project_id,role",
+                null, null, null, null, null, "", true
+            );
+
+            // Loop through each project and fetch additional details.
+            foreach ($projects as &$project) {
+                // Assuming project_id is stored in the $project array.
+                $projectDetails = $projectCrud->findBy(['id' => $project['project_id']],"id , title, description, external_link, visibility, created_at, updated_at");
+
+                // Merge additional data with the existing project entry.
+                $project['id'] = $projectDetails['id'];
+                $project['title'] = $projectDetails['title'];
+                $project['description'] = $projectDetails['description'];
+                $project['external_link'] = $projectDetails['external_link'];
+                $project['visibility'] = $projectDetails['visibility'];
+                $project['created_at'] = $projectDetails['created_at'];
+                $project['updated_at'] = $projectDetails['updated_at'];
+            }
+
+            // Assign the modified projects array back to the role.
+            $projectsByRole[$role->value] = $projects;
         }
 
         // Return the projects grouped by role
@@ -224,13 +247,19 @@ class ProjectUser
         return true;
     }
 
-    public static function create(string $email, string $role, string $projectId): int
+    public static function createAdd(string $email, string $role, string $projectId): int
     {
         $userProjectCrud = new Crud('project_users');
         $userCrud = new Crud('users');
-        $user = $userCrud->findBy(['email' => $email]);
+        $user = $userCrud->findBy(['email' => $email], "*", null,null,null,"",true);
         $user_id = $user['id'];
         return $userProjectCrud->create([ 'project_id' => $projectId,'user_id'=> $user_id  ,'role' => $role ]);
+    }
+
+    public static function create(mixed $user_id, int $projectId): int
+    {
+        $userProjectCrud = new Crud('project_users');
+        return $userProjectCrud->create([ 'user_id' => $user_id, 'project_id' => $projectId ,'role' => 'owner']);
     }
 
 }

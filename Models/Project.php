@@ -644,8 +644,8 @@ class Project implements ICrud
             description: $project['description'] ?? '',
             external_link: $project['external_link'] ?? null,
             visibility: Visibility::tryFrom($project['visibility']) ?? Visibility::PRIVATE,
-            created_at: $project['created_at'] ?? null,
-            updated_at: $project['updated_at'] ?? null,
+            created_at: isset($project['created_at']) ? new DateTime($project['created_at']) : null,
+            updated_at: isset($project['updated_at']) ? new DateTime($project['updated_at']) : null,
             images: $projectImages
         );
     }

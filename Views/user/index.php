@@ -13,6 +13,10 @@ try {
     // Debug
     Logger::log($e->getMessage(), __FILE__, Level::DEBUG);
 }
+$error = '';
+if (isset($_GET['error_message'])) {
+    $error = $_GET['error_message'];
+}
 ?>
 
     <!-- Welcome Section -->
@@ -23,7 +27,7 @@ try {
             <a href="/register" class="btn">S'inscrire</a>
         <?php endif; ?>
     </header>
-
+<?php if (!empty($error)) echo "<p style='color: red;'>$error</p>"; ?>
 <!-- Public Projects Section -->
 <section class="projects">
     <h2>Projets Publics</h2>

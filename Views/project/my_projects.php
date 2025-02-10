@@ -26,6 +26,7 @@ $projectController = new ProjectController();
 $userProjectsController = new User_ProjectController();
 
 $projectsByRole = $userProjectsController->getUserProject($user_id);
+
 ?>
 
 <?php if (!empty($errorMessage)): ?>
@@ -44,11 +45,6 @@ $projectsByRole = $userProjectsController->getUserProject($user_id);
 
     <h1>User Projects</h1>
 
-<?php if (empty($projectsByRole)): ?>
-    <p>No projects found for this user.</p>
-    <!-- Add Button to add a new project -->
-    <a href="add_project.php" class="btn btn-primary">Add New Project</a>
-<?php else: ?>
     <div class="project-list">
         <?php foreach ($projectsByRole as $role => $projects): ?>
             <h2><?= ucfirst($role) ?> Projects</h2>
@@ -88,7 +84,6 @@ $projectsByRole = $userProjectsController->getUserProject($user_id);
     </div>
 
     <!-- Add Button for Adding New Project -->
-    <a href="add_project.php" class="btn btn-primary">Add New Project</a>
-<?php endif; ?>
+    <a href="/project/new" class="btn btn-primary">Add New Project</a>
 
 <?php include "Views/templates/footer.php"; ?>
