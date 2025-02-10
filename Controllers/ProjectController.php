@@ -19,7 +19,7 @@ class ProjectController {
     /**
      * @throws Exception
      */
-    public function getProject(string $projectId): ?Project
+    public function getProject(mixed $projectId): ?Project
     {
         return Project::getProject($projectId);
     }

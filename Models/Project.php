@@ -626,7 +626,7 @@ class Project implements ICrud
     /**
      * @throws Exception
      */
-    public static function getProject(string $projectId): ?self
+    public static function getProject(mixed $projectId): ?self
     {
         $project_crud = new Crud('projects');
         $project = $project_crud->findBy(["id" => $projectId]);

@@ -3,6 +3,8 @@
 use App\Controllers\ProjectController;
 use App\Controllers\User_ProjectController;
 
+include "Views/templates/header.php";
+
 if (!isset($_SESSION['user_id'])) {
     header("Location: /login");
     exit();
@@ -16,23 +18,14 @@ if (isset($_GET['message'])) {
 $user_id = (int) $_SESSION['user_id'];
 $_SESSION['previousPage'] = "/projects";
 $errorMessage = [];
+if (isset($_GET['errorMessage'])) {
+    $errorMessage = $_GET['errorMessage'];
+}
 
 $projectController = new ProjectController();
 $userProjectsController = new User_ProjectController();
 
-$projectList = $userProjectsController->getUserProject($user_id);
-$projectsByRole = [];
-
-foreach ($projectList as $projectData) {
-    $role = $projectData['role'];
-    $projectId = $projectData['id'];
-    try {
-        $projectContent = $projectController->getProject($projectId);
-        $projectsByRole[$role][] = $projectContent;
-    } catch (Exception $e) {
-        $errorMessage[] = "Failed to get project: " . $e->getMessage();
-    }
-}
+$projectsByRole = $userProjectsController->getUserProject($user_id);
 ?>
 
 <?php if (!empty($errorMessage)): ?>
@@ -54,7 +47,7 @@ foreach ($projectList as $projectData) {
 <?php if (empty($projectsByRole)): ?>
     <p>No projects found for this user.</p>
     <!-- Add Button to add a new project -->
-    <a href="/add_project.php" class="btn btn-primary">Add New Project</a>
+    <a href="add_project.php" class="btn btn-primary">Add New Project</a>
 <?php else: ?>
     <div class="project-list">
         <?php foreach ($projectsByRole as $role => $projects): ?>
@@ -97,3 +90,5 @@ foreach ($projectList as $projectData) {
     <!-- Add Button for Adding New Project -->
     <a href="add_project.php" class="btn btn-primary">Add New Project</a>
 <?php endif; ?>
+
+<?php include "Views/templates/footer.php"; ?>
