@@ -75,7 +75,6 @@ class Project implements ICrud
 
 
 
-
     /**
      * Get the ID of the project.
      *
@@ -424,37 +423,60 @@ class Project implements ICrud
      * The method currently returns the raw database result.
      *
      * @param int $id The unique identifier of the project to retrieve.
-     * @return mixed An array containing project data and associated images, or null if no record is found.
+     * @return Project|null An array containing project data and associated images, or null if no record is found.
+     * @throws DateMalformedStringException
      */
-    static function get(int $id): mixed
+    public static function get(int $id): ?self
     {
         // Create a new CRUD instance for the 'projects' table with the alias 'p'.
         $project_crud = new Crud('projects p');
 
         // Fetch project details and associated images from the database using a left join.
-        $result = $project_crud->findBy(
-
-            // Filter by the project's unique ID.
-            conditions: ['id' => $id],
-
-            // Select specific columns.
-            columns: 'p.id, p.title, p.description, p.external_link, p.visibility, p.created_at, p.updated_at, pi.id, pi.image_path, pi.uploaded_at',
+        $results = $project_crud->findBy(
+            conditions: ['p.id' => $id],  // Use alias for consistency
+            columns: 'p.id, p.title, p.description, p.external_link, p.visibility, p.created_at, p.updated_at, pi.id as image_id, pi.image_path, pi.uploaded_at',
             joins: [
                 [
-                    // Perform a left join with 'project_images'.
                     'type' => 'left',
-
-                    // Join the 'project_images' table using the alias 'pi'.
                     'table' => 'project_images pi',
-
-                    // Match 'projects' and 'project_images' on their related ID fields.
                     'on' => 'p.id = pi.project_id'
                 ]
             ]
         );
 
-        // TODO -> convert $result to Project entity.
-        return $result;
+        // If no project is found, return null
+        if (!$results) {
+            return null;
+        }
+
+        // Extract project details from the first row
+        $firstRow = $results[0];
+
+        // Convert visibility to Enum
+        $visibility = Visibility::tryFrom($firstRow['visibility']) ?? Visibility::PRIVATE;
+
+        // Convert DateTime fields
+        $createdAt = new DateTime($firstRow['created_at']);
+        $updatedAt = new DateTime($firstRow['updated_at']);
+
+        // Extract images
+        $images = array_map(fn($row) => [
+            'id' => $row['image_id'],
+            'path' => $row['image_path'],
+            'uploaded_at' => $row['uploaded_at'],
+        ], array_filter($results, fn($row) => !empty($row['image_id'])));
+
+        // Return a new instance of the project
+        return new self(
+            id: $id,
+            title: $firstRow['title'] ?? '',
+            description: $firstRow['description'] ?? '',
+            external_link: $firstRow['external_link'] ?? null,
+            visibility: $visibility,
+            created_at: $createdAt,
+            updated_at: $updatedAt,
+            images: $images
+        );
     }
 
     /**
@@ -604,10 +626,10 @@ class Project implements ICrud
     /**
      * @throws Exception
      */
-    public static function getProject(string $projectId, string $projectName): ?self
+    public static function getProject(string $projectId): ?self
     {
         $project_crud = new Crud('projects');
-        $project = $project_crud->findBy(["title" => $projectName, "id" => $projectId]);
+        $project = $project_crud->findBy(["id" => $projectId]);
 
         if (!$project) {
             throw new Exception("Project not found.");
@@ -618,7 +640,7 @@ class Project implements ICrud
 
         return new self(
             id: $projectId,
-            title: $projectName,
+            title: $project['title'] ?? '',
             description: $project['description'] ?? '',
             external_link: $project['external_link'] ?? null,
             visibility: Visibility::tryFrom($project['visibility']) ?? Visibility::PRIVATE,
@@ -626,6 +648,25 @@ class Project implements ICrud
             updated_at: $project['updated_at'] ?? null,
             images: $projectImages
         );
+    }
+
+    public static function createProject(string $title, string $description, string $externalLink, string $visibility): int
+    {
+        // Validate visibility
+        $visibilityEnum = Visibility::tryFrom($visibility) ?? Visibility::PRIVATE;
+
+        $project_crud = new Crud('projects');
+
+        $data = [
+            'title' => $title,
+            'description' => $description,
+            'external_link' => $externalLink,
+            'visibility' => $visibilityEnum->value,
+            'created_at' => new DateTime(),
+            'updated_at' => new DateTime()
+        ];
+
+        return $project_crud->create($data);
     }
 
 

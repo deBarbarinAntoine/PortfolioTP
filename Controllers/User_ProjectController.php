@@ -16,4 +16,29 @@ class User_ProjectController
 
         return [];
     }
+
+    public function isUserAllowedToUpdate(string $projectId, mixed $userId): bool
+    {
+        $isOwner = ProjectUser::isOwner($projectId, $userId);
+        $isContributor = ProjectUser::isContributor($projectId, $userId);
+        if ($isOwner || $isContributor) {
+            return true;
+        }
+        return false;
+    }
+
+    public function isUserAllowedToDelete(mixed $projectId, mixed $userId): bool
+    {
+       return ProjectUser::isOwner($projectId, $userId);
+    }
+
+    public function getIsOwner(string $projectId, mixed $userId): bool
+    {
+        return ProjectUser::isOwner($projectId, $userId);
+    }
+
+    public function addUserToProject(string $email, string $role, string $projectId): int
+    {
+        return ProjectUser::create($email, $role, $projectId);
+    }
 }
