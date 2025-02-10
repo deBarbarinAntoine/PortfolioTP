@@ -31,4 +31,14 @@ class User_ProjectController
     {
        return ProjectUser::isOwner($projectId, $userId);
     }
+
+    public function getIsOwner(string $projectId, mixed $userId): bool
+    {
+        return ProjectUser::isOwner($projectId, $userId);
+    }
+
+    public function addUserToProject(string $email, string $role, string $projectId): int
+    {
+        return ProjectUser::create($email, $role, $projectId);
+    }
 }

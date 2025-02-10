@@ -224,4 +224,13 @@ class ProjectUser
         return true;
     }
 
+    public static function create(string $email, string $role, string $projectId): int
+    {
+        $userProjectCrud = new Crud('project_users');
+        $userCrud = new Crud('users');
+        $user = $userCrud->findBy(['email' => $email]);
+        $user_id = $user['id'];
+        return $userProjectCrud->create([ 'project_id' => $projectId,'user_id'=> $user_id  ,'role' => $role ]);
+    }
+
 }
