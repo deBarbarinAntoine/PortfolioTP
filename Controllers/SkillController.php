@@ -46,4 +46,9 @@ class SkillController
         return Skill::getAll();
     }
 
+    public function getSkill(mixed $skill_id): ?Skill
+    {
+        return Skill::get($skill_id);
+    }
+
 }

@@ -11,16 +11,14 @@ class User_SkillController
 {
     public function getUserSkills(mixed $user_id): array
     {
-        $user = [];
-        try {
-            $user = User::get($user_id);
-        } catch (PDOException|DateMalformedStringException $e) {
-            $errorMessage = $e->getMessage();
+        $userSkills = UserSkill::getByUser($user_id);
+        if (is_bool($userSkills)) {
+            return [];
         }
-        if ($user != []) {
-            return $user->getSkills();
+        if (is_null($userSkills)) {
+            return [];
         }
-        return [];
+        return $userSkills;
     }
 
     public function deleteSkillFromUser(int $UserSkillId): string|bool
@@ -38,7 +36,7 @@ class User_SkillController
         return $errorMessage;
     }
 
-    public function updateUserSkillLevel(mixed $userSkillId, array|int|string $skillId, string $newLevel): string|bool
+    public function updateUserSkillLevel(mixed $userSkillId, string $newLevel): string| int
     {
         $userSkill = [];
         $errorMessage = "";
@@ -50,15 +48,15 @@ class User_SkillController
         if ($userSkill != []) {
             // Check if $newLevel is a valid value from the UserSkillLevel enum
             $level = UserSkillLevel::tryFrom($newLevel);
-
             if ($level) {
                 // Set the level if it's a valid UserSkillLevel enum instance
                 $userSkill->setLevel($level);
-                $userSkill->update();
+
+                return $userSkill->update();
             }
         }
 
-        return $errorMessage;
+         return $errorMessage;
     }
 
     public function addSkillToUser(mixed $user_id, int $newSkillId, string $newSkillLevel): string|bool
@@ -67,7 +65,7 @@ class User_SkillController
         $userSkill = false;
         try {
             $userSkill = UserSkill::new($user_id, $newSkillId, $newSkillLevel);
-        }catch (PDOException|DateMalformedStringException $e) {
+        }catch (PDOException $e) {
             $errorMessage = $e->getMessage();
         }
         if ($userSkill === true) {

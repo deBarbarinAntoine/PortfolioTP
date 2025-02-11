@@ -44,6 +44,9 @@ $routes[] = ['GET', '/reset/mail', '/Views/user/password_reset_mail.php'];
 $routes[] = ['GET', '/profile', '/Views/user/profile.php'];
 $routes[] = ['GET', '/profile/update', '/Views/user/edit_profile.php'];
 $routes[] = ['POST', '/profile/update', '/Views/user/edit_profile.php'];
+$routes[] = ['POST', '/profile/addSkill', '/Views/user/add_skill.php'];
+$routes[] = ['POST', '/profile/updateSkill', '/Views/user/update_skill.php'];
+$routes[] = ['POST', '/profile/deleteSkill', '/Views/user/delete_skill.php'];
 $routes[] = ['GET', '/profile/skills', '/Views/user/edit_skills.php'];
 $routes[] = ['POST', '/profile/skills', '/Views/user/edit_skills.php'];
 

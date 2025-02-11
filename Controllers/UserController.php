@@ -89,7 +89,7 @@ class UserController
         try {
             // Attempt to retrieve the user from the database
             $user = User::get($user_id);
-
+            $pass = User::getPass($user_id);
             // If no user was found, return false
             if (!$user) {
                 return false;
@@ -99,6 +99,7 @@ class UserController
             $user->setUsername($updatedName);
             $user->setEmail($updatedEmail);
             $user->setAvatar($avatarPath);
+            $user->setPasswordHash($pass['password']);
 
             // Perform the update in the database
             $user->update();

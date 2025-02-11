@@ -4,6 +4,7 @@ include "Views/templates/header.php";
 
 // Ensure the user is logged in
 use App\Controllers\SkillController;
+use App\Controllers\User_SkillController;
 use App\Controllers\UserController;
 
 if (!isset($_SESSION['user_id'])) {
@@ -17,7 +18,7 @@ $user_role = $_SESSION['user_role'];
 
 $userController = new UserController();
 $skillController = new SkillController();
-
+$user_skillController = new User_SkillController();
 $user = null;
 $error_message = null;
 
@@ -39,12 +40,22 @@ if (!$user) {
     $userRole = $user_role;
     $userSince = $userController->getUserCreationDate($user);
     $userModified = $userController->getUserModificationDate($user);
-    $userSkills = $userController->getUserSkills($user);
+    $userSkills = $user_skillController->getUserSkills($user_id);
+    foreach ($userSkills as $userSkill) {
+        $skill = $skillController->getSkill($userSkill['skill_id']);
+        $userSkill['name'] = $skill->getName();
+        $userSkill['description'] = $skill->getDescription();
+        $skillsInUserSkills[] = $userSkill;
+    }
+
 }
 ?>
     <div class="profile-container">
         <?php if (isset($_GET['message'])): ?>
             <p style="color: green;"><?php echo htmlspecialchars($_GET['message']); ?></p>
+        <?php endif; ?>
+        <?php if (isset($_GET['success_message'])): ?>
+            <p style="color: green;"><?php echo htmlspecialchars($_GET['success_message']); ?></p>
         <?php endif; ?>
         <?php if ($error_message): ?>
             <p style="color: red;"><?= htmlspecialchars($error_message); ?></p>
@@ -59,14 +70,9 @@ if (!$user) {
 
             <h3>Skills:</h3>
             <ul>
-                <?php if (!empty($userSkills)): ?>
-                    <?php foreach ($userSkills as $skill): ?>
-                        <?php
-                        // Get skill name and level for each skill
-                        $skillName = $skillController->getSkillName($skill);
-                        $skillLevel = $skillController->getSKillLevel($skill);
-                        ?>
-                        <li><?= htmlspecialchars($skillName); ?> - Level <?= htmlspecialchars($skillLevel); ?></li>
+                <?php if (!empty($skillsInUserSkills)): ?>
+                    <?php foreach ($skillsInUserSkills as $skillsInUserSkill): ?>
+                        <li><?= htmlspecialchars($skillsInUserSkill['name']); ?> - Level <?= htmlspecialchars($skillsInUserSkill['level']); ?> - Description : <?= htmlspecialchars($skillsInUserSkill['description']) ?></li>
                     <?php endforeach; ?>
                 <?php else: ?>
 

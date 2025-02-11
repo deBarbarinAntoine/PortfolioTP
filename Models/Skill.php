@@ -66,6 +66,7 @@ class Skill implements ICrud
         $this->id = $id;
     }
 
+
     /**
      * Gets the name of the skill.
      *

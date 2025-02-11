@@ -11,6 +11,14 @@ if (!isset($_SESSION['user_id'])) {
     exit();
 }
 
+if (isset($_GET['success_message'])){
+    $success = $_GET['success_message'];
+}
+
+if (isset($_GET['error_message'])){
+    $error = $_GET['error_message'];
+}
+
 $user_id = $_SESSION['user_id'];
 $user_csrf_token = $_SESSION['csrf_token'];
 $userController = new UserController();
@@ -21,6 +29,7 @@ $skillController = new SkillController();
 $user = null;
 $error_message = null;
 $skillsNotInUserSkills = [];
+$skillsInUserSkills = [];
 $userSkills = [];
 $skillList = $skillController->getAllSkills();
 
@@ -29,8 +38,20 @@ try {
     $user = $userController->getUser($user_id);
     if ($user) {
         $userSkills = $user_skillController->getUserSkills($user_id);
-        // Compare $skillList with $userSkills to find skills not in $userSkills
-        $skillsNotInUserSkills = array_diff($skillList, $userSkills);
+        if (!$userSkills){
+            $skillsNotInUserSkills = $skillList;
+        }
+        foreach ($skillList as $skill) {
+            foreach ($userSkills as $userSkill) {
+                 if ($skill->getId() == $userSkill['skill_id']) {
+                    $userSkill['name'] = $skill->getName();
+                    $userSkill['description'] = $skill->getDescription();
+                    $skillsInUserSkills[] = $userSkill;
+                } else {
+                    $skillsNotInUserSkills[] = $userSkill;
+                }
+            }
+        }
     }
 } catch (Exception $e) {
     $error_message = "An unexpected error occurred while fetching your skills. Please try again later.";
@@ -76,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $userSkillId = $_POST['user_skill_id'] ?? null;
 
                 if ($skillId && $newLevel && $userSkillId) {
-                    $success = $user_skillController->updateUserSkillLevel($userSkillId,$skillId, $newLevel);
+                    $success = $user_skillController->updateUserSkillLevel($userSkillId, $newLevel);
                     if ($success === true) {
                         header("Location: /profile/update?message=Skill updated successfully!");
                         exit();
@@ -87,44 +108,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
     }
-
-    // Handle adding new skill
-    if (isset($_POST['add_skill'])) {
-        $newSkillId = intval($_POST['new_skill_id']);
-        $newSkillLevel = htmlspecialchars($_POST['new_skill_level']);
-
-        // Check if the user already has this skill
-        $existingSkills = array_column($userSkills, 'skill_id');
-        if (in_array($newSkillId, $existingSkills)) {
-            $error_message = "You already have this skill!";
-        } else {
-            try {
-                $success = $user_skillController->addSkillToUser($user_id, $newSkillId, $newSkillLevel);
-                if ($success === true) {
-                    header("Location: /profile/update?message=New skill added successfully!");
-                    exit();
-                } else {
-                    $error_message = "Failed to add the new skill." . $success;
-                }
-            } catch (Exception $e) {
-                $error_message = "An unexpected error occurred while adding the skill.";
-            }
-        }
-    }
-
 }
+
 ?>
 
 <div class="skill-management-container">
     <?php if ($error_message): ?>
         <p style="color: red;"><?= htmlspecialchars($error_message); ?></p>
     <?php endif; ?>
-
+    <?php if (!empty($error)) echo "<p style='color: red;'>$error</p>"; ?>
+    <?php if (!empty($success)) echo "<p style='color: green;'>$success</p>"; ?>
     <h3>Your Skills</h3>
-    <form method="POST" action="/profile/update">
+
         <ul>
-            <?php if (!empty($userSkills)): ?>
-                <?php foreach ($userSkills as $userSkill): ?>
+            <?php if (!empty($skillsInUserSkills)): ?>
+                <?php foreach ($skillsInUserSkills as $userSkill): ?>
                     <?php
                     $userSkillId = $userSkill['id'];
                     $skillId = $userSkill['skill_id'];
@@ -134,17 +132,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <li>
                         <p><?= htmlspecialchars($skillName); ?> - Level <?= htmlspecialchars($skillLevel); ?></p>
 
-                        <!-- Modify Skill Form -->
-                        <label for="new_level_<?= $skillId ?>">New Level:</label>
-                        <select id="new_level_<?= $skillId ?>" name="new_level_<?= $skillId ?>" required>
-                            <?php foreach ($levelEnum as $level): ?>
-                                <option value="<?= htmlspecialchars($level->value) ?>"><?= htmlspecialchars($level->value) ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                        <input type="hidden" name="user_skill_id" value="<?= $userSkillId ?>">
 
-                        <!-- Delete Skill Form -->
-                        <button type="submit" name="delete_skill" value="<?= $userSkillId ?>" onclick="return confirm('Are you sure you want to delete this skill?')">Delete Skill</button>
+
+                        <form method="POST" action="/profile/updateSkill">
+                            <!-- Modify Skill Form -->
+                            <label for="new_level>">New Level</label>
+                            <select id="new_level>" name="new_level" required>
+                                <?php foreach ($levelEnum as $level): ?>
+                                    <option value="<?= htmlspecialchars($level->value) ?>"><?= htmlspecialchars($level->value) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($user_csrf_token); ?>">
+                            <input type="hidden" name="userSkillId" value="<?= $userSkillId ?>">
+                            <button type="submit">Update Skill</button>
+                        </form>
+
+                        <form method="POST" action="/profile/deleteSkill">
+                            <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($user_csrf_token); ?>">
+                            <input type="hidden" name="userSkillId" value="<?= $userSkillId ?>">
+                            <button type="submit" name="delete_skill" value="<?= $userSkillId ?>" onclick="return confirm('Are you sure you want to delete this skill?')">Delete Skill</button>
+                        </form>
+
                     </li>
                 <?php endforeach; ?>
             <?php else: ?>
@@ -152,20 +160,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endif; ?>
         </ul>
 
-        <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($user_csrf_token); ?>">
 
-        <!-- Submit Button -->
-        <button type="submit">Submit</button>
-    </form>
+
+
+
 
     <h3>Add a New Skill</h3>
-    <form method="POST" action="/profile/update">
+    <form method="POST" action="/profile/addSkill">
+
         <label for="new_skill_id">Skill:</label>
-        <select id="new_skill_id" name="new_skill_id" required>
+        <select id="new_skill_id" name="new_skill_name" required>
             <?php
-            foreach ($skillsNotInUserSkills as $skill):
-                ?>
-                <option value="<?= htmlspecialchars($skill['id']) ?>"><?= htmlspecialchars($skill['name']) ?></option>
+            foreach ($skillsNotInUserSkills as $skill):?>
+                <option value="<?= htmlspecialchars($skill->getName()) ?>"><?= htmlspecialchars($skill->getName()) ?></option>
+                <input type="hidden" name="new_skill_id" value="<?= htmlspecialchars($skill->getId()) ?>">
             <?php endforeach; ?>
         </select>
 

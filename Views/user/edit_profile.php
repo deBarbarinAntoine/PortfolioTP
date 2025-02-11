@@ -10,18 +10,18 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 $user_csrf_token = $_SESSION['csrf_token'];
-$_SESSION['previous_page'] = '/profile/update';
+$_SESSION['previous_page'] = '/profile';
 $userController = new UserController();
 
 $user = null;
 $error_message = null;
 $nextPageError = null;
 $nextPageSuccess = null;
-if (isset($_GET['$error_message'])) {
-    $nextPageError = $_GET['$error_message'];
+if (isset($_GET['error_message'])) {
+    $nextPageError = $_GET['error_message'];
 }
-if (isset($_GET['$success_message'])) {
-    $nextPageSuccess = $_GET['$success_message'];
+if (isset($_GET['success_message'])) {
+    $nextPageSuccess = $_GET['success_message'];
 }
 $userName = "";
 $userEmail = "";
@@ -49,8 +49,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die();
     }
     $updatedAvatar = $_FILES['avatar'];
-    $oldPassword = htmlspecialchars($_POST['current_password']);
-    $newPassword = htmlspecialchars($_POST['new_password']);
     $csrf_token = htmlspecialchars($_POST['csrf_token']);
 
     if ($csrf_token !== $user_csrf_token) {
@@ -63,7 +61,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error_message = "Name and email are required.";
         die();
     }
-
     // Process avatar upload (if new file is selected)
     if ($updatedAvatar['error'] === UPLOAD_ERR_OK && !$error_message) {
         // Validate file type and extension
@@ -81,20 +78,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if (!$isAllowedType || !$isAllowedExtension) {
             $error_message = "Invalid file type. Only JPEG, PNG, and GIF are allowed.";
-            die();
         }
 
         // Validate file size (2MB max)
         // Validate file size (Max 2MB)
         $maxFileSize = 2 * 1024 * 1024; // 2MB
+
         if ($updatedAvatar['size'] > $maxFileSize) {
             $error_message = "File is too large. Maximum size is 2MB.";
-            die();
         }
 
         $avatarPath = 'public/img/' . $user_id . '.' . pathinfo($updatedAvatar['name'], PATHINFO_EXTENSION);
 
-    } else {
+    } else if ($updatedAvatar['error'] === UPLOAD_ERR_INI_SIZE ) {
+        $avatarPath = $userAvatar;
+        $error_message = "File is too large. Maximum size is 2MB."; // change with whatever is in your php.ini
+    }else {
         // If no avatar is uploaded or error, use the current one
         $avatarPath = $userAvatar;
     }
@@ -116,7 +115,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
     }
 }
-
 ?>
 
 <div class="profile-edit-container">
@@ -140,7 +138,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         <label for="avatar">Avatar:</label>
         <input type="file" id="avatar" name="avatar"><br>
-        <img src="public/img/<?= htmlspecialchars($userAvatar); ?>" alt="Current Avatar" width="100"><br>
+        <img src="../<?= $userAvatar ?>" alt="Avatar" width="100">
+        <br>
 
         <input type="hidden" name="csrf_token" value="<?= htmlspecialchars($user_csrf_token); ?>">
 

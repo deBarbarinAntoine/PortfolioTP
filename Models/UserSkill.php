@@ -96,6 +96,7 @@ class UserSkill implements ICrud
         return false;
     }
 
+
     /**
      * Gets the ID of the user.
      *
@@ -252,12 +253,11 @@ class UserSkill implements ICrud
     {
         $user_skill_crud = new Crud('user_skills');
 
-        return $user_skill_crud->update(
+        return $user_skill_crud->updateString(
             [
                 'user_id' => $this->user_id,
                 'skill_id' => $this->skill_id,
                 'level' => $this->level->value,
-                'updated_at' => $this->updated_at->format('Y-m-d H:i:s'),
             ],
             [ 'id' => $this->id ]
         );
@@ -330,4 +330,11 @@ class UserSkill implements ICrud
 
         return array_filter(array_map(fn($row) => self::toUserSkill($row), $result));
     }
+
+    public static function getByUser(mixed $user_id): false|array|null
+    {
+        $user_skill_crud = new Crud('user_skills');
+        return $user_skill_crud->findAllBy(['user_id' => $user_id]);
+    }
+
 }
