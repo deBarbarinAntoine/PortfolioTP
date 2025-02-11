@@ -56,7 +56,7 @@ $projectsByRole = $userProjectsController->getUserProject($user_id);
                     <?php foreach ($projects as $project): ?>
                         <li>
                             <strong>Project Name:</strong>
-                            <a href="/project/<?= htmlspecialchars($project['id']) ?>?name=<?= urlencode($project['title']) ?>">
+                            <a href="/project/<?= htmlspecialchars($project['id']) ?>">
                                 <?= htmlspecialchars($project['title']) ?>
                             </a> <br>
                             <strong>Description:</strong> <?= htmlspecialchars($project['description']) ?> <br>
