@@ -644,7 +644,7 @@ class Project implements ICrud
             visibility: Visibility::tryFrom($project['visibility']) ?? Visibility::PRIVATE,
             created_at: isset($project['created_at']) ? new DateTime($project['created_at']) : null,
             updated_at: isset($project['updated_at']) ? new DateTime($project['updated_at']) : null,
-            images: $projectImages
+            images: $projectImages,
         );
     }
 

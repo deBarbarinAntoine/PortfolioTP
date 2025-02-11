@@ -57,6 +57,7 @@ $routes[] = ['POST', '/project/{id:\d+}/update', '/Views/project/edit_project.ph
 $routes[] = ['POST', '/deleteImg/{id:\d+}', '/Views/project/delete_project_image.php'];
 $routes[] = ['POST', '/project/{id:\d+}/delete', '/Views/project/delete_project.php'];
 $routes[] = ['POST', '/project/{id:\d+}/add', '/Views/project/add_user_to_project.php'];
+$routes[] = ['POST', '/deleteUserProject/{id:\d+}', '/Views/project/delete_user_from_project.php'];
 
 // Admin routes
 $routes[] = ['GET', '/admin', '/Views/admin/admin_dashboard.php'];

@@ -4,6 +4,7 @@ include "Views/templates/header.php";
 
 use App\Controllers\ProjectController;
 use App\Controllers\User_ProjectController;
+use App\Controllers\UserController;
 
 if (isset($paramID['id'])) {
     $projectID = $paramID['id'];
@@ -35,8 +36,24 @@ $projectId = $projectID ?? "";
 $isOwner = false;
 $projectController = new ProjectController();
 $user_projectController = new User_ProjectController();
+$userController = new UserController();
 try {
     $projectData = $projectController->getProject($projectId);
+    $projectContributors = $user_projectController->getContributors($projectId);
+    foreach ($projectContributors as $key => $projectContributor) {
+        $projectContributorID = $projectContributor['user_id'];
+        $userContributor = $userController->getUser($projectContributorID);
+        $projectContributors[$key]['user'] = $userContributor;
+    }
+
+
+    $projectViewers= $user_projectController->getViewers($projectId);
+    foreach ($projectViewers as $key => $projectViewer) {
+        $projectViewersID = $projectViewer['user_id'];
+        $userViewer = $userController->getUser($projectViewersID);
+        $projectViewers[$key]['user'] = $userViewer;
+    }
+
     if (isset($_SESSION['user_id'])) {
         $userId = $_SESSION['user_id'];
         $isOwner = $user_projectController->getIsOwner($projectId, $userId);
@@ -80,6 +97,43 @@ try {
                 <?php endforeach; ?>
             <?php else : ?>
                 <p>No images available for this project.</p>
+            <?php endif; ?>
+        </div>
+
+        <h3>Project Contributor:</h3>
+        <div>
+            <?php if (!empty($projectContributors)) : ?>
+                <?php foreach ($projectContributors as $projectContributor) : ?>
+                    <hr>
+                    <div>
+                        <!-- Display User Details -->
+                        <p>Username: <?= htmlspecialchars($projectContributor['user']->getUsername()) ?></p>
+                        <p>Email: <?= htmlspecialchars($projectContributor['user']->getEmail()) ?></p>
+                        <img src="<?= htmlspecialchars($projectContributor['user']->getAvatar()) ?>" alt="User Avatar" width="50">
+
+                    </div>
+                    <hr>
+                <?php endforeach; ?>
+            <?php else : ?>
+                <p>No Project Contributor for this project.</p>
+            <?php endif; ?>
+        </div>
+
+        <h3>Project Viewer:</h3>
+        <div>
+            <?php if (!empty($projectViewers)) : ?>
+                <?php foreach ($projectViewers as $projectViewer) : ?>
+                    <div>
+                        <!-- Display User Details -->
+                        <p>Username: <?= htmlspecialchars($projectViewer['user']->getUsername()) ?></p>
+                        <p>Email: <?= htmlspecialchars($projectViewer['user']->getEmail()) ?></p>
+                        <img src="<?= htmlspecialchars($projectViewer['user']->getAvatar()) ?>" alt="User Avatar" width="50">
+
+                    </div>
+                    <hr>
+                <?php endforeach; ?>
+            <?php else : ?>
+                <p>No Project Viewer for this project.</p>
             <?php endif; ?>
         </div>
 

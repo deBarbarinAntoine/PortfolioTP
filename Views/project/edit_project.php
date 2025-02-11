@@ -1,6 +1,7 @@
 <?php
 use App\Controllers\ProjectController;
 use App\Controllers\User_ProjectController;
+use App\Controllers\UserController;
 
 $title = $description = $externalLink = $visibility = "";
 $images = [];
@@ -12,6 +13,10 @@ if (isset($_GET['errors'])) {
 }
 if (isset($_GET['success'])) {
     $success = $_GET['success'];
+}
+
+if (isset($_GET['success_message'])){
+    $success = $_GET['success_message'];
 }
 
 if (!isset($projectId)) {
@@ -33,10 +38,25 @@ if (!isset($_SESSION['user_id']) || !isset($_SESSION['csrf_token'])) {
 
 if ($_SERVER["REQUEST_METHOD"] == "GET") {
     $projectController = new ProjectController();
+    $user_projectController = new User_ProjectController();
+    $userController = new UserController();
     if (isset($projectId)) {
         try {
             $project = $projectController->getProject($projectId);
+            $projectContributors = $user_projectController->getContributors($projectId);
+            foreach ($projectContributors as $key => $projectContributor) {
+                $projectContributorID = $projectContributor['user_id'];
+                $userContributor = $userController->getUser($projectContributorID);
+                $projectContributors[$key]['user'] = $userContributor;
+            }
 
+
+            $projectViewers= $user_projectController->getViewers($projectId);
+            foreach ($projectViewers as $key => $projectViewer) {
+                $projectViewersID = $projectViewer['user_id'];
+                $userViewer = $userController->getUser($projectViewersID);
+                $projectViewers[$key]['user'] = $userViewer;
+            }
         } catch (Exception $e) {
             $errors[] ="Exception error while fetching project data : " . $e->getMessage();
             exit;
@@ -140,12 +160,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         <?php endif; ?>
 
-        <?php if (isset($_GET['success']) && $_GET['success'] == 1): ?>
-            <div class="alert alert-success">
-                Project updated successfully!
-            </div>
-        <?php endif; ?>
-
         <form method="POST" enctype="multipart/form-data">
             <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
             <input type="hidden" name="project_id" value="<?= htmlspecialchars($projectId) ?>">
@@ -200,7 +214,54 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             </div>
         <?php endforeach; ?>
 
+        <h3>Project Contributor:</h3>
+        <div>
+            <?php if (!empty($projectContributors)) : ?>
+                <?php foreach ($projectContributors as $projectContributor) : ?>
+                    <hr>
+                    <div>
+                        <!-- Display User Details -->
+                        <p>Username: <?= htmlspecialchars($projectContributor['user']->getUsername()) ?></p>
+                        <p>Email: <?= htmlspecialchars($projectContributor['user']->getEmail()) ?></p>
+                        <img src="<?= htmlspecialchars($projectContributor['user']->getAvatar()) ?>" alt="User Avatar" width="50">
+                        <form action="/deleteUserProject/<?php echo $projectId; ?>"" method="POST" onsubmit="return confirm('Are you sure you want to delete this contributor from project ?');">
+                            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                            <input type="hidden" name="contributor_id" value="<?php echo $projectContributor['user_id']; ?>">
+                            <input type="hidden" name="project_id" value="<?php echo $projectId; ?>">
+                            <input type="hidden" name="previousPage" value="<?php echo parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH); ?>">
+                            <button type="submit">Delete Contributor From project</button>
+                        </form>
+                    </div>
+                    <hr>
+                <?php endforeach; ?>
+            <?php else : ?>
+                <p>No Project Contributor for this project.</p>
+            <?php endif; ?>
+        </div>
 
+        <h3>Project Viewer:</h3>
+        <div>
+            <?php if (!empty($projectViewers)) : ?>
+                <?php foreach ($projectViewers as $projectViewer) : ?>
+                    <div>
+                        <!-- Display User Details -->
+                        <p>Username: <?= htmlspecialchars($projectViewer['user']->getUsername()) ?></p>
+                        <p>Email: <?= htmlspecialchars($projectViewer['user']->getEmail()) ?></p>
+                        <img src="<?= htmlspecialchars($projectViewer['user']->getAvatar()) ?>" alt="User Avatar" width="50">
+                        <form action="/deleteUserProject/<?php echo $projectViewer['user_id']; ?>" method="POST" onsubmit="return confirm('Are you sure you want to delete this viewer from project ?');">
+                            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+                            <input type="hidden" name="viewer_id" value="<?php echo $projectViewer['user_id']; ?>">
+                            <input type="hidden" name="project_id" value="<?php echo $projectId; ?>">
+                            <input type="hidden" name="previousPage" value="<?php echo parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH); ?>">
+                            <button type="submit">Delete Viewer From project</button>
+                        </form>
+                    </div>
+                    <hr>
+                <?php endforeach; ?>
+            <?php else : ?>
+                <p>No Project Viewer for this project.</p>
+            <?php endif; ?>
+        </div>
         <script>
             // Image Preview Function
             document.getElementById('images').addEventListener('change', function(event) {

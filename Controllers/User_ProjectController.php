@@ -51,4 +51,19 @@ class User_ProjectController
     {
         return ProjectUser::delete($projectId);
     }
+
+    public function getContributors(false|string $projectId): array
+    {
+        return ProjectUser::getContributors($projectId);
+    }
+
+    public function getViewers(false|string $projectId): array
+    {
+        return ProjectUser::getViewers($projectId);
+    }
+
+    public function deleteUserFromProject(mixed $user_id): int
+    {
+        return ProjectUser::deleteUserFromProject($user_id);
+    }
 }

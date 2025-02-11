@@ -26,7 +26,6 @@ class ProjectUser
 
 
 
-
     /**
      * Gets the id of the ProjectUser.
      *
@@ -267,5 +266,25 @@ class ProjectUser
         $userProjectCrud = new Crud('project_users');
         return $userProjectCrud->delete(['project_id' => $projectId]);
     }
+
+    public static function deleteUserFromProject(mixed $user_id): int
+    {
+        $userProjectCrud = new Crud('project_users');
+        return $userProjectCrud->delete(['user_id' => $user_id]);
+    }
+
+
+    public static function getContributors(false|string $projectId): array
+    {
+        $userProjectCrud = new Crud('project_users');
+        return $userProjectCrud->findAllBy(['project_id' => $projectId , 'role' => 'contributor'], "*",null,null,null,null,null,"",true);
+    }
+
+    public static function getViewers(false|string $projectId): array
+    {
+        $userProjectCrud = new Crud('project_users');
+        return $userProjectCrud->findAllBy(['project_id' => $projectId , 'role' => 'viewer'],"*",null,null,null,null,null,"",true);
+    }
+
 
 }
