@@ -5,9 +5,17 @@
 use App\Controllers\ProjectController;
 use App\Controllers\User_ProjectController;
 
-$projectId = isset($ParamID) ? (int)$ParamID : '';  // Sanitize the $ParamID
-$errors = [];
 
+if (!isset($projectId)) {
+    $uri = $_SERVER['REQUEST_URI']; // Example: "/project/3/something"
+    $segments = explode('/', trim($uri, '/'));
+
+    if (isset($segments[1])) { // Ensure the second segment exists
+        $projectId = $segments[1]; // Get the second segment
+    }
+}
+
+$errors = [];
 
 include "Views/templates/header.php";
 
@@ -26,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $errors[] = "Sorry, which project ?";
     }
 
-    if (!isset($_POST['user_id']) || $_POST['user_id'] !== $_SESSION['user_id']) {
+    if (!isset($_POST['user_id']) || (int) $_POST['user_id'] !== $_SESSION['user_id']) {
         $errors[] = "Sorry, who are you ?";
     }
 
@@ -52,13 +60,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (empty($errors)) {
         $projectController = new ProjectController();
+        $userProjectController = new User_ProjectController();
         $rows = $projectController->deleteProject($projectId);
+        $rows1 = $userProjectController->deleteProject($projectId);
         if ($rows <= 0) {
             $errors[] = "Sorry, there was a problem with the delete operation";
-            header('Location: project.php?id=' . $projectId . '&error_message=' . urlencode(implode(', ', $errors)));
-
+            header('Location: /project/' . $projectId . '&error_message=' . urlencode(implode(', ', $errors)));
+            exit;
         }
-        header('Location: my_projects.php?message=' . urlencode($rows . ' project(s) have been deleted'));
+        if ($rows1<=0){
+            $errors[] = "Sorry, there was a problem with the delete operation for your roles, please contact support to debug with data : projectId = " . $projectId;
+            header('Location: /projects' . '&error_message=' . urlencode(implode(', ', $errors)));
+            exit;
+        }
+
+        header('Location: /projects?message=' . urlencode($rows . ' project(s) have been deleted successfully with ' . $rows1 . ' project(s) role(s)'));
+        exit;
     }
 
 }

@@ -262,4 +262,10 @@ class ProjectUser
         return $userProjectCrud->create([ 'user_id' => $user_id, 'project_id' => $projectId ,'role' => 'owner']);
     }
 
+    public static function delete(mixed $projectId): int
+    {
+        $userProjectCrud = new Crud('project_users');
+        return $userProjectCrud->delete(['project_id' => $projectId]);
+    }
+
 }

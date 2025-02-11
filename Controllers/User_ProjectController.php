@@ -46,4 +46,9 @@ class User_ProjectController
     {
         return ProjectUser::create($user_id, $projectId);
     }
+
+    public function deleteProject(mixed $projectId): int
+    {
+        return ProjectUser::delete($projectId);
+    }
 }

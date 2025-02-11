@@ -77,7 +77,13 @@ $projectsByRole = $userProjectsController->getUserProject($user_id);
                                 <!-- Edit and Delete Buttons -->
                                 <br>
                                 <a href="/project/<?= $project['id'] ?>/update" class="btn btn-secondary">Edit Project</a>
-                                <a href="/project/<?= $project['id'] ?>/delete" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this project?');">Delete Project</a>
+
+                                <form action="/project/<?= $project['id'] ?>/delete" method="POST" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this project?');">
+                                    <input type="hidden" name="user_id" value="<?php echo $user_id ?>">
+                                    <input type="hidden" name="project_id" value="<?php echo $project['id'] ?>">
+                                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token'] ?>">
+                                    <button type="submit" class="btn btn-danger">Delete Project</button>
+                                </form>
                             <?php endif; ?>
                         </li>
                     <?php endforeach; ?>
