@@ -533,7 +533,31 @@ class Crud {
 
         $sql = "UPDATE $this->table SET " . implode(", ", $setClauses) . " WHERE " . implode(" AND ", $conditionClauses);
         $stmt = $this->pdo->prepare($sql);
+        try {
+            $stmt->execute();
+            return $stmt->rowCount() ;
+        } catch (PDOException $e) {
 
+            // LOGGING
+            Logger::log("Update Error: " . $e->getMessage(), __METHOD__);
+
+            return -1;
+        }
+    }
+    public function updateString(array $data, array $conditions): int {
+        $setClauses = [];
+        foreach ($data as $key => $value) {
+            $setClauses[] = "$key = '$value'";
+        }
+
+        $conditionClauses = [];
+        foreach ($conditions as $key => $value) {
+            $conditionClauses[] = "$key = $value";
+        }
+
+        $sql = "UPDATE $this->table SET " . implode(", ", $setClauses) . " WHERE " . implode(" AND ", $conditionClauses);
+        $stmt = $this->pdo->prepare($sql);
+        var_dump($sql);
         try {
             $stmt->execute();
             return $stmt->rowCount() ;

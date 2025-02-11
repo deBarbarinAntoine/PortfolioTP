@@ -108,26 +108,6 @@ class Skill implements ICrud
         $this->description = $description;
     }
 
-    /**
-     * Gets the proficiency level of the skill.
-     *
-     * @return string|null The proficiency level of the skill.
-     */
-    public function getLevel(): ?string
-    {
-        return $this->level;
-    }
-
-    /**
-     * Sets the proficiency level of the skill.
-     *
-     * @param string|null $level The level to set.
-     * @return void
-     */
-    public function setLevel(?string $level): void
-    {
-        $this->level = $level;
-    }
 
     /**
      * Gets the creation timestamp of the skill.
@@ -177,16 +157,14 @@ class Skill implements ICrud
      * @param int $id The unique identifier for the skill. A value of -1 indicates an unsaved skill.
      * @param string $name The name of the skill.
      * @param string $description A detailed description of the skill.
-     * @param string|null $level The proficiency level of the skill (e.g., beginner, intermediate, expert).
      * @param DateTime|null $created_at The timestamp of when the skill was created.
      * @param DateTime|null $updated_at The timestamp of when the skill was last updated.
      */
-    private function __construct(int $id, string $name, string $description, ?string $level = null, ?DateTime $created_at = null, ?DateTime $updated_at = null)
+    private function __construct(int $id, string $name, string $description, ?DateTime $created_at, ?DateTime $updated_at)
     {
         $this->id = $id;
         $this->name = $name;
         $this->description = $description;
-        $this->level = $level;
         $this->created_at = $created_at;
         $this->updated_at = $updated_at;
     }
@@ -203,7 +181,9 @@ class Skill implements ICrud
         return new self(
             -1,
             $name,
-            $description
+            $description,
+            new DateTime(),
+            new DateTime(),
         );
     }
 
@@ -246,7 +226,7 @@ class Skill implements ICrud
     {
         $skill_crud = new Crud('skills');
 
-        return $skill_crud->update(
+        return $skill_crud->updateString(
             [
                 'name' => $this->name,
                 'description' => $this->description
@@ -285,7 +265,10 @@ class Skill implements ICrud
             return new self(
                 $result['id'],
                 $result['name'],
-                $result['description']
+                $result['description'],
+                new DateTime($result['created_at']),
+                new DateTime($result['updated_at'])
+
             );
         } catch (Exception $e) {
 
@@ -313,6 +296,8 @@ class Skill implements ICrud
                     $skill['id'],
                     $skill['name'],
                     $skill['description'],
+                    new DateTime($skill['created_at']),
+                    new DateTime($skill['updated_at'])
                 );
             }
             return $skills;
@@ -349,7 +334,6 @@ class Skill implements ICrud
 
         // Get raw results from the findAllBy method
         $results = $skill_crud->searchSkill($search, 10, $offset);
-
         // Return the array of Skill objects
         return self::toSkillArray($results);
     }
@@ -366,6 +350,7 @@ class Skill implements ICrud
      *                       Each element may represent a single skill or a group of rows identified
      *                       by a skill ID.
      * @return array An array of Skill objects converted from the provided results.
+     * @throws \DateMalformedStringException
      */
     private static function toSkillArray(array $results): array
     {
@@ -381,7 +366,6 @@ class Skill implements ICrud
 
             // Iterate through each record in the results.
             foreach ($results as $row) {
-
                 // Convert each row into a skill object.
                 $skill = self::toSkill($row);
 
@@ -416,32 +400,33 @@ class Skill implements ICrud
         return $skills;
     }
 
+    /**
+     * @throws \DateMalformedStringException
+     */
     private static function toSkill(array $skill): skill
     {
-        // Assume the first element in the group contains the skill's data
-        $firstRow = $skill[0];
-
         // Return a new skill object
         return new self(
-            $firstRow['u.id'],           // skill id
-            $firstRow['name'],           // skill name
-            $firstRow['description'] ?? null  // skill description
+            $skill['id'],           // skill id
+            $skill['name'],           // skill name
+            $skill['description'] ?? null,  // skill description
+            new DateTime($skill['created_at']),
+            new DateTime($skill['updated_at'])
         );
     }
 
     /**
-     * Creates a new Skill object based on user skill data from the database.
+     * Creates a new Skill object based on skill data from the database.
      *
-     * @param array $result An associative array containing user skill data (e.g., skill ID, name, and level).
+     * @param array $result An associative array containing user skill data (e.g., skill ID, name).
      * @return Skill The newly created Skill instance populated with the provided data.
      */
-    public static function newUserSkill(array $result): Skill
+    public static function newSkill(array $result): Skill
     {
         return new self(
             $result['us.skill_id'],
             $result['s.name'],
             $result['s.description'],
-            $result['us.level'],
             $result['us.created_at'],
             $result['us.updated_at']
         );

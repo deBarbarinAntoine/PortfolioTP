@@ -66,6 +66,7 @@ $routes[] = ['GET', '/admin/users', '/Views/admin/admin_users.php'];
 $routes[] = ['POST', '/admin/user/{id:\d+}/delete', '/Views/admin/delete_user.php'];
 
 $routes[] = ['GET', '/admin/skills', '/Views/admin/admin_skills.php'];
+$routes[] = ['POST', '/admin/skills', '/Views/admin/admin_skills.php'];
 $routes[] = ['GET', '/admin/skill/{id:\d+}/update', '/Views/admin/edit_skill.php'];
 $routes[] = ['POST', '/admin/skill/{id:\d+}/update', '/Views/admin/edit_skill.php'];
 $routes[] = ['POST', '/admin/skill/{id:\d+}/delete', '/Views/admin/delete_skill.php'];

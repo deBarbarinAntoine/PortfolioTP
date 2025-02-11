@@ -11,8 +11,14 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
     exit();
 }
 
+if (isset($_GET['success_message'])){
+    $success = $_GET['success_message'];
+}
+
 $adminController = new AdminController();
 $skillController = new SkillController();
+$error='';
+$success = '';
 
 $total_skills = $skillController->getSkillsNumber();
 $search = $_GET['search'] ?? '';
@@ -35,9 +41,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['create_skill'])) {
 
     // Store the success message in the session if creation was successful
     if ($success > 0) {
-        $_SESSION['success_message'] = 'Skill created successfully!';
+        $success = 'Skill created successfully!';
     } else {
-        $_SESSION['error_message'] = 'Failed to create skill. Please try again.';
+        $error = 'Failed to create skill. Please try again.';
     }
 
     // Redirect back to the admin_skills.php page to show the success or error message
@@ -59,9 +65,9 @@ if (isset($_SESSION['success_message'])) {
 
 <div class="container">
     <h1>Admin Dashboard</h1>
-
+    <?php if (!empty($success)) echo "<p style='color: green;'>$success</p>"; ?>
     <!-- Search form -->
-    <form method="GET" action="/admin/skills">
+    <form method="GET" action="">
         <label>
             <input type="text" name="search" placeholder="Search skills..." value="<?= htmlspecialchars($search) ?>">
         </label>
@@ -70,13 +76,17 @@ if (isset($_SESSION['success_message'])) {
 
     <!-- Create Skill form -->
     <h2>Create Skill</h2>
-    <form method="POST" action="/admin/skills">
+    <form method="POST" action="">
         <label>
+            Name : <br>
             <input type="text" name="name" placeholder="Skill Name" required>
         </label>
+        <br>
         <label>
+            Description : <br>
             <textarea name="description" placeholder="Skill Description"></textarea>
         </label>
+        <br>
         <button type="submit" name="create_skill">Create Skill</button>
     </form>
 
@@ -84,6 +94,7 @@ if (isset($_SESSION['success_message'])) {
     <h2>Skills</h2>
     <table>
         <thead>
+        <?php if (!empty($admin_dashboard)): ?>
         <tr>
             <th>Skill Name</th>
             <th>Description</th>
@@ -91,20 +102,10 @@ if (isset($_SESSION['success_message'])) {
         </tr>
         </thead>
         <tbody>
-        <?php if (!empty($admin_dashboard)): ?>
             <?php foreach ($admin_dashboard as $skill): ?>
                 <tr>
-                    <td><?= htmlspecialchars($skill['name']) ?></td>
-                    <td><?= htmlspecialchars($skill['description']) ?></td>
-                    <td>
-                        <!-- Edit Skill -->
-                        <a href="/admin/skill/<?= $skill['id'] ?>/update?name=<?= $skill['name'] ?>&desc=<?= $skill['description'] ?>">Edit</a> |
-                        <!-- Delete Skill -->
-                        <form action="/admin/skill/<?= $skill['id'] ?>/delete" method="POST">
-                            <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
-                            <button type="submit" onclick="return confirm('Are you sure you want to delete this skill?')">Delete</button>
-                        </form>
-                    </td>
+                    <td><?= htmlspecialchars($skill->getName()) ?></td>
+                    <td><?= htmlspecialchars($skill->getDescription()) ?></td>
                 </tr>
             <?php endforeach; ?>
         <?php else: ?>

@@ -1,41 +1,45 @@
 <?php
+
 use App\Controllers\SkillController;
 
 include "Views/templates/header.php";
 
 $skillController = new SkillController();
 
-$skill_id = $ParamID ?? '';
-$name = $_GET['name'] ?? '';
-$desc = $_GET['desc'] ?? '';
+$skill_id = $_GET['skill_id'] ?? "";
+$skill_name = $_GET['skill_name'] ?? "";
+$description = $_GET['skill_description'] ?? "";
 
 // Handle Skill Update
-if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_skill'])) {
-    $name = $_POST['name'];
-    $description = $_POST['description'] ?? '';
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $skill_id = $_POST['skill_id'];
+    $skill_name = $_POST['skill_name'];
+    $description = $_POST['skill_description'];
 
-    $success = $skillController->updateSkill($skill_id, $name, $description);
+    $success = $skillController->updateSkill($skill_id, $skill_name, $description);
 
     if ($success > 0) {
-        $_SESSION['success_message'] = "Skill updated successfully! (Affected Rows: $success)";
+        $success_message = "Skill updated successfully! (Affected Rows: $success)";
+        header("Location: /admin/skills?success_message=$success_message");
+        exit();
     } else {
-        $_SESSION['error_message'] = "Failed to update skill. (Affected Rows: $success) Please try again.";
+        $error = "Failed to update skill. (Affected Rows: $success) Please contact the administrator.";
     }
 
-    header("Location: /admin/skills");
-    exit();
+
 }
 ?>
 
 <div class="container">
     <h1>Edit Skill</h1>
-
-    <form method="POST" action="/admin/skill/<?= $skill_id ?>/update">
+    <?php if (!empty($error)) echo "<p style='color: red;'>$error</p>"; ?>
+    <form method="POST" action="">
+        <input type="hidden" name="skill_id" value="<?= htmlspecialchars($skill_id) ?>">
         <label>
-            <input type="text" name="name" value="<?= htmlspecialchars($name) ?>" required>
+            <input type="text" name="skill_name" value="<?= htmlspecialchars($skill_name) ?>" required>
         </label>
         <label>
-            <textarea name="description"><?= htmlspecialchars($desc) ?></textarea>
+            <textarea name="skill_description"><?= htmlspecialchars($description) ?></textarea>
         </label>
         <button type="submit" name="update_skill">Update Skill</button>
     </form>

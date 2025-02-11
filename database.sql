@@ -31,7 +31,9 @@ CREATE TABLE skills
 (
     id          INT PRIMARY KEY AUTO_INCREMENT,
     name        VARCHAR(100) NOT NULL UNIQUE,
-    description TEXT         NULL -- Optionnel mais utile pour mieux définir les compétences
+    description TEXT         NULL, -- Optionnel mais utile pour mieux définir les compétences
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- Table de liaison utilisateur-compétences

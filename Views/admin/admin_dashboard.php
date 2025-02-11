@@ -6,10 +6,9 @@ use App\Models\Logger;
 
 include "Views/templates/header.php";
 
-// Debug
-$id = $_SESSION['user_id'];
-$role = $_SESSION['user_role'];
-Logger::log("id: $id | role: $role", __FILE__, Level::DEBUG);
+if (isset($_GET['success_message'])){
+    $success = $_GET['success_message'];
+}
 
 // Check if the user is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
@@ -28,6 +27,7 @@ $adminController = new AdminController();
 $admin_dashboard = $adminController->getAdminDashboard($search,$offset);
 extract($admin_dashboard);
 $total_pages = $skills_count / $limit;
+
 // >> if extract don't work <<
 //$users_count = $admin_dashboard['users_count'];
 //$skills_count = $admin_dashboard['skills_count'];
@@ -39,7 +39,8 @@ $total_pages = $skills_count / $limit;
 ?>
 
     <h1>Admin Dashboard</h1>
-
+    <?php if (!empty($error)) echo "<p style='color: red;'>$error</p>"; ?>
+    <?php if (!empty($success)) echo "<p style='color: green;'>$success</p>"; ?>
     <!-- Search Form -->
     <form method="GET" action="">
         <label>
@@ -74,10 +75,22 @@ $total_pages = $skills_count / $limit;
         <?php endforeach; ?>
     </table>
 
-    <h2>Skills</h2>
+    <h2>Skills</h2> <a href="/admin/skills"><button>Create New Skill</button>
+</a>
     <ul>
         <?php foreach ($skills as $skill): ?>
-            <li><strong><?php echo htmlspecialchars($skill['name']); ?></strong>: <?php echo htmlspecialchars($skill['description']); ?></li>
+            <li><strong><?php echo htmlspecialchars($skill->getName()); ?></strong>: <?php echo htmlspecialchars($skill->getDescription()); ?></li>
+            <form action="/admin/skill/<?php echo $skill->getId(); ?>/update" method="GET">
+                <input type="hidden" name="skill_id" value="<?php echo $skill->getId(); ?>">
+                <input type="hidden" name="skill_name" value="<?php echo $skill->getName(); ?>">
+                <input type="hidden" name="skill_description" value="<?php echo $skill->getDescription(); ?>">
+                <button type="submit">Modify Skill</button>
+            </form>
+            <form action="/admin/skill/<?php echo $skill->getId(); ?>/delete" method="POST">
+                <input type="hidden" name="skill_id" value="<?php echo $skill->getId(); ?>">
+                <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token'] ?>">
+                <button type="submit">Delete Skill</button>
+            </form>
         <?php endforeach; ?>
     </ul>
 
