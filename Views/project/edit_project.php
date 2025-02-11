@@ -224,7 +224,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <p>Username: <?= htmlspecialchars($projectContributor['user']->getUsername()) ?></p>
                         <p>Email: <?= htmlspecialchars($projectContributor['user']->getEmail()) ?></p>
                         <img src="<?= htmlspecialchars($projectContributor['user']->getAvatar()) ?>" alt="User Avatar" width="50">
-                        <form action="/deleteUserProject/<?php echo $projectId; ?>"" method="POST" onsubmit="return confirm('Are you sure you want to delete this contributor from project ?');">
+                        <form action="/deleteUserProject/<?php echo $projectId; ?>" method="POST" onsubmit="return confirm('Are you sure you want to delete this contributor from project ?');">
                             <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
                             <input type="hidden" name="contributor_id" value="<?php echo $projectContributor['user_id']; ?>">
                             <input type="hidden" name="project_id" value="<?php echo $projectId; ?>">
