@@ -20,10 +20,14 @@ class UserController
     /**
      * @throws DateMalformedStringException
      */
-    public function updateRole(int $user_id, mixed $new_role): bool
+    public function updateRole(int $user_id, mixed $new_role): int
     {
         $user = User::get($user_id);
-        $user->setRole($new_role);
+        $pass = User::getPass($user_id);
+
+        $newRole = UserRole::tryFrom($new_role);
+        $user->setRole($newRole);
+        $user->setPasswordHash($pass['password']);
         return $user->update();
     }
 

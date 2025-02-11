@@ -63,6 +63,7 @@ $routes[] = ['POST', '/deleteUserProject/{id:\d+}', '/Views/project/delete_user_
 $routes[] = ['GET', '/admin', '/Views/admin/admin_dashboard.php'];
 
 $routes[] = ['GET', '/admin/users', '/Views/admin/admin_users.php'];
+$routes[] = ['POST', '/admin/users/changeRole', '/Views/admin/change_role.php'];
 $routes[] = ['POST', '/admin/user/{id:\d+}/delete', '/Views/admin/delete_user.php'];
 
 $routes[] = ['GET', '/admin/skills', '/Views/admin/admin_skills.php'];

@@ -97,6 +97,12 @@ class User implements ICrud
         return $result ? $result['id'] : -1;
     }
 
+    public static function getPass(int $user_id): false|array|null
+    {
+        $user_crud = new Crud('users');
+        return $user_crud->findBy(['id' => $user_id], 'password');
+    }
+
 
     /**
      * Gets the ID of the user.
@@ -352,12 +358,12 @@ class User implements ICrud
     {
         $user_crud = new Crud('users');
 
-        return $user_crud->update(
+        return $user_crud->updateString(
             [
                 'username' => $this->username,
                 'email' => $this->email,
                 'avatar' => $this->avatar,
-                'password_hash' => $this->password_hash,
+                'password' => $this->password_hash,
                 'role' => $this->role->value,
             ],
             [ 'id' => $this->id ]

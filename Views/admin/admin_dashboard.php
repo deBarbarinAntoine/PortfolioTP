@@ -10,6 +10,10 @@ if (isset($_GET['success_message'])){
     $success = $_GET['success_message'];
 }
 
+if (isset($_GET['error_message'])){
+    $error = $_GET['error_message'];
+}
+
 // Check if the user is an admin
 if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
     header("Location: /login");
@@ -63,6 +67,7 @@ $total_pages = $skills_count / $limit;
             <th>Email</th>
             <th>Role</th>
             <th>Created At</th>
+            <th>Change User Role</th>
         </tr>
         <?php foreach ($latest_users as $user): ?>
             <tr>
@@ -71,6 +76,15 @@ $total_pages = $skills_count / $limit;
                 <td><?php echo htmlspecialchars($user->getEmail()); ?></td>
                 <td><?php echo htmlspecialchars($user->getRole()->value); ?></td>
                 <td><?php echo $user->getCreatedAt()->format("F j, Y, g:i a"); ?></td>
+                <td>
+                    <form action="/admin/users/changeRole" method="POST">
+                        <input type="hidden" name="user_id" value="<?php echo htmlspecialchars($user->getId()); ?>">
+                        <input type="hidden" name="new_role" value="<?php echo ($user->getRole()->value === 'admin') ? 'user' : 'admin'; ?>">
+                        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']?>">
+                        <button type="submit">Change to <?php echo ($user->getRole()->value === 'admin') ? 'User' : 'Admin'; ?></button>
+                    </form>
+                </td>
+
             </tr>
         <?php endforeach; ?>
     </table>

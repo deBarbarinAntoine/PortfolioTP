@@ -197,7 +197,6 @@ class Crud {
         // Limit to 1 result since it's findBy
         $sql .= " LIMIT 1";
 
-
         try {
             $stmt = $this->pdo->prepare($sql);
 
@@ -533,6 +532,7 @@ class Crud {
 
         $sql = "UPDATE $this->table SET " . implode(", ", $setClauses) . " WHERE " . implode(" AND ", $conditionClauses);
         $stmt = $this->pdo->prepare($sql);
+
         try {
             $stmt->execute();
             return $stmt->rowCount() ;
@@ -557,12 +557,12 @@ class Crud {
 
         $sql = "UPDATE $this->table SET " . implode(", ", $setClauses) . " WHERE " . implode(" AND ", $conditionClauses);
         $stmt = $this->pdo->prepare($sql);
-        var_dump($sql);
+
+
         try {
             $stmt->execute();
             return $stmt->rowCount() ;
         } catch (PDOException $e) {
-
             // LOGGING
             Logger::log("Update Error: " . $e->getMessage(), __METHOD__);
 
