@@ -39,6 +39,8 @@ class Image
      */
     private DateTime $uploaded_at;
 
+
+
     /**
      * Gets the unique identifier of the image.
      *
@@ -142,5 +144,11 @@ class Image
             $name,
             new DateTime()
         );
+    }
+
+    public static function delete(string $image_id): int
+    {
+        $imageCrud = new Crud('project_images');
+        return $imageCrud->delete(['id ' => $image_id]);
     }
 }

@@ -54,6 +54,7 @@ $routes[] = ['POST', '/project/new', '/Views/project/add_project.php'];
 $routes[] = ['GET', '/project/{id:\d+}', '/Views/project/project.php'];
 $routes[] = ['GET', '/project/{id:\d+}/update', '/Views/project/edit_project.php'];
 $routes[] = ['POST', '/project/{id:\d+}/update', '/Views/project/edit_project.php'];
+$routes[] = ['POST', '/deleteImg/{id:\d+}', '/Views/project/delete_project_image.php'];
 $routes[] = ['POST', '/project/{id:\d+}/delete', '/Views/project/delete_project.php'];
 $routes[] = ['POST', '/project/{id:\d+}/add', '/Views/project/add_user_to_project.php'];
 

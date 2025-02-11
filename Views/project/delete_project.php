@@ -9,7 +9,7 @@ $projectId = isset($ParamID) ? (int)$ParamID : '';  // Sanitize the $ParamID
 $errors = [];
 
 
-include "../user/header.php";
+include "Views/templates/header.php";
 
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['csrf_token'])) {
     $error_message = "Please Log In First";

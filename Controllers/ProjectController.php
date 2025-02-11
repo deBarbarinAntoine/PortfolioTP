@@ -2,6 +2,7 @@
 
 namespace App\Controllers;
 
+use App\Models\Image;
 use App\Models\Project;
 use App\Models\Visibility;
 use DateMalformedStringException;
@@ -56,6 +57,8 @@ class ProjectController {
         $project->setVisibility(Visibility::tryFrom($visibility) ?? Visibility::PRIVATE);
         $project->setImages($images);
 
+        var_dump($project);
+
         // Perform update and return status
         return $project->update();
     }
@@ -63,6 +66,11 @@ class ProjectController {
     public function deleteProject(mixed $projectId): int
     {
       return Project::delete($projectId);
+    }
+
+    public function deleteImage(string $image_id): int
+    {
+        return Image::delete($image_id);
     }
 
 }

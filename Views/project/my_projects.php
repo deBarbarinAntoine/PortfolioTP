@@ -72,10 +72,13 @@ $projectsByRole = $userProjectsController->getUserProject($user_id);
                                 <?php endforeach; ?>
                             <?php endif; ?>
 
-                            <!-- Edit and Delete Buttons -->
-                            <br>
-                            <a href="edit_project.php?id=<?= $project['id'] ?>" class="btn btn-secondary">Edit Project</a>
-                            <a href="delete_project.php?id=<?= $project['id'] ?>" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this project?');">Delete Project</a>
+                            <!-- Only display Edit and Delete buttons for projects where the role is 'owner' -->
+                            <?php if ($role == 'owner'): ?>
+                                <!-- Edit and Delete Buttons -->
+                                <br>
+                                <a href="/project/<?= $project['id'] ?>/update" class="btn btn-secondary">Edit Project</a>
+                                <a href="/project/<?= $project['id'] ?>/delete" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this project?');">Delete Project</a>
+                            <?php endif; ?>
                         </li>
                     <?php endforeach; ?>
                 </ul>

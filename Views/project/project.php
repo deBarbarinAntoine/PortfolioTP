@@ -52,8 +52,10 @@ try {
     <div class="project-container">
         <h1 class="project-title"><?php echo htmlspecialchars($projectData->getTitle()); ?></h1>
 
+        <p><strong> Visibility :</strong> <?php echo nl2br(htmlspecialchars($projectData->getVisibilityStr() ?? "No Visibility available.")); ?></p>
+
         <p class="project-description">
-            <?php echo nl2br(htmlspecialchars($projectData->getDescription() ?? "No description available.")); ?>
+            <strong>Title : </strong><?php echo nl2br(htmlspecialchars( $projectData->getDescription() ?? "No description available.")); ?>
         </p>
 
         <?php if (!empty($projectData->getExternalLink())) : ?>
@@ -74,7 +76,7 @@ try {
         <div class="project-images">
             <?php if (!empty($projectData->getImages())) : ?>
                 <?php foreach ($projectData->getImages() as $image) : ?>
-                    <img src="<?php echo htmlspecialchars($image['image_url']); ?>" alt="Project Image">
+                    <img src="<?php echo htmlspecialchars($image['image_path']); ?>" alt="Project Image">
                 <?php endforeach; ?>
             <?php else : ?>
                 <p>No images available for this project.</p>

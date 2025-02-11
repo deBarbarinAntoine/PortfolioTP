@@ -522,19 +522,19 @@ class Crud {
     public function update(array $data, array $conditions): int {
         $setClauses = [];
         foreach ($data as $key => $value) {
-            $setClauses[] = "$key = :$key";
+            $setClauses[] = "$key = $value";
         }
 
         $conditionClauses = [];
         foreach ($conditions as $key => $value) {
-            $conditionClauses[] = "$key = :$key";
+            $conditionClauses[] = "$key = $value";
         }
 
         $sql = "UPDATE $this->table SET " . implode(", ", $setClauses) . " WHERE " . implode(" AND ", $conditionClauses);
         $stmt = $this->pdo->prepare($sql);
 
         try {
-            $stmt->execute(array_merge($data, $conditions));
+            $stmt->execute();
             return $stmt->rowCount() ;
         } catch (PDOException $e) {
 
@@ -558,14 +558,14 @@ class Crud {
     public function delete(array $conditions): int {
         $conditionClauses = [];
         foreach ($conditions as $key => $value) {
-            $conditionClauses[] = "$key = :$key";
+            $conditionClauses[] = "$key = $value";
         }
 
         $sql = "DELETE FROM $this->table WHERE " . implode(" AND ", $conditionClauses);
         $stmt = $this->pdo->prepare($sql);
 
         try {
-            $stmt->execute($conditions);
+            $stmt->execute();
             return $stmt->rowCount();
         } catch (PDOException $e) {
 

@@ -378,13 +378,11 @@ class Project implements ICrud
     
         // Loop through each image associated with the project and update its details in `project_images`.
         foreach ($this->images as $image) {
-            $img_rows[] = $project_image_crud->update(
+            var_dump($this->images);
+            $img_rows[] = $project_image_crud->create(
                 [
                     'project_id' => $this->id, // Associate the image with the current project.
-                    'image_path' => $image->getPath() . $image->getName() // Build the full image path.
-                ],
-                [
-                    'id' => $image->id, // Use the image's unique ID to identify the record to update.
+                    'image_path' => $image // image path.
                 ]
             );
         }
@@ -450,7 +448,7 @@ class Project implements ICrud
         }
 
         // Extract project details from the first row
-        $firstRow = $results[0];
+        $firstRow = $results;
 
         // Convert visibility to Enum
         $visibility = Visibility::tryFrom($firstRow['visibility']) ?? Visibility::PRIVATE;
