@@ -29,27 +29,41 @@ if (!isset($projectId)) {
 }
 
 include "Views/templates/header.php";
-
+$projectController = new ProjectController();
+$user_projectController = new User_ProjectController();
+$userController = new UserController();
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['csrf_token'])) {
     $error_message = "Please Log In First";
     header('Location: login.php?error_message=' . urlencode($error_message));
     exit;
+} else {
+    $userId = $_SESSION['user_id'];
+    $isOwner = $user_projectController->getIsOwner($projectId, $userId);
+
+    if (!$isOwner) {
+        $error_message = "You are not authorized to access this page";
+        header('Location: /?error_message=' . urlencode($error_message));
+        exit;
+    }
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "GET") {
-    $projectController = new ProjectController();
-    $user_projectController = new User_ProjectController();
-    $userController = new UserController();
     if (isset($projectId)) {
         try {
             $project = $projectController->getProject($projectId);
+
+            if ($project == null) {
+                $error = "Project does not exist.";
+                header("Location: /?error_message=". urlencode($error));
+                exit;
+            }
+
             $projectContributors = $user_projectController->getContributors($projectId);
             foreach ($projectContributors as $key => $projectContributor) {
                 $projectContributorID = $projectContributor['user_id'];
                 $userContributor = $userController->getUser($projectContributorID);
                 $projectContributors[$key]['user'] = $userContributor;
             }
-
 
             $projectViewers= $user_projectController->getViewers($projectId);
             foreach ($projectViewers as $key => $projectViewer) {
