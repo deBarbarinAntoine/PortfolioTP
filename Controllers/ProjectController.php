@@ -57,7 +57,6 @@ class ProjectController {
         $project->setVisibility(Visibility::tryFrom($visibility) ?? Visibility::PRIVATE);
         $project->setImages($images);
 
-        var_dump($project);
 
         // Perform update and return status
         return $project->update();

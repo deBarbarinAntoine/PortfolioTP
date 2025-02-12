@@ -361,7 +361,7 @@ class Project implements ICrud
         $project_image_crud = new Crud('project_images');
     
         // Update the project's main attributes in the 'projects' table based on the current object state.
-        $rows = $project_crud->update(
+        $rows = $project_crud->updateString(
             [
                 'title' => $this->title,
                 'description' => $this->description,
@@ -375,7 +375,7 @@ class Project implements ICrud
     
         // Initialize an array to store the number of affected rows for each image update.
         $img_rows = [];
-    
+
         // Loop through each image associated with the project and update its details in `project_images`.
         foreach ($this->images as $image) {
             var_dump($this->images);
@@ -571,18 +571,14 @@ class Project implements ICrud
     public static function getPublicProjects(): array
     {
         $project_crud = new Crud('projects');
-        $results = $project_crud->findAllBy(['visibility' => 'public']);
-
-        return self::mapResultsToProjects($results);
-    }
-
-    /**
-     * @throws DateMalformedStringException
-     */
-    public static function getProjects(int $user_id): array
-    {
-        $project_crud = new Crud('projects');
-        $results = $project_crud->findAllByUser($user_id);
+        $results = $project_crud->findAllBy(['visibility' => 'public'] , "*", null, null, null, null,null,"", true);
+        $imageCrud = new Crud('project_images');
+        if ($results) {
+            foreach ($results as &$result) {
+                $projectImages = $imageCrud->findAllBy(['project_id' => $result['id']]);
+                $result['images'] = $projectImages;
+            }
+        }
 
         return self::mapResultsToProjects($results);
     }
@@ -605,6 +601,7 @@ class Project implements ICrud
                 throw new DateMalformedStringException("Invalid DateTime format: " . $e->getMessage());
             }
 
+
             // Create the Project object
             $projects[] = new self(
                 id: $result['id'],
@@ -614,7 +611,7 @@ class Project implements ICrud
                 visibility: Visibility::from($result['visibility']),
                 created_at: $createdAt,
                 updated_at: $updatedAt,
-                images: [] // Handle images separately if needed
+                images: $result['images']
             );
         }
 
@@ -630,7 +627,7 @@ class Project implements ICrud
         $project = $project_crud->findBy(["id" => $projectId]);
 
         if (!$project) {
-            throw new Exception("Project not found.");
+            return null;
         }
 
         $project_Image_crud = new Crud('project_images');

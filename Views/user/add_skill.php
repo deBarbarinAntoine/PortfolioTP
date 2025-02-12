@@ -13,7 +13,6 @@ $user_csrf_token = $_SESSION['csrf_token'];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $skill_id = $_POST['new_skill_id'];
-    $skill_name = $_POST['new_skill_name'];
     $skill_level = $_POST['new_skill_level'];
 
     $userSkillController = new User_SkillController();

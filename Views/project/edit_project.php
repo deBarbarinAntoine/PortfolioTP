@@ -87,6 +87,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $description = trim($_POST["description"] ?? "");
         $externalLink = trim($_POST["externalLink"] ?? "");
         $visibility = trim($_POST["visibility"] ?? "");
+        var_dump($_POST);
 
         // Validate external link (if provided)
         if (!empty($externalLink) && !filter_var($externalLink, FILTER_VALIDATE_URL)) {
@@ -130,12 +131,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $projectController = new ProjectController();
         try {
             $modified = $projectController->modifyProject($projectId, $title, $description, $externalLink, $visibility, $images);
-            if ($modified) {
-                header("Location: /project/$projectId");
+            if ($modified <= 0) {
+                $errors [] = "Sorry something went wrong.";
                 exit;
             }
+            $success = "Project successfully updated.";
+            header("Location: /project/$projectId?success_message=". urlencode($success));
+            exit;
         } catch (Exception $e) {
-            error_log("Project modification error: " . $e->getMessage());
             $errors[] = "An error occurred while modifying the project. Please try again later.";
         }
     }

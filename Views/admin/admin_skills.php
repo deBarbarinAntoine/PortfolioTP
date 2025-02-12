@@ -10,6 +10,8 @@ if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
     header("Location: /login");
     exit();
 }
+$error='';
+$success = '';
 
 if (isset($_GET['success_message'])){
     $success = $_GET['success_message'];
@@ -17,8 +19,6 @@ if (isset($_GET['success_message'])){
 
 $adminController = new AdminController();
 $skillController = new SkillController();
-$error='';
-$success = '';
 
 $total_skills = $skillController->getSkillsNumber();
 $search = $_GET['search'] ?? '';

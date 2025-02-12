@@ -34,11 +34,20 @@ if (!isset($paramID['id']) && !isset($projectID)) {
 
 $projectId = $projectID ?? "";
 $isOwner = false;
+$isContributor = false;
+$isViewer = false;
 $projectController = new ProjectController();
 $user_projectController = new User_ProjectController();
 $userController = new UserController();
+
+
 try {
     $projectData = $projectController->getProject($projectId);
+    if ($projectData == null) {
+        $error = "Project does not exist.";
+        header("Location: /?error_message=". urlencode($error));
+        exit;
+    }
     $projectContributors = $user_projectController->getContributors($projectId);
     foreach ($projectContributors as $key => $projectContributor) {
         $projectContributorID = $projectContributor['user_id'];
@@ -57,7 +66,20 @@ try {
     if (isset($_SESSION['user_id'])) {
         $userId = $_SESSION['user_id'];
         $isOwner = $user_projectController->getIsOwner($projectId, $userId);
+        $isViewer = $user_projectController->getIsViewer($projectId, $userId);
+        $isContributor =$user_projectController->getIsContributor($projectId, $userId);
     }
+    var_dump($projectData->getVisibilityStr());
+    if ( $projectData->getVisibilityStr() != "public") {
+        if ($isOwner || $isContributor || $isViewer) {
+
+        } else {
+            $error = "You don't have access to this project.";
+            header("Location: /?error_message=". urlencode($error));
+            exit;
+        }
+    }
+
 } catch (Exception $e) {
     $errorMessage = "Failed to find the project ".$e->getMessage();
     exit;

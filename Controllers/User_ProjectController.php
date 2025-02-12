@@ -66,4 +66,14 @@ class User_ProjectController
     {
         return ProjectUser::deleteUserFromProject($user_id);
     }
+
+    public function getIsViewer(false|string $projectId, mixed $userId)
+    {
+        return ProjectUser::isViewer($projectId, $userId);
+    }
+
+    public function getIsContributor(false|string $projectId, mixed $userId)
+    {
+        return ProjectUser::isContributor($projectId, $userId);
+    }
 }

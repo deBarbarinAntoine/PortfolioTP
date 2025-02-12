@@ -48,6 +48,8 @@ try {
                     $userSkill['description'] = $skill->getDescription();
                     $skillsInUserSkills[] = $userSkill;
                 } else {
+                     $userSkill['name'] = $skill->getName();
+                     $userSkill['description'] = $skill->getDescription();
                     $skillsNotInUserSkills[] = $userSkill;
                 }
             }
@@ -56,58 +58,6 @@ try {
 } catch (Exception $e) {
     $error_message = "An unexpected error occurred while fetching your skills. Please try again later.";
     die();
-}
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $csrf_token = htmlspecialchars($_POST['csrf_token']);
-
-    if ($csrf_token !== $user_csrf_token) {
-        $error_message = "An unexpected token error occurred. Please try again later.";
-    }
-
-    // Handle deleting skill
-    if (isset($_POST['delete_skill'])) {
-        $UserSkillId = intval($_POST['delete_skill']);
-        try {
-            $success = $user_skillController->deleteSkillFromUser($UserSkillId);
-            if ($success === true) {
-                header("Location: /profile/update?message=Skill deleted successfully!");
-                exit();
-            } else {
-                $error_message = "Failed to delete the skill: " . $success;
-            }
-        } catch (Exception $e) {
-            $error_message = "An unexpected error occurred while deleting the skill.";
-        }
-    }
-
-    // Handle modifying skill level
-    if (isset($_POST['modify_skill'])) {
-        // Loop through all the submitted new level inputs
-        foreach ($_POST as $key => $value) {
-            // Check if the key is related to the skill level (starts with 'new_level_')
-            if (str_starts_with($key, 'new_level_')) {
-                // Extract the skill ID from the key (e.g., 'new_level_3' -> 3)
-                $skillId = str_replace('new_level_', '', $key);
-
-                // Get the new level value
-                $newLevel = htmlspecialchars($value);
-
-                // Get the associated user skill ID from the hidden input
-                $userSkillId = $_POST['user_skill_id'] ?? null;
-
-                if ($skillId && $newLevel && $userSkillId) {
-                    $success = $user_skillController->updateUserSkillLevel($userSkillId, $newLevel);
-                    if ($success === true) {
-                        header("Location: /profile/update?message=Skill updated successfully!");
-                        exit();
-                    } else {
-                        $error_message = "Failed to update the skill: " . $success;
-                    }
-                }
-            }
-        }
-    }
 }
 
 ?>
@@ -119,7 +69,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <?php if (!empty($error)) echo "<p style='color: red;'>$error</p>"; ?>
     <?php if (!empty($success)) echo "<p style='color: green;'>$success</p>"; ?>
     <h3>Your Skills</h3>
-
         <ul>
             <?php if (!empty($skillsInUserSkills)): ?>
                 <?php foreach ($skillsInUserSkills as $userSkill): ?>
@@ -131,9 +80,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ?>
                     <li>
                         <p><?= htmlspecialchars($skillName); ?> - Level <?= htmlspecialchars($skillLevel); ?></p>
-
-
-
                         <form method="POST" action="/profile/updateSkill">
                             <!-- Modify Skill Form -->
                             <label for="new_level>">New Level</label>
@@ -169,11 +115,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <form method="POST" action="/profile/addSkill">
 
         <label for="new_skill_id">Skill:</label>
-        <select id="new_skill_id" name="new_skill_name" required>
-            <?php
-            foreach ($skillsNotInUserSkills as $skill):?>
-                <option value="<?= htmlspecialchars($skill->getName()) ?>"><?= htmlspecialchars($skill->getName()) ?></option>
-                <input type="hidden" name="new_skill_id" value="<?= htmlspecialchars($skill->getId()) ?>">
+        <select id="new_skill_id" name="new_skill_id" required>
+            <?php foreach ($skillsNotInUserSkills as $skill): ?>
+                <option value="<?= htmlspecialchars(is_object($skill) ? $skill->getId() : $skill['id']) ?>">
+                    <?= htmlspecialchars(is_object($skill) ? $skill->getName() : $skill['name']) ?>
+                </option>
             <?php endforeach; ?>
         </select>
 

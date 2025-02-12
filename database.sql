@@ -141,3 +141,78 @@ CREATE TABLE password_resets
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (email) REFERENCES users (email) ON DELETE CASCADE
 );
+
+-- Insert Admin User
+INSERT INTO users (username, email, password, role, avatar)
+VALUES ('admin', 'admin@example.com',
+        'JGFyZ29uMmlkJHY9MTkkbT02NTUzNix0PTMscD00JEdNUjhWMkt6ZkNpQWRrelVuQnY2OUEkcWJWNnRqQUhMam0rUE9FL3Jta3JadGphdWtxVUFRNDE5WjNpUWhuS2NuOA==',
+        'admin', 'admin_avatar.png');
+
+-- Insert Regular User
+INSERT INTO users (username, email, password, role, avatar)
+VALUES ('user', 'user@example.com',
+        'JGFyZ29uMmlkJHY9MTkkbT02NTUzNix0PTMscD00JEdNUjhWMkt6ZkNpQWRrelVuQnY2OUEkcWJWNnRqQUhMam0rUE9FL3Jta3JadGphdWtxVUFRNDE5WjNpUWhuS2NuOA==',
+        'user', 'user_avatar.png');
+
+-- Insert Random Users
+INSERT INTO users (username, email, password, role, avatar)
+VALUES
+    ('john_doe', 'john@example.com', 'random_hashed_password_1', 'user', 'john_avatar.png'),
+    ('jane_doe', 'jane@example.com', 'random_hashed_password_2', 'user', 'jane_avatar.png'),
+    ('dev_master', 'dev@example.com', 'random_hashed_password_3', 'admin', 'dev_avatar.png');
+
+-- Insert Random Skills
+INSERT INTO skills (name, description)
+VALUES
+    ('JavaScript', 'Langage de programmation pour le développement web'),
+    ('Python', 'Langage de programmation polyvalent utilisé pour le développement web, la data science et l’IA'),
+    ('SQL', 'Langage utilisé pour gérer et manipuler les bases de données'),
+    ('React', 'Bibliothèque JavaScript pour la création d’interfaces utilisateur interactives'),
+    ('Machine Learning', 'Branche de l’intelligence artificielle axée sur les modèles d’apprentissage');
+
+-- Assign Random Skills to Users
+INSERT INTO user_skills (user_id, skill_id, level)
+VALUES
+    (1, 1, 'expert'),
+    (1, 2, 'avancé'),
+    (2, 3, 'intermédiaire'),
+    (3, 4, 'débutant'),
+    (4, 5, 'avancé');
+
+-- Insert Random Projects
+INSERT INTO projects (title, description, external_link, visibility)
+VALUES
+    ('Gestion de Projet Web', 'Une application pour gérer les tâches et les projets en équipe.', 'https://github.com/example/project1', 'public'),
+    ('Bot IA en Python', 'Un chatbot intelligent basé sur du machine learning.', 'https://github.com/example/project2', 'private'),
+    ('Site e-commerce', 'Développement d’un site e-commerce moderne avec React et Node.js.', 'https://github.com/example/project3', 'public');
+
+-- Assign Users to Projects
+INSERT INTO project_users (project_id, user_id, role)
+VALUES
+    (1, 1, 'owner'),
+    (1, 2, 'contributor'),
+    (2, 3, 'owner'),
+    (3, 4, 'contributor'),
+    (3, 5, 'viewer');
+
+-- Insert Project Images
+INSERT INTO project_images (project_id, image_path)
+VALUES
+    (1, 'images/project1_img1.png'),
+    (1, 'images/project1_img2.png'),
+    (2, 'images/project2_img1.png'),
+    (3, 'images/project3_img1.png'),
+    (3, 'images/project3_img2.png');
+
+-- Insert Random Sessions
+INSERT INTO sessions (user_id, token, expires_at)
+VALUES
+    (1, 'random_token_1', DATE_ADD(NOW(), INTERVAL 7 DAY)),
+    (2, 'random_token_2', DATE_ADD(NOW(), INTERVAL 7 DAY)),
+    (3, 'random_token_3', DATE_ADD(NOW(), INTERVAL 7 DAY));
+
+-- Insert Password Reset Requests
+INSERT INTO password_resets (email, token, expires_at)
+VALUES
+    ('john@example.com', 'reset_token_1', DATE_ADD(NOW(), INTERVAL 1 DAY)),
+    ('jane@example.com', 'reset_token_2', DATE_ADD(NOW(), INTERVAL 1 DAY));
