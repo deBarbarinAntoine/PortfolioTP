@@ -4,7 +4,7 @@
 Ce projet est une application web développée en PHP & MySQL permettant aux utilisateurs de :
 - [X] Gérer leur profil (inscription, connexion, mise à jour des informations).
 - [X] Ajouter et modifier leurs compétences parmi celles définies par un administrateur.
-- [ ] Ajouter et gérer leurs projets (titre, description, image et lien).
+- [X] Ajouter et gérer leurs projets (titre, description, image et lien).
 - [X] Un administrateur peut gérer les compétences disponibles.
 
 ## Fonctionnalités Implémentées
@@ -23,15 +23,15 @@ Ce projet est une application web développée en PHP & MySQL permettant aux uti
 - [X] Niveau de compétence défini sur une échelle (débutant → expert)
 
 ### Gestion des Projets
-- [ ] Ajout, modification et suppression de projets
+- [X] Ajout, modification et suppression de projets
 - [X] Chaque projet contient : Titre, Description, Image, Lien externe
-- [ ] Upload sécurisé des images avec restrictions de format et taille
+- [X] Upload sécurisé des images avec restrictions de format et taille
 - [X] Affichage structuré des projets
 
 ### Sécurité
 - [X] Protection contre XSS, CSRF et injections SQL
 - [X] Hachage sécurisé des mots de passe
-- [X] Gestion des erreurs utilisateur avec affichage des messages et conservation des champs remplis
+- [ ] Gestion des erreurs utilisateur avec affichage des messages et conservation des champs remplis
 - [X] Expiration automatique de la session après inactivité
 
 ## Installation et Configuration
@@ -48,7 +48,7 @@ Ce projet est une application web développée en PHP & MySQL permettant aux uti
    cd PortfolioTP
    ```
 2. Importer la base de données :
-    - *à renseigner*
+    - PortfolioTP/database.sql
 
 3. Configurer la connexion à la base de données :
    Modifier le fichier `config/database.php` :
@@ -90,10 +90,10 @@ UN exemple de structure possible (la première ligne doit respecter cette struct
 ```
 
 ## Technologies Utilisées
-- **Backend** : **à renseigner**
-- **Frontend** : **à renseigner**
-- **Sécurité** : **à renseigner**
-- **Gestion du Projet** : **à renseigner**
+- **Backend** : **PHP**
+- **Frontend** : **PHP / HTML / JS / (S)CSS**
+- **Sécurité** : **PHP / RootFast / encyption**
+- **Gestion du Projet** : **Discord / GitHub**
 
 ## Licence
 Ce projet est sous licence MIT.
