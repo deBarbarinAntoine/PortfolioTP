@@ -3,11 +3,6 @@ include "Views/templates/header.php";
 
 use App\Controllers\UserController;
 
-if (!isset($_SESSION['user_id'])) {
-    header("Location: /login");
-    exit();
-}
-
 $user_id = $_SESSION['user_id'];
 $user_csrf_token = $_SESSION['csrf_token'];
 $_SESSION['previous_page'] = '/profile';

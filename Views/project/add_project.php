@@ -2,13 +2,6 @@
 //  Form to add a new project.
 include 'Views/templates/header.php';
 
-
-if (!isset($_SESSION['user_id'])){
-    $error_message = "Please Log In First";
-    header('Location: login.php?error_message='. $error_message);
-    exit;
-}
-
 $errorMessages = [];
 $title = $description = $externalLink = $visibility = "";
 $user_id = $_SESSION['user_id'];

@@ -5,11 +5,6 @@ use App\Controllers\User_ProjectController;
 
 include "Views/templates/header.php";
 
-if (!isset($_SESSION['user_id'])) {
-    header("Location: /login");
-    exit();
-}
-
 $message = "";
 if (isset($_GET['message'])) {
     $message = $_GET['message'];

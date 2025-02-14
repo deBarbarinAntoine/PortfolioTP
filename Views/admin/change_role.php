@@ -5,11 +5,6 @@ include "Views/templates/header.php";
 // Check if the user is an admin
 use App\Controllers\UserController;
 
-if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
-    header("Location: /login");
-    exit();
-}
-
 // Validate CSRF token
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
     header("Location: /admin?error_message=CSRF validation failed");

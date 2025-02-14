@@ -7,11 +7,6 @@ use App\Controllers\User_SkillController;
 use App\Controllers\UserController;
 use App\Models\UserSkillLevel;
 
-if (!isset($_SESSION['user_id'])) {
-    header("Location: /login");
-    exit();
-}
-
 if (isset($_GET['success_message'])){
     $success = $_GET['success_message'];
 }

@@ -1,8 +1,6 @@
 <?php
 // Overview of site stats, users, and skills.
 use App\Controllers\AdminController;
-use App\Models\Level;
-use App\Models\Logger;
 
 include "Views/templates/header.php";
 
@@ -12,12 +10,6 @@ if (isset($_GET['success_message'])){
 
 if (isset($_GET['error_message'])){
     $error = $_GET['error_message'];
-}
-
-// Check if the user is an admin
-if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
-    header("Location: /login");
-    exit();
 }
 
 // Fetch search term and pagination parameters

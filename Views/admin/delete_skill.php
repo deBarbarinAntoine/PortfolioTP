@@ -4,13 +4,6 @@ include "Views/templates/header.php";
 
 use App\Controllers\SkillController;
 
-
-// Check if the user is an admin
-if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
-    header("Location: /login");
-    exit();
-}
-
 // Validate CSRF token
 if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
     header("Location: /login");

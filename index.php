@@ -9,6 +9,8 @@
 require 'vendor/autoload.php';
 
 // Import essential classes for logging, routing, and debugging purposes.
+use App\Models\Guard;
+use App\Models\GuardType;
 use App\Models\Level;
 use App\Models\Logger;
 use FastRoute\Dispatcher;
@@ -27,55 +29,57 @@ use FastRoute\RouteCollector;
 $routes = [];
 
 // Favicon
-$routes[] = ['GET', '/favicon', '/Views/favicon.php'];
+$routes[] = ['GET', '/favicon', '/Views/favicon.php', GuardType::PUBLIC];
 
 // Authentication routes
-$routes[] = ['GET', '/', '/Views/user/index.php'];
-$routes[] = ['GET', '/login', '/Views/user/login.php'];
-$routes[] = ['POST', '/login', '/Views/user/login.php'];
-$routes[] = ['GET', '/logout', '/Views/user/logout.php'];
-$routes[] = ['GET', '/register', '/Views/user/register.php'];
-$routes[] = ['POST', '/register', '/Views/user/register.php'];
-$routes[] = ['GET', '/reset', '/Views/user/reset_password.php'];
-$routes[] = ['POST', '/reset', '/Views/user/change_password.php'];
-$routes[] = ['GET', '/reset/mail', '/Views/user/password_reset_mail.php'];
+$routes[] = ['GET', '/', '/Views/user/index.php', GuardType::PUBLIC];
+$routes[] = ['GET', '/logout', '/Views/user/logout.php', GuardType::PUBLIC];
+
+$routes[] = ['GET', '/login', '/Views/user/login.php', GuardType::VISITOR];
+$routes[] = ['POST', '/login', '/Views/user/login.php', GuardType::VISITOR];
+$routes[] = ['GET', '/register', '/Views/user/register.php', GuardType::VISITOR];
+$routes[] = ['POST', '/register', '/Views/user/register.php', GuardType::VISITOR];
 
 // User Management routes
-$routes[] = ['GET', '/profile', '/Views/user/profile.php'];
-$routes[] = ['GET', '/profile/update', '/Views/user/edit_profile.php'];
-$routes[] = ['POST', '/profile/update', '/Views/user/edit_profile.php'];
-$routes[] = ['POST', '/profile/addSkill', '/Views/user/add_skill.php'];
-$routes[] = ['POST', '/profile/updateSkill', '/Views/user/update_skill.php'];
-$routes[] = ['POST', '/profile/deleteSkill', '/Views/user/delete_skill.php'];
-$routes[] = ['GET', '/profile/skills', '/Views/user/edit_skills.php'];
-$routes[] = ['POST', '/profile/skills', '/Views/user/edit_skills.php'];
+$routes[] = ['GET', '/profile', '/Views/user/profile.php', GuardType::USER];
+$routes[] = ['GET', '/profile/update', '/Views/user/edit_profile.php', GuardType::USER];
+$routes[] = ['POST', '/profile/update', '/Views/user/edit_profile.php', GuardType::USER];
+$routes[] = ['POST', '/profile/addSkill', '/Views/user/add_skill.php', GuardType::USER];
+$routes[] = ['POST', '/profile/updateSkill', '/Views/user/update_skill.php', GuardType::USER];
+$routes[] = ['POST', '/profile/deleteSkill', '/Views/user/delete_skill.php', GuardType::USER];
+$routes[] = ['GET', '/profile/skills', '/Views/user/edit_skills.php', GuardType::USER];
+$routes[] = ['POST', '/profile/skills', '/Views/user/edit_skills.php', GuardType::USER];
+
+$routes[] = ['GET', '/reset', '/Views/user/reset_password.php', GuardType::USER];
+$routes[] = ['POST', '/reset', '/Views/user/change_password.php', GuardType::USER];
+$routes[] = ['GET', '/reset/mail', '/Views/user/password_reset_mail.php', GuardType::USER];
 
 // Project Management routes
-$routes[] = ['GET', '/projects', '/Views/project/my_projects.php'];
-$routes[] = ['GET', '/project/new', '/Views/project/add_project.php'];
-$routes[] = ['POST', '/project/new', '/Views/project/add_project.php'];
-$routes[] = ['GET', '/project/{id:\d+}', '/Views/project/project.php'];
-$routes[] = ['GET', '/project/{id:\d+}/update', '/Views/project/edit_project.php'];
-$routes[] = ['POST', '/project/{id:\d+}/update', '/Views/project/edit_project.php'];
-$routes[] = ['POST', '/deleteImg/{id:\d+}', '/Views/project/delete_project_image.php'];
-$routes[] = ['POST', '/project/{id:\d+}/delete', '/Views/project/delete_project.php'];
-$routes[] = ['POST', '/project/{id:\d+}/add', '/Views/project/add_user_to_project.php'];
-$routes[] = ['POST', '/deleteUserProject/{id:\d+}', '/Views/project/delete_user_from_project.php'];
+$routes[] = ['GET', '/projects', '/Views/project/my_projects.php', GuardType::USER];
+$routes[] = ['GET', '/project/new', '/Views/project/add_project.php', GuardType::USER];
+$routes[] = ['POST', '/project/new', '/Views/project/add_project.php', GuardType::USER];
+$routes[] = ['GET', '/project/{id:\d+}', '/Views/project/project.php', GuardType::USER];
+$routes[] = ['GET', '/project/{id:\d+}/update', '/Views/project/edit_project.php', GuardType::USER];
+$routes[] = ['POST', '/project/{id:\d+}/update', '/Views/project/edit_project.php', GuardType::USER];
+$routes[] = ['POST', '/deleteImg/{id:\d+}', '/Views/project/delete_project_image.php', GuardType::USER];
+$routes[] = ['POST', '/project/{id:\d+}/delete', '/Views/project/delete_project.php', GuardType::USER];
+$routes[] = ['POST', '/project/{id:\d+}/add', '/Views/project/add_user_to_project.php', GuardType::USER];
+$routes[] = ['POST', '/deleteUserProject/{id:\d+}', '/Views/project/delete_user_from_project.php', GuardType::USER];
 
 // Admin routes
-$routes[] = ['GET', '/admin', '/Views/admin/admin_dashboard.php'];
+$routes[] = ['GET', '/admin', '/Views/admin/admin_dashboard.php', GuardType::ADMIN];
 
-$routes[] = ['GET', '/admin/users', '/Views/admin/admin_users.php'];
-$routes[] = ['POST', '/admin/users/changeRole', '/Views/admin/change_role.php'];
-$routes[] = ['POST', '/admin/user/{id:\d+}/delete', '/Views/admin/delete_user.php'];
+$routes[] = ['GET', '/admin/users', '/Views/admin/admin_users.php', GuardType::ADMIN];
+$routes[] = ['POST', '/admin/users/changeRole', '/Views/admin/change_role.php', GuardType::ADMIN];
+$routes[] = ['POST', '/admin/user/{id:\d+}/delete', '/Views/admin/delete_user.php', GuardType::ADMIN];
 
-$routes[] = ['GET', '/admin/skills', '/Views/admin/admin_skills.php'];
-$routes[] = ['POST', '/admin/skills', '/Views/admin/admin_skills.php'];
-$routes[] = ['GET', '/admin/skill/{id:\d+}/update', '/Views/admin/edit_skill.php'];
-$routes[] = ['POST', '/admin/skill/{id:\d+}/update', '/Views/admin/edit_skill.php'];
-$routes[] = ['POST', '/admin/skill/{id:\d+}/delete', '/Views/admin/delete_skill.php'];
+$routes[] = ['GET', '/admin/skills', '/Views/admin/admin_skills.php', GuardType::ADMIN];
+$routes[] = ['POST', '/admin/skills', '/Views/admin/admin_skills.php', GuardType::ADMIN];
+$routes[] = ['GET', '/admin/skill/{id:\d+}/update', '/Views/admin/edit_skill.php', GuardType::ADMIN];
+$routes[] = ['POST', '/admin/skill/{id:\d+}/update', '/Views/admin/edit_skill.php', GuardType::ADMIN];
+$routes[] = ['POST', '/admin/skill/{id:\d+}/delete', '/Views/admin/delete_skill.php', GuardType::ADMIN];
 
-$routes[] = ['POST', '/admin/role/{id:\d+}/update', '/Views/admin/update_role.php'];
+$routes[] = ['POST', '/admin/role/{id:\d+}/update', '/Views/admin/update_role.php', GuardType::ADMIN];
 
 
 /**
@@ -86,11 +90,22 @@ $dispatcher = FastRoute\simpleDispatcher(function (RouteCollector $r) use ($rout
 
     // Iterate over each defined route and add it to the RouteCollector.
     foreach ($routes as $route) {
-        list($method, $uri, $file) = $route;
+        list($method, $uri, $file, $guard) = $route;
 
         // Add a route to the dispatcher. The route's URI is mapped to an anonymous 
         // function that includes the target view file when executed.
-        $r->addRoute($method, $uri, function () use ($file) {
+        $r->addRoute($method, $uri, function () use ($file, $guard) {
+
+            // Debug
+            Logger::log("Guard: ". $guard->value, __FILE__, Level::DEBUG);
+
+            // Manage sessions
+            if (session_status() !== PHP_SESSION_ACTIVE) {
+                session_start();
+            }
+
+            // Guard
+            Guard::use($guard);
 
             // Include the route's corresponding view file.
             include __DIR__ . $file;

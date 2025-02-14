@@ -7,11 +7,6 @@ use App\Controllers\SkillController;
 use App\Controllers\User_SkillController;
 use App\Controllers\UserController;
 
-if (!isset($_SESSION['user_id'])) {
-    header("Location: /login");
-    exit();
-}
-
 // Fetch user data
 $user_id = $_SESSION['user_id'];
 $user_role = $_SESSION['user_role'];

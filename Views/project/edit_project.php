@@ -20,21 +20,17 @@ if (isset($_GET['success_message'])){
 }
 
 if (!isset($projectId)) {
-    $uri = $_SERVER['REQUEST_URI']; // Example: "/project/3/something"
-    $segments = explode('/', trim($uri, '/'));
-
-    if (isset($segments[1])) { // Ensure the second segment exists
-        $projectId = $segments[1]; // Get the second segment
-    }
+    $projectId = $GLOBALS['id'];
 }
 
 include "Views/templates/header.php";
+
 $projectController = new ProjectController();
 $user_projectController = new User_ProjectController();
 $userController = new UserController();
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['csrf_token'])) {
+if (!isset($_SESSION['csrf_token'])) {
     $error_message = "Please Log In First";
-    header('Location: login.php?error_message=' . urlencode($error_message));
+    header('Location: /login?error_message=' . urlencode($error_message));
     exit;
 } else {
     $userId = $_SESSION['user_id'];

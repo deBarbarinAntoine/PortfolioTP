@@ -2,12 +2,6 @@
 
 use App\Controllers\AdminController;
 
-session_start();
-
-if (!isset($_SESSION['user_id']) || $_SESSION['user_role'] !== 'admin') {
-    die("Unauthorized access.");
-}
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
         die("CSRF validation failed.");

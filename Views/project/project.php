@@ -6,10 +6,6 @@ use App\Controllers\ProjectController;
 use App\Controllers\User_ProjectController;
 use App\Controllers\UserController;
 
-if (isset($GLOBALS['id'])) {
-    $projectID = $GLOBALS['id'];
-}
-
 if (isset($_GET['error_message'])) {
     $error = htmlspecialchars($_GET['error_message']);
 }
@@ -19,12 +15,8 @@ if (isset($_GET['success_message'])) {
 }
 
 if (!isset($projectID)) {
-    $uri = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH); // Extracts only the path, ignoring query parameters
-    $segments = explode('/', trim($uri, '/'));
-    $projectID = end($segments); // Get the last segment
+    $projectID = $GLOBALS['id'];
 }
-
-
 
 if (!isset($GLOBALS['id']) && !isset($projectID)) {
     $errorMessage = 'Please select a valid project, selected id =  ' . $projectID ;

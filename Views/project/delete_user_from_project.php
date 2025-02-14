@@ -4,23 +4,12 @@ use App\Controllers\User_ProjectController;
 
 
 if (!isset($projectId)) {
-    $uri = $_SERVER['REQUEST_URI']; // Example: "/project/3/something"
-    $segments = explode('/', trim($uri, '/'));
-
-    if (isset($segments[1])) { // Ensure the second segment exists
-        $projectId = $segments[1]; // Get the second segment
-    }
+    $projectId = $GLOBALS['id'];
 }
 
 $errors = [];
 
 include "Views/templates/header.php";
-
-if (!isset($_SESSION['user_id']) || !isset($_SESSION['csrf_token'])) {
-    $error_message = "Please Log In First";
-    header('Location: '.$_POST['previousPage'].'?error_message=' . urlencode($error_message));
-    exit;
-}
 
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
