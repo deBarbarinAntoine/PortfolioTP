@@ -51,13 +51,37 @@ Ce projet est une application web développée en PHP & MySQL permettant aux uti
     - PortfolioTP/database.sql
 
 3. Configurer la connexion à la base de données :
-   Modifier le fichier `config/database.php` :
+
+> Attention !
+> 
+> Il y a deux moyens de configurer la connexion à la base de données et d'autres aspects de l'application web.
+> 
+> - `config/database.php` est le minimum requis, mais devient optionnel si le `.env` est renseigné.
+> - `.env` est optionnel mais fortement conseillé (plus précis et complet), et a la **PRIORITÉ** sur le fichier `config/database.php`.
+
+   - Option 1 : modifier le fichier `config/database.php` :
    ```php
    define('DB_HOST', 'localhost');
    define('DB_NAME', 'projetb2');
    define('DB_USER', 'projetb2');
    define('DB_PASS', 'password');
    define('DB_PORT', 3306);
+   ```
+   - Option 2 : copier le fichier `.env.example` et le renommer `.env`, ensuite, renseigner les données de configuration :
+   ```dotenv
+   DB_HOST=localhost
+   DB_PORT=3306
+   DB_NAME=projetb2
+   DB_USER=projetb2
+   DB_PASS=password
+   ENVIRONMENT=production
+   MAIL_SENDER="PortfolioTP <no-reply@PortfolioTP.com>"
+   MAIL_ADDRESS=your_mail_address
+   MAIL_USERNAME=your_mail_username
+   MAIL_PASSWORD=your_mail_password
+   MAIL_HOST=smtp.mail.io
+   MAIL_PORT=587
+   MAIL_ENCRYPTION=PHPMailer::ENCRYPTION_STARTTLS
    ```
 
 4. Démarrer le serveur PHP et tester l'application :
@@ -78,25 +102,29 @@ Ce projet est une application web développée en PHP & MySQL permettant aux uti
 
 ## Structure du Projet
 
-UN exemple de structure possible (la première ligne doit respecter cette structure).
-
 ```
-/config/database.php -> Configuration de la base de données
-/models/         -> Classes PHP (User, Auth, Project, Skill)
-/controllers/    -> Gestion des requêtes et logiques métier
-/views/          -> Interfaces utilisateur (HTML, CSS, Bootstrap)
-/public/         -> Images et assets du projet
-/database.sql    -> Script SQL pour initialiser la base de données
+/index.php           -> Point d'entrée et routeur du site web
+/config/database.php -> Configuration de la base de données (optionnel si .env correct)
+/.env                -> Fichier de variables d'environnement (prioritaire au /config/database.php, optionnel)
+/database.sql        -> Script SQL pour initialiser la base de données
+/composer.json|.lock -> Fichiers de configuration Composer
+
+/Models/             -> Classes PHP (User, Project, Skill, etc.)
+/Controllers/        -> Gestion des requêtes et logiques métier
+/Views/              -> Interfaces utilisateur (HTML, CSS)
+/public/             -> Images et assets du projet
 ```
 
 ## Technologies Utilisées
 - **Backend** : **PHP**
 - **Frontend** : **PHP / HTML / JS / (S)CSS**
-- **Sécurité** : **PHP / RootFast / encryption**
+- **Sécurité** : **PHP / FastRoute / encryption**
 - **Gestion du Projet** : **Discord / GitHub**
 
 ## Licence
 Ce projet est sous licence MIT.
 
 ## Contact
-Une question ou un bug ? Contactez-nous : nicolas.moyon@ynov.com
+Une question ou un bug ? Contactez-nous :
+- [nicolas.moyon@ynov.com](mailto:nicolas.moyon@ynov.com)
+- [antoine.debarbarin@ynov.com](mailto:antoine.debarbarin@ynov.com)
