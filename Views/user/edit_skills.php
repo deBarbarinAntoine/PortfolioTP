@@ -52,7 +52,7 @@ try {
                         $isUserSkill = true;
                     }
                 }
-                if ($isUserSkill) {
+                if (!$isUserSkill) {
                     $skillsNotInUserSkills[] = $skill;
                 }
             }
