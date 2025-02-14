@@ -47,8 +47,10 @@ Ce projet est une application web développée en PHP & MySQL permettant aux uti
    git clone https://github.com/deBarbarinAntoine/PortfolioTP.git
    cd PortfolioTP
    ```
+   
 2. Importer la base de données :
-    - PortfolioTP/database.sql
+    - `PortfolioTP/database.sql`
+
 
 3. Configurer la connexion à la base de données :
 
