@@ -2,4 +2,4 @@
 .env
 vendor/*
 /public/img
-docker-compose.yml
+php_errors.log

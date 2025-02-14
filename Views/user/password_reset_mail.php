@@ -37,18 +37,16 @@ if (!$userController->checkAnyUserHaveEmail($userEmail)) {
     exit;
 }
 
-require 'vendor/autoload.php'; // Include PHPMailer's autoload
-
 $passwordResetController = new PasswordResetController();
 
 // Get the environment variables
-$mailSender = $_ENV['MAIL_SENDER'];
-$mailAddress= $_ENV['MAIL_ADDRESS'];
-$mailUsername = $_ENV['MAIL_USERNAME'];
-$mailPassword = $_ENV['MAIL_PASSWORD'];
-$mailHost = $_ENV['MAIL_HOST'];
-$mailPort = $_ENV['MAIL_PORT'];
-$mailEncryption = $_ENV['MAIL_ENCRYPTION'];
+$mailSender = $_ENV['MAIL_SENDER'] || 'PortfolioTP <no-reply@PortfolioTP.com>';
+$mailAddress= $_ENV['MAIL_ADDRESS'] || 'mail@example.com';
+$mailUsername = $_ENV['MAIL_USERNAME'] || 'mail@example.com';
+$mailPassword = $_ENV['MAIL_PASSWORD'] || 'password';
+$mailHost = $_ENV['MAIL_HOST'] || 'smtp.mail.io';
+$mailPort = $_ENV['MAIL_PORT'] || '587';
+$mailEncryption = $_ENV['MAIL_ENCRYPTION'] || 'PHPMailer::ENCRYPTION_STARTTLS';
 
 // Ensure that the necessary values are set
 if (!$mailUsername || !$mailPassword || !$mailHost || !$mailPort || !$mailEncryption) {

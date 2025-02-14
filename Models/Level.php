@@ -13,8 +13,8 @@ namespace App\Models;
  */
 enum Level: string
 {
-    case DEBUG = 'debug';       // Used for detailed debug information.
-    case INFO = 'info';        // Used for informational messages.
-    case WARNING = 'warning';  // Used for warning messages that are not errors.
-    case ERROR = 'error';      // Used for error messages.
+    case DEBUG = 'DEBUG';       // Used for detailed debug information.
+    case INFO = 'INFO';        // Used for informational messages.
+    case WARNING = 'WARNING';  // Used for warning messages that are not errors.
+    case ERROR = 'ERROR';      // Used for error messages.
 }

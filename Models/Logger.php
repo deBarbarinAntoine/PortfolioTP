@@ -6,6 +6,7 @@ use DateMalformedStringException;
 use DateTime;
 use DateTimeZone;
 use Dotenv\Dotenv;
+use Exception;
 
 /**
  * The Logger class is responsible for recording log messages of varying severity levels.
@@ -47,8 +48,21 @@ class Logger
     {
 
         if (!isset($_ENV['ENVIRONMENT'])) {
-            $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
-            $dotenv->load();
+
+            if (file_exists(".env")) {
+
+                $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
+                $dotenv->load();
+
+                // Debug
+                Logger::log("Dotenv file found successfully", __METHOD__, Level::DEBUG);
+            } else {
+
+                $_ENV['ENVIRONMENT'] = 'production';
+
+                // LOGGING
+                Logger::log("Dotenv not found", __METHOD__, Level::WARNING);
+            }
         }
 
         $this->level = $level;
@@ -77,7 +91,7 @@ class Logger
         } catch (DateMalformedStringException $e) {
 
             // LOGGING
-            self::log($e->getMessage(), __METHOD__);
+//            self::log($e->getMessage(), __METHOD__);
         }
 
         $logger = new self($message, $datetime->format("Y-m-d H:i:s"), $location, $level); // Initialize a Logger object.
@@ -90,6 +104,9 @@ class Logger
         } else if (isset($_ENV['ENVIRONMENT']) && $_ENV['ENVIRONMENT'] === 'development') {
             $logger->print();
         }
+
+        // Clear the memory
+        unset($logger);
     }
 
     /**

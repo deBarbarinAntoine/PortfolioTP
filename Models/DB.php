@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use DateMalformedStringException;
 use Dotenv\Dotenv;
 use Exception;
 use PDO;
@@ -52,23 +51,41 @@ class DB
      */
     public static function getPDO(): PDO
     {
-        $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
-        $dotenv->load();
-
         // Check if a PDO connection is already established.
         if (isset(self::$pdo) && !empty(self::$pdo)) {
             return self::$pdo;
         }
 
-        // Load database configuration from environment variables.
-        $host = $_ENV['DB_HOST'];
-        $port = $_ENV['DB_PORT'];
-        $dbname = $_ENV['DB_NAME'];
-        $username = $_ENV['DB_USER'];
-        $password = $_ENV['DB_PASS'];
+        // Include the database configuration file
+        include_once "config/database.php";
+
+        $host = DB_HOST;
+        $port = DB_PORT;
+        $dbname = DB_NAME;
+        $username = DB_USER;
+        $password = DB_PASS;
+
+        if (file_exists(".env")) {
+
+            // Debug
+            Logger::log("Dotenv file found successfully", __METHOD__, Level::DEBUG);
+
+            $dotenv = Dotenv::createImmutable(__DIR__ . '/../');
+            $dotenv->load();
+
+            // Load database configuration from environment variables.
+            $host = $_ENV['DB_HOST'];
+            $port = $_ENV['DB_PORT'];
+            $dbname = $_ENV['DB_NAME'];
+            $username = $_ENV['DB_USER'];
+            $password = $_ENV['DB_PASS'];
+        } else {
+            // LOGGING
+            Logger::log("Dotenv not found", __METHOD__, Level::WARNING);
+        }
 
         // Debug
-        Logger::log("mysql:host=$host;port=$port;dbname=$dbname;username=$username;password=$password", __METHOD__, Level::DEBUG);
+        Logger::log("mysql:host=$host;port=$port;dbname=$dbname;username=$username", __METHOD__, Level::DEBUG);
 
         // Ensure all required configuration variables are defined.
         if (!isset($host, $port, $dbname, $username, $password)) {
