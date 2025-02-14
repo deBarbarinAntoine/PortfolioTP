@@ -766,7 +766,7 @@ class User implements ICrud
     public static function doesEmailExist(mixed $userEmail)
     {
         $user_crud = new Crud('users');
-        return $user_crud->findSingleValueBy(['email' => $userEmail]);
+        return $user_crud->findSingleValueBy(['email' => "'$userEmail'"]);
     }
 
 }

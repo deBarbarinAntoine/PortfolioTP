@@ -208,6 +208,7 @@ class UserController
     public function createUser(string $username, string $email, string $password): bool
     {
         $user = User::new($username, $email, $password);
+
         if ($user === null) {
             return false;
         }

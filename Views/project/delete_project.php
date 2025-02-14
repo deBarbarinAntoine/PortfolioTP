@@ -1,6 +1,6 @@
 <?php
-// POST /project/$ParamID/delete
-// $ParamID & Check csrf_token – Handles project deletion
+// POST /project/$GLOBALS['id']/delete
+// $GLOBALS['id'] & Check csrf_token – Handles project deletion
 
 use App\Controllers\ProjectController;
 use App\Controllers\User_ProjectController;

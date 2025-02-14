@@ -4,6 +4,7 @@ namespace App\Models;
 
 use DateMalformedStringException;
 use Dotenv\Dotenv;
+use Exception;
 use PDO;
 use RuntimeException;
 
@@ -36,7 +37,7 @@ class DB
     private static array $options = [
         PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
         PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-        PDO::ATTR_AUTOCOMMIT => false,
+        //PDO::ATTR_AUTOCOMMIT => false,
     ];
 
     /**
@@ -82,8 +83,15 @@ class DB
         // Create a Data Source Name (DSN) string for the MySQL connection.
         $dsn = "mysql:host=$host;port=$port;dbname=$dbname";
 
-        // Create a new PDO instance with the DSN, username, password, and connection options.
-        self::$pdo = new PDO($dsn, $username, $password, self::$options);
+        try {// Create a new PDO instance with the DSN, username, password, and connection options.
+            self::$pdo = new PDO($dsn, $username, $password, self::$options);
+        } catch (Exception $e) {
+
+            // LOGGING
+            Logger::log('Error connecting to database: ' . $e->getMessage(), __METHOD__);
+            header('HTTP/1.0 500 Internal Server Error');
+            die();
+        }
 
         // Return the established PDO connection.
         return self::$pdo;

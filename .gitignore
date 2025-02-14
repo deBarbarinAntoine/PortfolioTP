@@ -2,3 +2,4 @@
 .env
 vendor/*
 /public/img
+docker-compose.yml

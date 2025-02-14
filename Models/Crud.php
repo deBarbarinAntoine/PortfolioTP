@@ -63,6 +63,7 @@ class Crud {
 
         // Debug
         Logger::log($sql, __METHOD__, Level::DEBUG);
+        Logger::log($data, __METHOD__, Level::DEBUG);
 
         // Convert DateTime objects to strings
         foreach ($data as $key => $value) {
@@ -74,7 +75,13 @@ class Crud {
         $stmt = $this->pdo->prepare($sql);
 
         try {
-            $stmt->execute($data); // Pass data to execute
+            $this->bindConditions($stmt, $data);
+            $ok = $stmt->execute();
+
+            // Debug
+            $message = $ok ? 'Created Successfully' : 'Create Failed';
+            Logger::log($message, __METHOD__, Level::DEBUG);
+
             return $this->pdo->lastInsertId();
         } catch (PDOException $e) {
             Logger::log("Create Error: " . $e->getMessage(), __METHOD__);
@@ -587,6 +594,10 @@ class Crud {
         }
 
         $sql = "DELETE FROM $this->table WHERE " . implode(" AND ", $conditionClauses);
+
+        // Debug
+        Logger::log($sql, __METHOD__, Level::DEBUG);
+
         $stmt = $this->pdo->prepare($sql);
 
         try {

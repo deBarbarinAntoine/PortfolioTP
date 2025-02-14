@@ -5,6 +5,7 @@ include "Views/templates/header.php";
 use App\Controllers\SkillController;
 use App\Controllers\User_SkillController;
 use App\Controllers\UserController;
+use App\Models\UserSkillLevel;
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: /login");
@@ -23,7 +24,7 @@ $user_id = $_SESSION['user_id'];
 $user_csrf_token = $_SESSION['csrf_token'];
 $userController = new UserController();
 $user_skillController = new User_SkillController();
-$levelEnum = App\Models\UserSkillLevel::cases();
+$levelEnum = UserSkillLevel::cases();
 $skillController = new SkillController();
 
 $user = null;
@@ -40,15 +41,19 @@ try {
         $userSkills = $user_skillController->getUserSkills($user_id);
         if (!$userSkills){
             $skillsNotInUserSkills = $skillList;
-        }
-        foreach ($skillList as $skill) {
-            foreach ($userSkills as $userSkill) {
-                 if ($skill->getId() == $userSkill['skill_id']) {
-                    $userSkill['name'] = $skill->getName();
-                    $userSkill['description'] = $skill->getDescription();
-                    $skillsInUserSkills[] = $userSkill;
-                } else {
-                    $skillsNotInUserSkills[] = $userSkill;
+        } else {
+            foreach ($skillList as $skill) {
+                $isUserSkill = false;
+                foreach ($userSkills as $userSkill) {
+                    if ($skill->getId() == $userSkill['skill_id']) {
+                        $userSkill['name'] = $skill->getName();
+                        $userSkill['description'] = $skill->getDescription();
+                        $skillsInUserSkills[] = $userSkill;
+                        $isUserSkill = true;
+                    }
+                }
+                if ($isUserSkill) {
+                    $skillsNotInUserSkills[] = $skill;
                 }
             }
         }

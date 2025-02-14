@@ -2,6 +2,8 @@
 // User registration form.
 
 use App\Controllers\UserController;
+use App\Models\Level;
+use App\Models\Logger;
 use App\Models\User;
 
 include "Views/templates/header.php";
@@ -45,7 +47,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         if (empty($errorMessages)) {
-            if (!$registerController->createUser($username, $email, $password)) {
+
+            $ok = $registerController->createUser($username, $email, $password);
+
+            // Debug
+            Logger::log("Register: " . $ok ? 'success' : 'failure', __METHOD__, Level::DEBUG);
+
+            if (!$ok) {
                 $errorMessages[] = "Error creating user.";
             } else {
                 setcookie("username", "", time() - 3600, "/");

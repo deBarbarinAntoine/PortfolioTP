@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use DateMalformedStringException;
 use DateTime;
 use Exception;
 
@@ -291,8 +292,14 @@ class Skill implements ICrud
 
         try {
             $results = $skill_crud->findAllBy();
+
             $skills = [];
             foreach ($results as $skill) {
+
+                // Debug
+                $msg = "Skill {id: ".$skill['id'].", name: ".$skill['name'].", description: ".$skill['description'].", created_at: ".$skill['created_at'].", updated_at: ".$skill['updated_at']."}";
+                Logger::log($msg, __METHOD__, Level::DEBUG);
+
                 $skills[] = new self(
                     $skill['id'],
                     $skill['name'],
@@ -327,6 +334,7 @@ class Skill implements ICrud
      * Retrieves all available skills from the database and maps them to Skill objects.
      *
      * @return array An array of Skill objects representing all available skills in the database.
+     * @throws DateMalformedStringException
      */
     public static function getAllSkills(string $search, int $offset): array
     {
@@ -351,7 +359,7 @@ class Skill implements ICrud
      *                       Each element may represent a single skill or a group of rows identified
      *                       by a skill ID.
      * @return array An array of Skill objects converted from the provided results.
-     * @throws \DateMalformedStringException
+     * @throws DateMalformedStringException
      */
     private static function toSkillArray(array $results): array
     {
@@ -382,7 +390,7 @@ class Skill implements ICrud
             foreach ($results as $row) {
 
                 // Group rows under their respective skill ID.
-                $skills[$row['u.id']][] = $row;
+                $skills[$row['u_id']][] = $row;
             }
 
             $skillList = [];
@@ -402,9 +410,22 @@ class Skill implements ICrud
     }
 
     /**
-     * @throws \DateMalformedStringException
+     * Converts an associative array containing skill data into a Skill object.
+     *
+     * This method requires specific keys to be present in the input array:
+     * - 'id': The unique identifier of the skill.
+     * - 'name': The name of the skill.
+     * - 'description' (optional): A descriptive text about the skill.
+     * - 'created_at': A datetime string representing the creation timestamp.
+     * - 'updated_at': A datetime string representing the last update timestamp.
+     *
+     * @param array $skill An associative array representing a skill, typically from a database query result.
+     *
+     * @return Skill A new Skill object initialized with the provided data.
+     *
+     * @throws DateMalformedStringException If the 'created_at' or 'updated_at' strings cannot be parsed into valid DateTime objects.
      */
-    private static function toSkill(array $skill): skill
+    private static function toSkill(array $skill): Skill
     {
         // Return a new skill object
         return new self(

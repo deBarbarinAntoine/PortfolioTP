@@ -6,8 +6,8 @@ use App\Controllers\ProjectController;
 use App\Controllers\User_ProjectController;
 use App\Controllers\UserController;
 
-if (isset($paramID['id'])) {
-    $projectID = $paramID['id'];
+if (isset($GLOBALS['id'])) {
+    $projectID = $GLOBALS['id'];
 }
 
 if (isset($_GET['error_message'])) {
@@ -26,7 +26,7 @@ if (!isset($projectID)) {
 
 
 
-if (!isset($paramID['id']) && !isset($projectID)) {
+if (!isset($GLOBALS['id']) && !isset($projectID)) {
     $errorMessage = 'Please select a valid project, selected id =  ' . $projectID ;
     header("Location: /?error_message=$errorMessage");
     exit;

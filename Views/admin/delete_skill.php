@@ -18,12 +18,7 @@ if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_tok
 }
 
 if (!isset($skillId)) {
-    $uri = $_SERVER['REQUEST_URI']; // Example: "/project/3/something"
-    $segments = explode('/', trim($uri, '/'));
-
-    if (isset($segments[2])) { // Ensure the second segment exists
-        $skillId = $segments[2]; // Get the second segment
-    }
+    $skillId = $GLOBALS['id'];
 }
 
 $skillController = new SkillController();

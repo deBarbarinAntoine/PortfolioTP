@@ -144,13 +144,13 @@ switch ($routeInfo[0]) {
         if (isset($vars['id'])) {
 
             // Assign the extracted 'id' parameter if available.
-            $paramID['id'] = $vars['id'];
+            $GLOBALS['id'] = $vars['id'];
         }
 
         // Log the matching route and associated parameters for debugging purposes.
         Logger::log("uri: $uri", __FILE__, Level::DEBUG);
-        if (isset($paramID)) {
-            Logger::log("id: " . json_encode($paramID), __FILE__, Level::DEBUG);
+        if (isset($GLOBALS['id'])) {
+            Logger::log("URL param: " . json_encode($GLOBALS['id']), __FILE__, Level::DEBUG);
         }
 
         // Invoke the callback function associated with the route.

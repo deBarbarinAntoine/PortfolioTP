@@ -106,7 +106,7 @@ class Logger
             $message = $this->message;
         } else if (gettype($this->message) === 'array') {
 
-            if (gettype($this->message[0]) === 'array') {
+            if (isset($this->message[0]) && gettype($this->message[0]) === 'array') {
                 foreach ($this->message as $row) {
                     $this->log($row, $this->location, $this->level);
                     return;
