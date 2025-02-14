@@ -145,7 +145,6 @@ class Crud {
         // Debugging output for the query (you can remove this in production)
         Logger::log($sql, __METHOD__, Level::DEBUG);
 
-
         try {
             $stmt = $this->pdo->prepare($sql);
 

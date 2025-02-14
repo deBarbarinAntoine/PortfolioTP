@@ -29,27 +29,41 @@ if (!isset($projectId)) {
 }
 
 include "Views/templates/header.php";
-
+$projectController = new ProjectController();
+$user_projectController = new User_ProjectController();
+$userController = new UserController();
 if (!isset($_SESSION['user_id']) || !isset($_SESSION['csrf_token'])) {
     $error_message = "Please Log In First";
     header('Location: login.php?error_message=' . urlencode($error_message));
     exit;
+} else {
+    $userId = $_SESSION['user_id'];
+    $isOwner = $user_projectController->getIsOwner($projectId, $userId);
+
+    if (!$isOwner) {
+        $error_message = "You are not authorized to access this page";
+        header('Location: /?error_message=' . urlencode($error_message));
+        exit;
+    }
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "GET") {
-    $projectController = new ProjectController();
-    $user_projectController = new User_ProjectController();
-    $userController = new UserController();
     if (isset($projectId)) {
         try {
             $project = $projectController->getProject($projectId);
+
+            if ($project == null) {
+                $error = "Project does not exist.";
+                header("Location: /?error_message=". urlencode($error));
+                exit;
+            }
+
             $projectContributors = $user_projectController->getContributors($projectId);
             foreach ($projectContributors as $key => $projectContributor) {
                 $projectContributorID = $projectContributor['user_id'];
                 $userContributor = $userController->getUser($projectContributorID);
                 $projectContributors[$key]['user'] = $userContributor;
             }
-
 
             $projectViewers= $user_projectController->getViewers($projectId);
             foreach ($projectViewers as $key => $projectViewer) {
@@ -87,6 +101,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $description = trim($_POST["description"] ?? "");
         $externalLink = trim($_POST["externalLink"] ?? "");
         $visibility = trim($_POST["visibility"] ?? "");
+        var_dump($_POST);
 
         // Validate external link (if provided)
         if (!empty($externalLink) && !filter_var($externalLink, FILTER_VALIDATE_URL)) {
@@ -130,12 +145,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $projectController = new ProjectController();
         try {
             $modified = $projectController->modifyProject($projectId, $title, $description, $externalLink, $visibility, $images);
-            if ($modified) {
-                header("Location: /project/$projectId");
+            if ($modified <= 0) {
+                $errors [] = "Sorry something went wrong.";
                 exit;
             }
+            $success = "Project successfully updated.";
+            header("Location: /project/$projectId?success_message=". urlencode($success));
+            exit;
         } catch (Exception $e) {
-            error_log("Project modification error: " . $e->getMessage());
             $errors[] = "An error occurred while modifying the project. Please try again later.";
         }
     }

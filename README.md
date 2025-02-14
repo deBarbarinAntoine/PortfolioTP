@@ -92,7 +92,7 @@ UN exemple de structure possible (la première ligne doit respecter cette struct
 ## Technologies Utilisées
 - **Backend** : **PHP**
 - **Frontend** : **PHP / HTML / JS / (S)CSS**
-- **Sécurité** : **PHP / RootFast / encyption**
+- **Sécurité** : **PHP / RootFast / encryption**
 - **Gestion du Projet** : **Discord / GitHub**
 
 ## Licence

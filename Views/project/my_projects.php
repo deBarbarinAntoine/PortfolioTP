@@ -53,10 +53,10 @@ $projectsByRole = $userProjectsController->getUserProject($user_id);
                 <p>No projects for this role.</p>
             <?php else: ?>
                 <ul>
-                    <?php foreach ($projects as $project): ?>
+                    <?php foreach ($projects as $project): ; ?>
                         <li>
                             <strong>Project Name:</strong>
-                            <a href="/project/<?= htmlspecialchars($project['id']) ?>">
+                            <a href="/project/<?= htmlspecialchars($project['project_id']) ?>">
                                 <?= htmlspecialchars($project['title']) ?>
                             </a> <br>
                             <strong>Description:</strong> <?= htmlspecialchars($project['description']) ?> <br>

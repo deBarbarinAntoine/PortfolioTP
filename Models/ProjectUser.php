@@ -200,7 +200,6 @@ class ProjectUser
             $projects = $userProjectCrud->findAllBy(['user_id' => $user_id, 'role' => $role->value], "project_id,role",
                 null, null, null, null, null, "", true
             );
-
             // Loop through each project and fetch additional details.
             foreach ($projects as &$project) {
                 // Assuming project_id is stored in the $project array.
@@ -214,6 +213,7 @@ class ProjectUser
                 $project['visibility'] = $projectDetails['visibility'];
                 $project['created_at'] = $projectDetails['created_at'];
                 $project['updated_at'] = $projectDetails['updated_at'];
+
             }
 
             // Assign the modified projects array back to the role.
@@ -240,6 +240,17 @@ class ProjectUser
         $userProjectCrud = new Crud('project_users');
         $user_Project = $userProjectCrud->findBy(['project_id' => $projectId, 'user_id' => $userId]);
         if ($user_Project == null || $user_Project['role'] !== 'contributor') {
+
+            return false;
+        }
+        return true;
+    }
+
+    public static function isViewer(string $projectId, mixed $userId): bool
+    {
+        $userProjectCrud = new Crud('project_users');
+        $user_Project = $userProjectCrud->findBy(['project_id' => $projectId, 'user_id' => $userId]);
+        if ($user_Project == null || $user_Project['role'] !== 'viewer') {
 
             return false;
         }

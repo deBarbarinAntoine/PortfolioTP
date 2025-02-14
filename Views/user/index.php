@@ -9,6 +9,7 @@ include "Views/templates/header.php";
 $projectController = new ProjectController();
 try {
     $projects = $projectController->getPublicProjects();
+
 } catch (DateMalformedStringException $e) {
     // Debug
     Logger::log($e->getMessage(), __FILE__, Level::DEBUG);
@@ -34,12 +35,16 @@ if (isset($_GET['error_message'])) {
     <div class="project-list">
         <?php if (!empty($projects)): ?>
             <?php foreach ($projects as $project): ?>
+                <hr>
                 <div class="project-card">
-                    <img src="../public/uploads/<?= htmlspecialchars($project['image']) ?>" alt="Image du projet">
-                    <h3><?= htmlspecialchars($project['title']) ?></h3>
-                    <p><?= htmlspecialchars(substr($project['details'], 0, 100)) ?>...</p>
-                    <a href="<?= htmlspecialchars($project['external_link']) ?>" target="_blank">Voir le projet</a>
+                    <a href="/project/<?= htmlspecialchars($project->getId()) ?>"> <h3> Titre : <?= htmlspecialchars($project->getTitle()) ?></h3></a> <br>
+                    <?php foreach ($project->getImages() as $image): ?>
+                        <img src="<?= htmlspecialchars($image['image_path']) ?>" alt="Image du projet" style="max-width: 500px">
+                    <?php endforeach; ?>
+                    <p> Description : <?= htmlspecialchars(substr($project->getDescription(), 0, 100)) ?></p>
+                    <a href="<?= htmlspecialchars($project->getExternalLink()) ?>" target="_blank">Lien vers le projet</a>
                 </div>
+                <hr>
             <?php endforeach; ?>
         <?php else: ?>
             <p>Aucun projet disponible.</p>
